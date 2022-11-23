@@ -7,12 +7,15 @@ import (
 )
 
 type BookingSessions struct {
-	ID        string
-	NIKUser   int
-	IDSession string
-	Queue     int
-	Status    string
+	ID        string `gorm:"type:varchar(255);primary_key"`
+	NikUser   int    `gorm:"type:bigint(16)"`
+	IdSession string `gorm:"type:varchar(255)"`
+	Queue     int    `gorm:"type:int(11)"`
+	Status    string `gorm:"type:varchar(255)"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	DeletedAt gorm.DeletedAt     `gorm:"index"`
+	User      *Users             `gorm:"foreignKey:NikUser"`   // belong to relationship
+	Session   *Sessions          `gorm:"foreignKey:IdSession"` // belong to relationship
+	Histroy   []VaccineHistories `gorm:"foreignKey:IdBooking"` // has many relationship
 }

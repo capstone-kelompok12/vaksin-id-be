@@ -16,10 +16,11 @@ func UserUnauthenticated(routes *echo.Group, api *controllers.UserController) {
 }
 
 func UserAuthenticated(routes *echo.Group, api *controllers.UserController) {
-	routes.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY"))))
+	authUser := routes.Group("/profile")
+	authUser.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY"))))
 	{
-		routes.GET("/profile", api.GetUserDataByNik)
-		routes.PUT("/profile", api.UpdateUser)
-		routes.DELETE("/profile", api.DeleteUser)
+		authUser.GET("/", api.GetUserDataByNik)
+		authUser.PUT("/", api.UpdateUser)
+		authUser.DELETE("/", api.DeleteUser)
 	}
 }

@@ -17,7 +17,6 @@ type ClaimsCustom struct {
 
 func CreateToken(nikUser string, email string) (string, error) {
 	exp := time.Now().Add(time.Hour * 1).Unix()
-
 	claims := ClaimsCustom{
 		NikUser: nikUser,
 		Email:   email,

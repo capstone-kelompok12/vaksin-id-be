@@ -20,23 +20,23 @@ func NewUserController(userServ service.UserService) *UserController {
 }
 
 func (u *UserController) RegisterUser(ctx echo.Context) error {
-	var payload payload.RegisterUser
+	var payloads payload.RegisterUser
 
-	if err := ctx.Bind(&payload); err != nil {
+	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	if err := util.Validate(payload); err != nil {
+	if err := util.ValidateRegister(payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	err := u.UserService.RegisterUser(payload)
+	err := u.UserService.RegisterUser(payloads)
 
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
@@ -107,7 +107,7 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 		})
 	}
 
-	if err := util.Validate(payloads); err != nil {
+	if err := util.ValidateUpdateUser(payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),

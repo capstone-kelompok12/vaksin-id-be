@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
 	m "vaksin-id-be/middleware"
@@ -39,6 +40,13 @@ func (u *userService) RegisterUser(payload payload.RegisterUser) error {
 
 	defaultVaccineCount := 0
 
+	const shortForm = "2006-Jan-02"
+
+	dateBirth, err := time.Parse(shortForm, payload.BirthDate.String())
+	if err != nil {
+		return err
+	}
+
 	userModel := model.Users{
 		NIK:          payload.NikUser,
 		Email:        payload.Email,
@@ -47,7 +55,7 @@ func (u *userService) RegisterUser(payload payload.RegisterUser) error {
 		PhoneNum:     payload.PhoneNum,
 		Gender:       payload.Gender,
 		VaccineCount: defaultVaccineCount,
-		BirthDate:    payload.BirthDate,
+		BirthDate:    dateBirth,
 	}
 
 	errRegis := u.UserRepo.RegisterUser(userModel)

@@ -9,7 +9,7 @@ import (
 type Addresses struct {
 	ID                 string  `gorm:"type:varchar(255);primary_key"`
 	IdHealthFacilities string  `gorm:"type:varchar(255)"`
-	NikUser            int     `gorm:"type:bigint(16)"`
+	NikUser            string  `gorm:"type:varchar(16)"`
 	CurrentAddress     string  `gorm:"type:longtext"`
 	District           string  `gorm:"type:varchar(255)"`
 	City               string  `gorm:"type:varchar(255)"`

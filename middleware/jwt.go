@@ -9,12 +9,18 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func CreateToken(userId string, username string) (string, error) {
+type ClaimsCustom struct {
+	NikUser string
+	Email   string
+	jwt.StandardClaims
+}
+
+func CreateToken(nikUser string, email string) (string, error) {
 	exp := time.Now().Add(time.Hour * 1).Unix()
 
-	claims := payload.ClaimsCustom{
-		UserId:   userId,
-		Username: username,
+	claims := ClaimsCustom{
+		NikUser: nikUser,
+		Email:   email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: exp,
 		},
@@ -25,8 +31,8 @@ func CreateToken(userId string, username string) (string, error) {
 	return token.SignedString(key)
 }
 
-func GetUserId(auth string) (string, error) {
-	claims := &payload.ClaimsCustom{}
+func GetUserNik(auth string) (string, error) {
+	claims := &ClaimsCustom{}
 	splitToken := strings.Split(auth, "Bearer ")
 	auth = splitToken[1]
 
@@ -37,5 +43,5 @@ func GetUserId(auth string) (string, error) {
 	if err != nil {
 		return "", errors.New("token has expired")
 	}
-	return claims.UserId, nil
+	return claims.NikUser, nil
 }

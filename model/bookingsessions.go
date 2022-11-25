@@ -8,7 +8,7 @@ import (
 
 type BookingSessions struct {
 	ID        string `gorm:"type:varchar(255);primary_key"`
-	NikUser   int    `gorm:"type:bigint(16)"`
+	NikUser   string `gorm:"type:varchar(16)"`
 	IdSession string `gorm:"type:varchar(255)"`
 	Queue     int    `gorm:"type:int(11)"`
 	Status    string `gorm:"type:varchar(255)"`

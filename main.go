@@ -23,8 +23,12 @@ func main() {
 
 	route := routes.Init()
 
-	port := ":" + os.Getenv("PORT")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	route.Logger.Fatal(route.Start(port))
+	routePort := ":" + port
 
+	route.Logger.Fatal(route.Start(routePort))
 }

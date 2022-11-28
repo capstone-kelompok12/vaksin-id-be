@@ -5,7 +5,10 @@ import (
 	m "vaksin-id-be/middleware"
 	users "vaksin-id-be/routes/users"
 
+	_ "vaksin-id-be/docs"
+
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func Init() *echo.Echo {
@@ -23,6 +26,9 @@ func Init() *echo.Echo {
 	// v1
 	// unauthenticated
 	v1 := routes.Group("/api/v1")
+
+	//swagger
+	routes.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// users
 	users.UserUnauthenticated(v1, userApi)

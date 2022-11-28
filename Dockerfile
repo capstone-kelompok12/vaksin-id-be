@@ -10,6 +10,4 @@ RUN go mod tidy
 
 RUN go build -o /vaksin-id-be
 
-EXPOSE 8080
-
 CMD ["/vaksin-id-be"]

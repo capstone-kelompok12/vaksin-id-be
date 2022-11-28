@@ -10,8 +10,3 @@ func ValidateRegister(payloads payload.RegisterUser) error {
 	validate := validator.New()
 	return validate.Struct(payloads)
 }
-
-// func ValidateUpdateUser(payloads payload.UpdateUser) error {
-// 	validate := validator.New()
-// 	return validate.Struct(payloads)
-// }

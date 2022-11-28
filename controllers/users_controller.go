@@ -105,13 +105,6 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 		})
 	}
 
-	// if err := util.ValidateUpdateUser(payloads); err != nil {
-	// 	return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
-	// 		"error":   true,
-	// 		"message": err.Error(),
-	// 	})
-	// }
-
 	nik := ctx.Request().Header.Get("Authorization")
 
 	if err := u.UserService.UpdateUserProfile(payloads, nik); err != nil {

@@ -9,7 +9,7 @@ func main() {
 
 	route := routes.Init()
 
-	port := ":" + os.Getenv("PORT")
+	port := ":" + os.Getenv("APP_PORT")
 
 	route.Logger.Fatal(route.Start(port))
 

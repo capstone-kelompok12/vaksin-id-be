@@ -17,5 +17,4 @@ func main() {
 	routePort := ":" + port
 
 	route.Logger.Fatal(route.Start(routePort))
-
 }

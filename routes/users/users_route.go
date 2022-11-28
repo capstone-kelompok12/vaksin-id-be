@@ -19,8 +19,10 @@ func UserAuthenticated(routes *echo.Group, api *controllers.UserController) {
 	authUser := routes.Group("/profile")
 	authUser.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY"))))
 	{
-		authUser.GET("/", api.GetUserDataByNik)
-		authUser.PUT("/", api.UpdateUser)
-		authUser.DELETE("/", api.DeleteUser)
+		authUser.GET("", api.GetUserDataByNik)
+		authUser.GET("/address", api.GetUserAddress)
+		authUser.PUT("", api.UpdateUser)
+		authUser.DELETE("", api.DeleteUser)
+		authUser.PUT("/address", api.UpdateUserAddress)
 	}
 }

@@ -1,21 +1,28 @@
 package payload
 
-import "time"
-
 type RegisterUser struct {
-	Fullname  string    `json:"fullname" gorm:"size:255;not null" validate:"required"`
-	NikUser   string    `json:"nik" gorm:"varchar:16;not null" validate:"required,min=16,max=16"`
-	Email     string    `json:"email" gorm:"size:100;not null" validate:"required,email"`
-	Gender    string    `json:"gender" gorm:"size:1;not null" validate:"required"`
-	Password  string    `json:"password" gorm:"size:100;not null" validate:"required,min=6"`
-	PhoneNum  string    `json:"phonenum" gorm:"size:15;not null" validate:"required,min=10,max=15"`
-	BirthDate time.Time `json:"birthdate" gorm:"not null" validate:"required"`
+	Fullname  string `json:"fullname" gorm:"size:255;not null" validate:"required"`
+	NikUser   string `json:"nik" gorm:"varchar:16;not null" validate:"required,min=16,max=16"`
+	Email     string `json:"email" gorm:"size:100;not null" validate:"required,email"`
+	Gender    string `json:"gender" gorm:"size:1;not null" validate:"required"`
+	Password  string `json:"password" gorm:"size:100;not null" validate:"required,min=6"`
+	PhoneNum  string `json:"phonenum" gorm:"size:15;not null" validate:"required,min=10,max=15"`
+	BirthDate string `json:"birthdate" gorm:"not null" validate:"required"`
 }
 
 type UpdateUser struct {
-	Fullname  string    `json:"fullname" gorm:"size:255"`
-	Email     string    `json:"email" gorm:"size:100" validate:"email"`
-	Gender    string    `json:"username" gorm:"size:255" validate:"min=4"`
-	PhoneNum  string    `json:"phonenum" gorm:"size:15" validate:"min=10,max=15"`
-	BirthDate time.Time `json:"birthdate"`
+	Fullname  string `json:"fullname" gorm:"size:255"`
+	Email     string `json:"email" gorm:"size:100"`
+	Gender    string `json:"username" gorm:"size:1"`
+	PhoneNum  string `json:"phonenum" gorm:"size:15"`
+	BirthDate string `json:"birthdate"`
+}
+
+type UpdateAddress struct {
+	CurrentAddress string  `json:"current_address"`
+	District       string  `json:"district"`
+	City           string  `json:"city"`
+	Province       string  `json:"province"`
+	Longitude      float64 `json:"longitude" gorm:"type:numeric(11,7)"`
+	Latitude       float64 `json:"latitude" gorm:"type:numeric(11,7)"`
 }

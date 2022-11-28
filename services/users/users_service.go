@@ -18,6 +18,8 @@ type UserService interface {
 	LoginUser(payloads payload.Login) (response.Login, error)
 	GetUserDataByNik(nik string) (response.UserProfile, error)
 	UpdateUserProfile(payloads payload.UpdateUser, nik string) error
+	GetAddressUser(nik string) (model.Addresses, error)
+	UpdateUserAddress(payloads payload.UpdateAddress, nik string) error
 	DeleteUserProfile(nik string) error
 }
 
@@ -31,29 +33,55 @@ func NewUserService(userRepo mysql.UserRepository) *userService {
 	}
 }
 
-func (u *userService) RegisterUser(payload payload.RegisterUser) error {
+func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 
-	hashPass, err := util.HashPassword(payload.Password)
+	hashPass, err := util.HashPassword(payloads.Password)
 	if err != nil {
 		return err
 	}
 
 	defaultVaccineCount := 0
 
-	const shortForm = "2006-Jan-02"
-
-	dateBirth, err := time.Parse(shortForm, payload.BirthDate.String())
+	dateBirth, err := time.Parse("2006-01-02", payloads.BirthDate)
+	if err != nil {
+		return err
+	}
+	data, err := u.UserRepo.CheckExistNik(payloads.NikUser)
 	if err != nil {
 		return err
 	}
 
+	if data.NIK != "" && data.DeletedAt != nil {
+		userModel := model.Users{
+			Email:     payloads.Email,
+			Password:  hashPass,
+			Fullname:  payloads.Fullname,
+			PhoneNum:  payloads.PhoneNum,
+			Gender:    payloads.Gender,
+			BirthDate: dateBirth,
+		}
+		err = u.UserRepo.ReactivatedUser(payloads.NikUser)
+		if err != nil {
+			return err
+		}
+		err = u.UserRepo.ReactivatedUpdateUser(userModel, payloads.NikUser)
+		if err != nil {
+			return err
+		}
+		err = u.UserRepo.ReactivatedAddress(payloads.NikUser)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
 	userModel := model.Users{
-		NIK:          payload.NikUser,
-		Email:        payload.Email,
+		NIK:          payloads.NikUser,
+		Email:        payloads.Email,
 		Password:     hashPass,
-		Fullname:     payload.Fullname,
-		PhoneNum:     payload.PhoneNum,
-		Gender:       payload.Gender,
+		Fullname:     payloads.Fullname,
+		PhoneNum:     payloads.PhoneNum,
+		Gender:       payloads.Gender,
 		VaccineCount: defaultVaccineCount,
 		BirthDate:    dateBirth,
 	}
@@ -66,8 +94,9 @@ func (u *userService) RegisterUser(payload payload.RegisterUser) error {
 	idAddr := uuid.NewString()
 
 	userAddr := model.Addresses{
-		ID:      idAddr,
-		NikUser: payload.NikUser,
+		ID:                 idAddr,
+		IdHealthFacilities: nil,
+		NikUser:            &payloads.NikUser,
 	}
 
 	errAddr := u.UserRepo.CreateAddress(userAddr)
@@ -78,12 +107,12 @@ func (u *userService) RegisterUser(payload payload.RegisterUser) error {
 	return nil
 }
 
-func (u *userService) LoginUser(payload payload.Login) (response.Login, error) {
+func (u *userService) LoginUser(payloads payload.Login) (response.Login, error) {
 	var loginResponse response.Login
 
 	userModel := model.Users{
-		Email:    payload.Email,
-		Password: payload.Password,
+		Email:    payloads.Email,
+		Password: payloads.Password,
 	}
 
 	userData, err := u.UserRepo.LoginUser(userModel)
@@ -91,7 +120,7 @@ func (u *userService) LoginUser(payload payload.Login) (response.Login, error) {
 		return loginResponse, err
 	}
 
-	isValid := util.CheckPasswordHash(payload.Password, userData.Password)
+	isValid := util.CheckPasswordHash(payloads.Password, userData.Password)
 	if !isValid {
 		return loginResponse, errors.New("wrong password")
 	}
@@ -112,7 +141,12 @@ func (u *userService) LoginUser(payload payload.Login) (response.Login, error) {
 func (u *userService) GetUserDataByNik(nik string) (response.UserProfile, error) {
 	var responseUser response.UserProfile
 
-	getData, err := u.UserRepo.GetUserDataByNik(nik)
+	getUserNik, err := m.GetUserNik(nik)
+	if err != nil {
+		return responseUser, err
+	}
+
+	getData, err := u.UserRepo.GetUserDataByNik(getUserNik)
 	if err != nil {
 		return responseUser, err
 	}
@@ -141,13 +175,18 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 		return err
 	}
 
+	dateBirth, err := time.Parse("2006-01-02", payloads.BirthDate)
+	if err != nil {
+		return err
+	}
+
 	dataUser := model.Users{
 		Fullname:  payloads.Fullname,
 		NIK:       userNik,
 		Email:     payloads.Email,
 		Gender:    payloads.Gender,
 		PhoneNum:  payloads.PhoneNum,
-		BirthDate: payloads.BirthDate,
+		BirthDate: dateBirth,
 	}
 
 	if err := u.UserRepo.UpdateUserProfile(dataUser); err != nil {
@@ -157,12 +196,55 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 	return nil
 }
 
-func (u *userService) DeleteUserProfile(nik string) error {
-	if err := u.UserRepo.DeleteAddress(nik); err != nil {
+func (u *userService) GetAddressUser(nik string) (model.Addresses, error) {
+	var address model.Addresses
+
+	getUserNik, err := m.GetUserNik(nik)
+	if err != nil {
+		return address, err
+	}
+
+	dataAddress, err := u.UserRepo.GetAddress(getUserNik)
+	if err != nil {
+		return address, err
+	}
+
+	return dataAddress, nil
+}
+
+func (u *userService) UpdateUserAddress(payloads payload.UpdateAddress, nik string) error {
+
+	getUserNik, err := m.GetUserNik(nik)
+	if err != nil {
 		return err
 	}
 
-	if err := u.UserRepo.DeleteUser(nik); err != nil {
+	newAddress := model.Addresses{
+		CurrentAddress: payloads.CurrentAddress,
+		District:       payloads.District,
+		City:           payloads.City,
+		Province:       payloads.Province,
+		Longitude:      payloads.Longitude,
+		Latitude:       payloads.Latitude,
+	}
+
+	if err := u.UserRepo.UpdateAddress(newAddress, getUserNik); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *userService) DeleteUserProfile(nik string) error {
+	getUserNik, err := m.GetUserNik(nik)
+	if err != nil {
+		return err
+	}
+
+	if err := u.UserRepo.DeleteAddress(getUserNik); err != nil {
+		return err
+	}
+
+	if err := u.UserRepo.DeleteUser(getUserNik); err != nil {
 		return err
 	}
 

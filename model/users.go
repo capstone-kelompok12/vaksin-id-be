@@ -17,6 +17,6 @@ type Users struct {
 	BirthDate    time.Time `gorm:"type:date"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	DeletedAt    gorm.DeletedAt `gorm:"index"`
-	Address      *Addresses     `gorm:"foreignKey:NikUser"` // has one to relationship
+	DeletedAt    *gorm.DeletedAt `gorm:"index"`
+	Address      *Addresses      `gorm:"foreignKey:NikUser"` // has one to relationship
 }

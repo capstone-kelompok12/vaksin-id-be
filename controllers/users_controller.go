@@ -71,11 +71,9 @@ func (u *UserController) LoginUser(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"error":   true,
+		"error":   false,
 		"message": "succes login user",
-		"data": map[string]interface{}{
-			"usertoken": authUser,
-		},
+		"data":    authUser,
 	})
 }
 
@@ -91,7 +89,7 @@ func (u *UserController) GetUserDataByNik(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"error":   true,
+		"error":   false,
 		"message": "succes get user",
 		"data":    data,
 	})
@@ -107,12 +105,12 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 		})
 	}
 
-	if err := util.ValidateUpdateUser(payloads); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
+	// if err := util.ValidateUpdateUser(payloads); err != nil {
+	// 	return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+	// 		"error":   true,
+	// 		"message": err.Error(),
+	// 	})
+	// }
 
 	nik := ctx.Request().Header.Get("Authorization")
 
@@ -124,8 +122,26 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"error":   true,
+		"error":   false,
 		"message": "succes update user",
+	})
+}
+
+func (u *UserController) GetUserAddress(ctx echo.Context) error {
+	nik := ctx.Request().Header.Get("Authorization")
+	data, err := u.UserService.GetAddressUser(nik)
+
+	if err != nil {
+		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "succes get user address",
+		"data":    data,
 	})
 }
 
@@ -140,7 +156,32 @@ func (u *UserController) DeleteUser(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"error":   true,
+		"error":   false,
 		"message": "succes delete user",
+	})
+}
+
+func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
+	var payloads payload.UpdateAddress
+
+	if err := ctx.Bind(&payloads); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	nik := ctx.Request().Header.Get("Authorization")
+
+	if err := u.UserService.UpdateUserAddress(payloads, nik); err != nil {
+		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "succes update address user",
 	})
 }

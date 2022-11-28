@@ -9,12 +9,18 @@ import (
 
 type UserRepository interface {
 	RegisterUser(data model.Users) error
+	CheckExistNik(nik string) (model.Users, error)
+	ReactivatedUser(nik string) error
+	ReactivatedUpdateUser(data model.Users, nik string) error
+	ReactivatedAddress(nik string) error
 	LoginUser(data model.Users) (model.Users, error)
 	GetUserDataByNik(nik string) (model.Users, error)
 	UpdateUserProfile(data model.Users) error
 	GetAgeUser(data model.Users) (response.AgeUser, error)
-	CreateAddress(data model.Addresses) error
 	DeleteUser(nik string) error
+	CreateAddress(data model.Addresses) error
+	GetAddress(nik string) (model.Addresses, error)
+	UpdateAddress(data model.Addresses, nik string) error
 	DeleteAddress(id string) error
 }
 
@@ -28,6 +34,38 @@ func NewUserRepository(db *gorm.DB) *userRepository {
 
 func (u *userRepository) RegisterUser(data model.Users) error {
 	if err := u.db.Create(&data).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *userRepository) CheckExistNik(nik string) (model.Users, error) {
+	var user model.Users
+	if err := u.db.Unscoped().Where("nik = ?", nik).First(&user).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
+func (u *userRepository) ReactivatedUser(nik string) error {
+	var user model.Users
+	if err := u.db.Unscoped().Model(&user).Where("nik = ?", nik).Update("deleted_at", nil).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *userRepository) ReactivatedUpdateUser(data model.Users, nik string) error {
+	var user model.Users
+	if err := u.db.Unscoped().Model(&user).Where("nik = ?", nik).Updates(&data).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *userRepository) ReactivatedAddress(nik string) error {
+	var address model.Addresses
+	if err := u.db.Unscoped().Model(&address).Where("nik_user = ?", nik).Update("deleted_at", nil).Error; err != nil {
 		return err
 	}
 	return nil
@@ -78,9 +116,25 @@ func (u *userRepository) DeleteUser(nik string) error {
 }
 
 func (u *userRepository) CreateAddress(data model.Addresses) error {
+	if err := u.db.Save(&data).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *userRepository) GetAddress(nik string) (model.Addresses, error) {
 	var address model.Addresses
 
-	if err := u.db.Save(&address).Error; err != nil {
+	if err := u.db.Where("nik_user = ?", nik).First(&address).Error; err != nil {
+		return address, err
+	}
+	return address, nil
+}
+
+func (u *userRepository) UpdateAddress(data model.Addresses, nik string) error {
+	var address model.Addresses
+
+	if err := u.db.Model(&address).Where("nik_user = ?", nik).Updates(&data).Error; err != nil {
 		return err
 	}
 	return nil

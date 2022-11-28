@@ -46,10 +46,7 @@ func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 	if err != nil {
 		return err
 	}
-	data, err := u.UserRepo.CheckExistNik(payloads.NikUser)
-	if err != nil {
-		return err
-	}
+	data, _ := u.UserRepo.CheckExistNik(payloads.NikUser)
 
 	if data.NIK != "" && data.DeletedAt != nil {
 		userModel := model.Users{

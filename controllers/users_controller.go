@@ -3,20 +3,22 @@ package controllers
 import (
 	"net/http"
 	"vaksin-id-be/dto/payload"
-	_ "vaksin-id-be/dto/response"
-	service "vaksin-id-be/services/users"
+	service_a "vaksin-id-be/services/addresses"
+	service_u "vaksin-id-be/services/users"
 	"vaksin-id-be/util"
 
 	"github.com/labstack/echo/v4"
 )
 
 type UserController struct {
-	UserService service.UserService
+	UserService    service_u.UserService
+	AddressService service_a.AddressService
 }
 
-func NewUserController(userServ service.UserService) *UserController {
+func NewUserController(userServ service_u.UserService, addressServ service_a.AddressService) *UserController {
 	return &UserController{
-		UserService: userServ,
+		UserService:    userServ,
+		AddressService: addressServ,
 	}
 }
 
@@ -92,7 +94,7 @@ func (u *UserController) LoginUser(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
-		"message": "succes login user",
+		"message": "success login user",
 		"data":    authUser,
 	})
 }
@@ -116,7 +118,7 @@ func (u *UserController) GetUserDataByNik(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
-		"message": "succes get user",
+		"message": "success get user",
 		"data":    data,
 	})
 }
@@ -152,7 +154,7 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
-		"message": "succes update user",
+		"message": "success update user",
 	})
 }
 
@@ -164,7 +166,7 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 // @Router		/api/v1/profile/address [get]
 func (u *UserController) GetUserAddress(ctx echo.Context) error {
 	nik := ctx.Request().Header.Get("Authorization")
-	data, err := u.UserService.GetAddressUser(nik)
+	data, err := u.AddressService.GetAddressUser(nik)
 
 	if err != nil {
 		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
@@ -175,7 +177,7 @@ func (u *UserController) GetUserAddress(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
-		"message": "succes get user address",
+		"message": "success get user address",
 		"data":    data,
 	})
 }
@@ -199,7 +201,7 @@ func (u *UserController) DeleteUser(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
-		"message": "succes delete user",
+		"message": "success delete user",
 	})
 }
 
@@ -225,7 +227,7 @@ func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 
 	nik := ctx.Request().Header.Get("Authorization")
 
-	if err := u.UserService.UpdateUserAddress(payloads, nik); err != nil {
+	if err := u.AddressService.UpdateUserAddress(payloads, nik); err != nil {
 		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
@@ -234,6 +236,6 @@ func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
-		"message": "succes update address user",
+		"message": "success update address user",
 	})
 }

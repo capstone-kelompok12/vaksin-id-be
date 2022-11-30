@@ -12,6 +12,7 @@ type Users struct {
 	Password     string    `gorm:"type:varchar(255)"`
 	Fullname     string    `gorm:"type:varchar(255)"`
 	PhoneNum     string    `gorm:"type:varchar(255)"`
+	ProfileImage *string   `gorm:"type:longtext"`
 	Gender       string    `gorm:"type:enum('P', 'L')"`
 	VaccineCount int       `gorm:"type:int(11)"`
 	BirthDate    time.Time `gorm:"type:date"`

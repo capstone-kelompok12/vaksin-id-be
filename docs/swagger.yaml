@@ -1,4 +1,325 @@
+basePath: /api/v1
+definitions:
+  payload.Login:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  payload.RegisterUser:
+    properties:
+      birthdate:
+        type: string
+      email:
+        type: string
+      fullname:
+        example: test
+        type: string
+      gender:
+        type: string
+      nik:
+        example: test
+        maxLength: 16
+        minLength: 16
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phonenum:
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - birthdate
+    - email
+    - fullname
+    - gender
+    - nik
+    - password
+    - phonenum
+    type: object
+  payload.UpdateAddress:
+    properties:
+      city:
+        type: string
+      current_address:
+        type: string
+      district:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      province:
+        type: string
+    type: object
+  payload.UpdateUser:
+    properties:
+      birthdate:
+        type: string
+      email:
+        type: string
+      fullname:
+        type: string
+      phonenum:
+        type: string
+      username:
+        type: string
+    type: object
+  response.Login:
+    properties:
+      token:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+  response.UserAddresses:
+    properties:
+      city:
+        type: string
+      createdAt:
+        type: string
+      currentAddress:
+        type: string
+      deletedAt:
+        type: string
+      district:
+        type: string
+      id:
+        type: string
+      idHealthFacilities:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      nikUser:
+        type: string
+      province:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  response.UserProfile:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      fullname:
+        type: string
+      gender:
+        type: string
+      nik:
+        type: string
+      phoneNum:
+        type: string
+      vaccineCount:
+        type: integer
+    type: object
 info:
   contact: {}
-paths: {}
+  description: |-
+    This is a Booking Vaccine API for manage Booking
+    Capstone Project Kelompok 12
+  title: VAKSIN-ID API
+  version: "1.0"
+paths:
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Login User
+      parameters:
+      - description: Input Login User
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/payload.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success login user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.Login'
+              type: object
+        "400":
+          description: error
+          schema:
+            type: string
+        "401":
+          description: error
+          schema:
+            type: string
+      summary: Login Users
+      tags:
+      - users
+  /api/v1/profile:
+    delete:
+      description: delete data users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete user
+          schema:
+            type: string
+        "401":
+          description: error
+          schema:
+            type: string
+      summary: delete user
+      tags:
+      - users
+    get:
+      description: This can only be done by the logged in user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success get user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UserProfile'
+              type: object
+      summary: get user by nik
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: This can only be done by the logged in user.
+      parameters:
+      - description: Input new data user
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/payload.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success update user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.UpdateUser'
+              type: object
+        "400":
+          description: error
+          schema:
+            type: string
+        "401":
+          description: error
+          schema:
+            type: string
+      summary: update users
+      tags:
+      - users
+  /api/v1/profile/address:
+    get:
+      description: This can only be done by the logged in user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success get user address
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UserAddresses'
+              type: object
+      summary: get user address
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: This can only be done by the logged in user.
+      parameters:
+      - description: Input new data user address
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/payload.UpdateAddress'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success update address user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.UpdateUser'
+              type: object
+        "400":
+          description: error
+          schema:
+            type: string
+        "401":
+          description: error
+          schema:
+            type: string
+      summary: update users addres
+      tags:
+      - users
+  /api/v1/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register User
+      parameters:
+      - description: Input Register User
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/payload.RegisterUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: success register user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.RegisterUser'
+              type: object
+        "400":
+          description: error
+          schema:
+            type: string
+      summary: Register Users
+      tags:
+      - users
+schemes:
+- http
+- https
 swagger: "2.0"

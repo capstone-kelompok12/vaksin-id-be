@@ -11,7 +11,6 @@ type Admins struct {
 	IdHealthFacilities string `gorm:"type:varchar(255)"`
 	Email              string `gorm:"type:varchar(255)"`
 	Password           string `gorm:"type:varchar(255)"`
-	PhoneNum           string `gorm:"type:varchar(255)"`
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
 	DeletedAt          gorm.DeletedAt    `gorm:"index"`

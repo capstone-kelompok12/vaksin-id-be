@@ -11,11 +11,12 @@ type RegisterUser struct {
 }
 
 type UpdateUser struct {
-	Fullname  string `json:"fullname" gorm:"size:255"`
-	Email     string `json:"email" gorm:"size:100"`
-	Gender    string `json:"username" gorm:"size:1"`
-	PhoneNum  string `json:"phonenum" gorm:"size:15"`
-	BirthDate string `json:"birthdate"`
+	Fullname     string `json:"fullname" gorm:"size:255"`
+	Email        string `json:"email" gorm:"size:100"`
+	Gender       string `json:"username" gorm:"size:1"`
+	PhoneNum     string `json:"phonenum" gorm:"size:15"`
+	ProfileImage string `json:"profileimage"`
+	BirthDate    string `json:"birthdate"`
 }
 
 type UpdateAddress struct {
@@ -23,6 +24,6 @@ type UpdateAddress struct {
 	District       string  `json:"district"`
 	City           string  `json:"city"`
 	Province       string  `json:"province"`
-	Longitude      float64 `json:"longitude" gorm:"type:numeric(11,7)"`
 	Latitude       float64 `json:"latitude" gorm:"type:numeric(11,7)"`
+	Longitude      float64 `json:"longitude" gorm:"type:numeric(11,7)"`
 }

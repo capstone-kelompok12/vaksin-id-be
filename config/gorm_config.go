@@ -10,7 +10,6 @@ import (
 )
 
 func InitGorm() *gorm.DB {
-	//util.ProcessEnv()
 
 	host := os.Getenv("DB_HOST")
 	username := os.Getenv("DB_USERNAME")

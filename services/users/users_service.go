@@ -7,7 +7,8 @@ import (
 	"vaksin-id-be/dto/response"
 	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
-	mysql "vaksin-id-be/repository/mysql/users"
+	mysqla "vaksin-id-be/repository/mysql/addresses"
+	mysqlu "vaksin-id-be/repository/mysql/users"
 	"vaksin-id-be/util"
 
 	"github.com/google/uuid"
@@ -18,18 +19,18 @@ type UserService interface {
 	LoginUser(payloads payload.Login) (response.Login, error)
 	GetUserDataByNik(nik string) (response.UserProfile, error)
 	UpdateUserProfile(payloads payload.UpdateUser, nik string) error
-	GetAddressUser(nik string) (model.Addresses, error)
-	UpdateUserAddress(payloads payload.UpdateAddress, nik string) error
 	DeleteUserProfile(nik string) error
 }
 
 type userService struct {
-	UserRepo mysql.UserRepository
+	UserRepo    mysqlu.UserRepository
+	AddressRepo mysqla.AddressesRepository
 }
 
-func NewUserService(userRepo mysql.UserRepository) *userService {
+func NewUserService(userRepo mysqlu.UserRepository, addressRepo mysqla.AddressesRepository) *userService {
 	return &userService{
-		UserRepo: userRepo,
+		UserRepo:    userRepo,
+		AddressRepo: addressRepo,
 	}
 }
 
@@ -79,6 +80,7 @@ func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 		Fullname:     payloads.Fullname,
 		PhoneNum:     payloads.PhoneNum,
 		Gender:       payloads.Gender,
+		ProfileImage: nil,
 		VaccineCount: defaultVaccineCount,
 		BirthDate:    dateBirth,
 	}
@@ -96,7 +98,7 @@ func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 		NikUser:            &payloads.NikUser,
 	}
 
-	errAddr := u.UserRepo.CreateAddress(userAddr)
+	errAddr := u.AddressRepo.CreateAddress(userAddr)
 	if errAddr != nil {
 		return errAddr
 	}
@@ -193,51 +195,13 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 	return nil
 }
 
-func (u *userService) GetAddressUser(nik string) (model.Addresses, error) {
-	var address model.Addresses
-
-	getUserNik, err := m.GetUserNik(nik)
-	if err != nil {
-		return address, err
-	}
-
-	dataAddress, err := u.UserRepo.GetAddress(getUserNik)
-	if err != nil {
-		return address, err
-	}
-
-	return dataAddress, nil
-}
-
-func (u *userService) UpdateUserAddress(payloads payload.UpdateAddress, nik string) error {
-
-	getUserNik, err := m.GetUserNik(nik)
-	if err != nil {
-		return err
-	}
-
-	newAddress := model.Addresses{
-		CurrentAddress: payloads.CurrentAddress,
-		District:       payloads.District,
-		City:           payloads.City,
-		Province:       payloads.Province,
-		Longitude:      payloads.Longitude,
-		Latitude:       payloads.Latitude,
-	}
-
-	if err := u.UserRepo.UpdateAddress(newAddress, getUserNik); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (u *userService) DeleteUserProfile(nik string) error {
 	getUserNik, err := m.GetUserNik(nik)
 	if err != nil {
 		return err
 	}
 
-	if err := u.UserRepo.DeleteAddress(getUserNik); err != nil {
+	if err := u.AddressRepo.DeleteAddressUser(getUserNik); err != nil {
 		return err
 	}
 

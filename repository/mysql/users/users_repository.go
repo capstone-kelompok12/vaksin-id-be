@@ -18,10 +18,6 @@ type UserRepository interface {
 	UpdateUserProfile(data model.Users) error
 	GetAgeUser(data model.Users) (response.AgeUser, error)
 	DeleteUser(nik string) error
-	CreateAddress(data model.Addresses) error
-	GetAddress(nik string) (model.Addresses, error)
-	UpdateAddress(data model.Addresses, nik string) error
-	DeleteAddress(id string) error
 }
 
 type userRepository struct {
@@ -110,40 +106,6 @@ func (u *userRepository) GetAgeUser(data model.Users) (response.AgeUser, error) 
 func (u *userRepository) DeleteUser(nik string) error {
 	var user model.Users
 	if err := u.db.Where("nik = ?", nik).Find(&user).Delete(&user).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-func (u *userRepository) CreateAddress(data model.Addresses) error {
-	if err := u.db.Save(&data).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-func (u *userRepository) GetAddress(nik string) (model.Addresses, error) {
-	var address model.Addresses
-
-	if err := u.db.Where("nik_user = ?", nik).First(&address).Error; err != nil {
-		return address, err
-	}
-	return address, nil
-}
-
-func (u *userRepository) UpdateAddress(data model.Addresses, nik string) error {
-	var address model.Addresses
-
-	if err := u.db.Model(&address).Where("nik_user = ?", nik).Updates(&data).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-func (u *userRepository) DeleteAddress(nik string) error {
-	var address model.Addresses
-
-	if err := u.db.Where("nik_user = ?", nik).Find(&address).Delete(&address).Error; err != nil {
 		return err
 	}
 	return nil

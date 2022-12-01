@@ -16,6 +16,149 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/admin/healthfacilities": {
+            "post": {
+                "description": "Create data for Health Facilities",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HealthFacilities"
+                ],
+                "summary": "Create HealthFacilities",
+                "parameters": [
+                    {
+                        "description": "Input data Health Facilities",
+                        "name": "healthfacilities",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payload.HealthFacilities"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "success create health facilities",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/payload.HealthFacilities"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "StatusBadRequest",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "StatusInternalServerError",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/healthfacilities/:id": {
+            "put": {
+                "description": "This can only be done by the logged in admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HealthFacilities"
+                ],
+                "summary": "Update HealthFacilities",
+                "parameters": [
+                    {
+                        "description": "Input new data health facilities",
+                        "name": "update",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payload.HealthFacilities"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success update health facilities",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/payload.HealthFacilities"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "StatusBadRequest",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete data healthfacilities",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HealthFacilities"
+                ],
+                "summary": "Delete HealthFacilities",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account ID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success delete healthfacilities",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseDelete"
+                        }
+                    },
+                    "401": {
+                        "description": "StatusUnauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/login": {
             "post": {
                 "description": "Login User",
@@ -26,7 +169,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Authentication"
                 ],
                 "summary": "Login Users",
                 "parameters": [
@@ -60,15 +203,15 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "error",
+                        "description": "StatusBadRequest",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.ResponseError"
                         }
                     },
                     "401": {
-                        "description": "error",
+                        "description": "StatusUnauthorized",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.ResponseError"
                         }
                     }
                 }
@@ -81,9 +224,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
-                "summary": "get user by nik",
+                "summary": "Get User by NIK",
                 "responses": {
                     "200": {
                         "description": "Success get user",
@@ -114,9 +257,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
-                "summary": "update users",
+                "summary": "Update User",
                 "parameters": [
                     {
                         "description": "Input new data user",
@@ -148,39 +291,33 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "error",
+                        "description": "StatusBadRequest",
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "error",
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.ResponseError"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "delete data users",
+                "description": "This can only be done by the logged in user.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
-                "summary": "delete user",
+                "summary": "Delete User",
                 "responses": {
                     "200": {
                         "description": "success delete user",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.ResponseDelete"
                         }
                     },
                     "401": {
-                        "description": "error",
+                        "description": "StatusUnauthorized",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.ResponseError"
                         }
                     }
                 }
@@ -193,9 +330,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
-                "summary": "get user address",
+                "summary": "Get User Address",
                 "responses": {
                     "200": {
                         "description": "Success get user address",
@@ -226,9 +363,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Users"
                 ],
-                "summary": "update users addres",
+                "summary": "Update User Address",
                 "parameters": [
                     {
                         "description": "Input new data user address",
@@ -260,15 +397,15 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "error",
+                        "description": "StatusBadRequest",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.ResponseError"
                         }
                     },
                     "401": {
-                        "description": "error",
+                        "description": "StatusUnauthorized",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.ResponseError"
                         }
                     }
                 }
@@ -284,7 +421,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "users"
+                    "Authentication"
                 ],
                 "summary": "Register Users",
                 "parameters": [
@@ -318,9 +455,15 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "error",
+                        "description": "StatusBadRequest",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "StatusInternalServerError",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseError"
                         }
                     }
                 }
@@ -328,6 +471,44 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "payload.HealthFacilities": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "current_address": {
+                    "type": "string"
+                },
+                "district": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phonenum": {
+                    "type": "string"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
         "payload.Login": {
             "type": "object",
             "required": [
@@ -336,10 +517,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@gmail.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user123"
                 }
             }
         },
@@ -356,32 +539,37 @@ const docTemplate = `{
             ],
             "properties": {
                 "birthdate": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2001-05-25"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@gmail.com"
                 },
                 "fullname": {
                     "type": "string",
-                    "example": "test"
+                    "example": "user"
                 },
                 "gender": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "L"
                 },
                 "nik": {
                     "type": "string",
                     "maxLength": 16,
                     "minLength": 16,
-                    "example": "test"
+                    "example": "1234567898765432"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 6
+                    "minLength": 6,
+                    "example": "user123"
                 },
                 "phonenum": {
                     "type": "string",
                     "maxLength": 15,
-                    "minLength": 10
+                    "minLength": 10,
+                    "example": "081234567890"
                 }
             }
         },
@@ -423,6 +611,9 @@ const docTemplate = `{
                 "phonenum": {
                     "type": "string"
                 },
+                "profileimage": {
+                    "type": "string"
+                },
                 "username": {
                     "type": "string"
                 }
@@ -432,7 +623,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1hIjoiRmFxaWgifQ.jtYrULLMxWPWfy39r4Qm0gCxo-5–542VhsRDSO5cjQ"
                 }
             }
         },
@@ -441,7 +633,37 @@ const docTemplate = `{
             "properties": {
                 "data": {},
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "response.ResponseDelete": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": ""
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success deleted"
+                }
+            }
+        },
+        "response.ResponseError": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "example": ""
+                },
+                "error": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "error"
                 }
             }
         },

@@ -1,10 +1,37 @@
 basePath: /api/v1
 definitions:
+  payload.HealthFacilities:
+    properties:
+      city:
+        type: string
+      current_address:
+        type: string
+      district:
+        type: string
+      email:
+        type: string
+      image:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      phonenum:
+        type: string
+      province:
+        type: string
+    required:
+    - email
+    type: object
   payload.Login:
     properties:
       email:
+        example: user@gmail.com
         type: string
       password:
+        example: user123
         type: string
     required:
     - email
@@ -13,23 +40,28 @@ definitions:
   payload.RegisterUser:
     properties:
       birthdate:
+        example: "2001-05-25"
         type: string
       email:
+        example: user@gmail.com
         type: string
       fullname:
-        example: test
+        example: user
         type: string
       gender:
+        example: L
         type: string
       nik:
-        example: test
+        example: "1234567898765432"
         maxLength: 16
         minLength: 16
         type: string
       password:
+        example: user123
         minLength: 6
         type: string
       phonenum:
+        example: "081234567890"
         maxLength: 15
         minLength: 10
         type: string
@@ -67,18 +99,42 @@ definitions:
         type: string
       phonenum:
         type: string
+      profileimage:
+        type: string
       username:
         type: string
     type: object
   response.Login:
     properties:
       token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1hIjoiRmFxaWgifQ.jtYrULLMxWPWfy39r4Qm0gCxo-5–542VhsRDSO5cjQ
         type: string
     type: object
   response.Response:
     properties:
       data: {}
       message:
+        example: success
+        type: string
+    type: object
+  response.ResponseDelete:
+    properties:
+      data:
+        example: ""
+        type: string
+      message:
+        example: success deleted
+        type: string
+    type: object
+  response.ResponseError:
+    properties:
+      data:
+        example: ""
+        type: string
+      error:
+        type: boolean
+      message:
+        example: error
         type: string
     type: object
   response.UserAddresses:
@@ -133,6 +189,94 @@ info:
   title: VAKSIN-ID API
   version: "1.0"
 paths:
+  /api/v1/admin/healthfacilities:
+    post:
+      consumes:
+      - application/json
+      description: Create data for Health Facilities
+      parameters:
+      - description: Input data Health Facilities
+        in: body
+        name: healthfacilities
+        required: true
+        schema:
+          $ref: '#/definitions/payload.HealthFacilities'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: success create health facilities
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.HealthFacilities'
+              type: object
+        "400":
+          description: StatusBadRequest
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+        "500":
+          description: StatusInternalServerError
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Create HealthFacilities
+      tags:
+      - HealthFacilities
+  /api/v1/admin/healthfacilities/:id:
+    delete:
+      description: delete data healthfacilities
+      parameters:
+      - description: Account ID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete healthfacilities
+          schema:
+            $ref: '#/definitions/response.ResponseDelete'
+        "401":
+          description: StatusUnauthorized
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Delete HealthFacilities
+      tags:
+      - HealthFacilities
+    put:
+      consumes:
+      - application/json
+      description: This can only be done by the logged in admin.
+      parameters:
+      - description: Input new data health facilities
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/payload.HealthFacilities'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success update health facilities
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.HealthFacilities'
+              type: object
+        "400":
+          description: StatusBadRequest
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Update HealthFacilities
+      tags:
+      - HealthFacilities
   /api/v1/login:
     post:
       consumes:
@@ -158,33 +302,33 @@ paths:
                   $ref: '#/definitions/response.Login'
               type: object
         "400":
-          description: error
+          description: StatusBadRequest
           schema:
-            type: string
+            $ref: '#/definitions/response.ResponseError'
         "401":
-          description: error
+          description: StatusUnauthorized
           schema:
-            type: string
+            $ref: '#/definitions/response.ResponseError'
       summary: Login Users
       tags:
-      - users
+      - Authentication
   /api/v1/profile:
     delete:
-      description: delete data users
+      description: This can only be done by the logged in user.
       produces:
       - application/json
       responses:
         "200":
           description: success delete user
           schema:
-            type: string
+            $ref: '#/definitions/response.ResponseDelete'
         "401":
-          description: error
+          description: StatusUnauthorized
           schema:
-            type: string
-      summary: delete user
+            $ref: '#/definitions/response.ResponseError'
+      summary: Delete User
       tags:
-      - users
+      - Users
     get:
       description: This can only be done by the logged in user.
       produces:
@@ -199,9 +343,9 @@ paths:
                 data:
                   $ref: '#/definitions/response.UserProfile'
               type: object
-      summary: get user by nik
+      summary: Get User by NIK
       tags:
-      - users
+      - Users
     put:
       consumes:
       - application/json
@@ -226,16 +370,12 @@ paths:
                   $ref: '#/definitions/payload.UpdateUser'
               type: object
         "400":
-          description: error
+          description: StatusBadRequest
           schema:
-            type: string
-        "401":
-          description: error
-          schema:
-            type: string
-      summary: update users
+            $ref: '#/definitions/response.ResponseError'
+      summary: Update User
       tags:
-      - users
+      - Users
   /api/v1/profile/address:
     get:
       description: This can only be done by the logged in user.
@@ -251,9 +391,9 @@ paths:
                 data:
                   $ref: '#/definitions/response.UserAddresses'
               type: object
-      summary: get user address
+      summary: Get User Address
       tags:
-      - users
+      - Users
     put:
       consumes:
       - application/json
@@ -278,16 +418,16 @@ paths:
                   $ref: '#/definitions/payload.UpdateUser'
               type: object
         "400":
-          description: error
+          description: StatusBadRequest
           schema:
-            type: string
+            $ref: '#/definitions/response.ResponseError'
         "401":
-          description: error
+          description: StatusUnauthorized
           schema:
-            type: string
-      summary: update users addres
+            $ref: '#/definitions/response.ResponseError'
+      summary: Update User Address
       tags:
-      - users
+      - Users
   /api/v1/signup:
     post:
       consumes:
@@ -313,12 +453,16 @@ paths:
                   $ref: '#/definitions/payload.RegisterUser'
               type: object
         "400":
-          description: error
+          description: StatusBadRequest
           schema:
-            type: string
+            $ref: '#/definitions/response.ResponseError'
+        "500":
+          description: StatusInternalServerError
+          schema:
+            $ref: '#/definitions/response.ResponseError'
       summary: Register Users
       tags:
-      - users
+      - Authentication
 schemes:
 - http
 - https

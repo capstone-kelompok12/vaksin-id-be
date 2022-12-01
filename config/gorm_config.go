@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"vaksin-id-be/util"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
@@ -11,11 +10,6 @@ import (
 )
 
 func InitGorm() *gorm.DB {
-<<<<<<< HEAD
-	util.ProcessEnv()
-=======
-	// util.ProcessEnv()
->>>>>>> fb68a2c230043ca8c110e286684288b6a9c7c618
 
 	host := os.Getenv("DB_HOST")
 	username := os.Getenv("DB_USERNAME")

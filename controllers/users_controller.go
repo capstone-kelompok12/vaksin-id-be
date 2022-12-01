@@ -55,19 +55,19 @@ func (u *UserController) RegisterUser(ctx echo.Context) error {
 }
 
 func (u *UserController) LoginUser(ctx echo.Context) error {
-	var payload payload.Login
+	var payloads payload.Login
 
-	if err := ctx.Bind(&payload); err != nil {
+	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	authUser, err := u.UserService.LoginUser(payload)
+	authUser, err := u.UserService.LoginUser(payloads)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -85,7 +85,7 @@ func (u *UserController) GetUserDataByNik(ctx echo.Context) error {
 	data, err := u.UserService.GetUserDataByNik(nik)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -111,7 +111,7 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 	nik := ctx.Request().Header.Get("Authorization")
 
 	if err := u.UserService.UpdateUserProfile(payloads, nik); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -128,7 +128,7 @@ func (u *UserController) GetUserAddress(ctx echo.Context) error {
 	data, err := u.AddressService.GetAddressUser(nik)
 
 	if err != nil {
-		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -145,7 +145,7 @@ func (u *UserController) DeleteUser(ctx echo.Context) error {
 	nik := ctx.Request().Header.Get("Authorization")
 
 	if err := u.UserService.DeleteUserProfile(nik); err != nil {
-		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -170,7 +170,7 @@ func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 	nik := ctx.Request().Header.Get("Authorization")
 
 	if err := u.AddressService.UpdateUserAddress(payloads, nik); err != nil {
-		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})

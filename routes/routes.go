@@ -3,6 +3,7 @@ package routes
 import (
 	"vaksin-id-be/config"
 	m "vaksin-id-be/middleware"
+	admins "vaksin-id-be/routes/admins"
 	hf "vaksin-id-be/routes/health_facilities"
 	users "vaksin-id-be/routes/users"
 
@@ -18,6 +19,7 @@ func Init() *echo.Echo {
 	// route config
 	userApi := config.InitUserAPI(dbConfig)
 	healthFacilitiesApi := config.InitHealthFacilitiesAPI(dbConfig)
+	adminsApi := config.InitAdminApi(dbConfig)
 
 	routes := echo.New()
 
@@ -38,6 +40,10 @@ func Init() *echo.Echo {
 
 	// health facilities
 	hf.HealthFacilitiesAuthenticated(v1, healthFacilitiesApi)
+
+	// admins
+	admins.UserUnauthenticated(v1, adminsApi)
+	admins.UserAuthenticated(v1, adminsApi)
 
 	return routes
 }

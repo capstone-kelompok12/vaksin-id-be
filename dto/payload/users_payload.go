@@ -1,8 +1,8 @@
 package payload
 
 type RegisterUser struct {
-	Fullname  string `json:"fullname" gorm:"size:255;not null" validate:"required"`
-	NikUser   string `json:"nik" gorm:"varchar:16;not null" validate:"required,min=16,max=16"`
+	Fullname  string `json:"fullname" gorm:"size:255;not null" validate:"required" example:"test"`
+	NikUser   string `json:"nik" gorm:"varchar:16;not null" validate:"required,min=16,max=16" example:"test"`
 	Email     string `json:"email" gorm:"size:100;not null" validate:"required,email"`
 	Gender    string `json:"gender" gorm:"size:1;not null" validate:"required"`
 	Password  string `json:"password" gorm:"size:100;not null" validate:"required,min=6"`

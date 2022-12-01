@@ -3,11 +3,9 @@ package config
 import (
 	"vaksin-id-be/controllers"
 	mysql_address "vaksin-id-be/repository/mysql/addresses"
-	mysql_admin "vaksin-id-be/repository/mysql/admins"
 	mysql_health "vaksin-id-be/repository/mysql/health_facilities"
 	mysql_user "vaksin-id-be/repository/mysql/users"
 	services_addresses "vaksin-id-be/services/addresses"
-	services_admin "vaksin-id-be/services/admins"
 	services_health "vaksin-id-be/services/health_facilities"
 	services_user "vaksin-id-be/services/users"
 
@@ -30,11 +28,4 @@ func InitHealthFacilitiesAPI(db *gorm.DB) *controllers.HealthFacilitiesControlle
 	addressServ := services_addresses.NewAddressesService(addressRepo)
 	healthAPI := controllers.NewHealthFacilitiesController(healthServ, addressServ)
 	return healthAPI
-}
-
-func InitAdminApi(db *gorm.DB) *controllers.AdminsController {
-	adminRepo := mysql_admin.NewAdminRepository(db)
-	adminServ := services_admin.NewAdminService(adminRepo)
-	adminApi := controllers.NewAdminsController(adminServ)
-	return adminApi
 }

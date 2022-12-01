@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strings"
 	"vaksin-id-be/dto/payload"
 	service_a "vaksin-id-be/services/addresses"
 	service_h "vaksin-id-be/services/health_facilities"
@@ -64,17 +65,52 @@ func (h *HealthFacilitiesController) CreateHealthFacilities(ctx echo.Context) er
 	})
 }
 
+func (h *HealthFacilitiesController) GetHealthFacilities(ctx echo.Context) error {
+	name := ctx.Param("name")
+	nameLower := strings.ToLower(name)
+	data, err := h.HealthService.GetHealthFacilities(nameLower)
+
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "success get health facilities",
+		"data":    data,
+	})
+}
+
+func (h *HealthFacilitiesController) GetAllHealthFacilities(ctx echo.Context) error {
+	data, err := h.HealthService.GetAllHealthFacilities()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "success get user",
+		"data":    data,
+	})
+}
+
 // @Summary 	Update HealthFacilities
 // @Description This can only be done by the logged in admin.
 // @Tags 		HealthFacilities
 // @Accept		json
 // @Produce 	json
-// @Param		update body 	payload.HealthFacilities	true	"Input new data health facilities"
+// @Param		update body 	payload.UpdateHealthFacilities	true	"Input new data health facilities"
 // @Success 	200		{object} 	response.Response{data=payload.HealthFacilities}		"success update health facilities"
 // @Router 		/api/v1/admin/healthfacilities/:id [put]
 // @failure		400		{object}		response.ResponseError	"StatusBadRequest"
 func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) error {
-	var payloads payload.HealthFacilities
+	var payloads payload.UpdateHealthFacilities
 
 	id := ctx.Param("id")
 

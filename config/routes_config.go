@@ -26,7 +26,8 @@ func InitUserAPI(db *gorm.DB) *controllers.UserController {
 func InitHealthFacilitiesAPI(db *gorm.DB) *controllers.HealthFacilitiesController {
 	healthRepo := mysql_health.NewHealthFacilitiesRepository(db)
 	addressRepo := mysql_address.NewAddressesRepository(db)
-	healthServ := services_health.NewHealthFacilitiesService(healthRepo, addressRepo)
+	adminRepo := mysql_admin.NewAdminsRepository(db)
+	healthServ := services_health.NewHealthFacilitiesService(healthRepo, addressRepo, adminRepo)
 	addressServ := services_addresses.NewAddressesService(addressRepo)
 	healthAPI := controllers.NewHealthFacilitiesController(healthServ, addressServ)
 	return healthAPI

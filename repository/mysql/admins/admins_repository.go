@@ -13,6 +13,7 @@ type AdminsRepository interface {
 	GetAdmins(id string) (model.Admins, error)
 	UpdateAdmins(data model.Admins, id string) error
 	DeleteAdmins(id string) error
+	DeleteAdminsByHealth(id string) error
 }
 
 type adminsRepository struct {
@@ -65,6 +66,14 @@ func (a *adminsRepository) UpdateAdmins(data model.Admins, id string) error {
 func (a *adminsRepository) DeleteAdmins(id string) error {
 	var admins model.Admins
 	if err := a.db.Where("id = ?", id).Delete(&admins).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *adminsRepository) DeleteAdminsByHealth(id string) error {
+	var admins model.Admins
+	if err := a.db.Where("id_health_facilities = ?", id).Delete(&admins).Error; err != nil {
 		return err
 	}
 	return nil

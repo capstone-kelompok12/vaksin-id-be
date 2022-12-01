@@ -8,12 +8,9 @@ import (
 	"vaksin-id-be/model"
 	mysqla "vaksin-id-be/repository/mysql/admins"
 	"vaksin-id-be/util"
-
-	"github.com/google/uuid"
 )
 
 type AdminService interface {
-	RegisterAdmin(payloads payload.AdminsPayload) error
 	LoginAdmin(payloads payload.Login) (response.Login, error)
 	GetAllAdmins() ([]response.AdminResponse, error)
 	GetAdmins(id string) (response.AdminResponse, error)
@@ -29,30 +26,6 @@ func NewAdminService(adminServ mysqla.AdminsRepository) *adminService {
 	return &adminService{
 		AdminServ: adminServ,
 	}
-}
-
-func (a *adminService) RegisterAdmin(payloads payload.AdminsPayload) error {
-
-	hashPass, err := util.HashPassword(payloads.Password)
-	if err != nil {
-		return err
-	}
-
-	id := uuid.NewString()
-
-	adminModel := model.Admins{
-		ID:                 id,
-		IdHealthFacilities: payloads.IdHealthFacilities,
-		Email:              payloads.Email,
-		Password:           hashPass,
-	}
-
-	err = a.AdminServ.RegisterAdmins(adminModel)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (a *adminService) LoginAdmin(payloads payload.Login) (response.Login, error) {

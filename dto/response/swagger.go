@@ -18,6 +18,15 @@ type UserAddresses struct {
 }
 
 type Response[T any] struct {
-	Message string `json:"message"`
+	Message string `json:"message" example:"success"`
 	Data    any    `json:"data"`
+}
+type ResponseError[T any] struct {
+	Message string `json:"message" example:"error"`
+	Data    string `json:"data" example:""`
+	Error   bool   `json:"error"`
+}
+type ResponseDelete[T any] struct {
+	Message string `json:"message" example:"success deleted"`
+	Data    string `json:"data" example:""`
 }

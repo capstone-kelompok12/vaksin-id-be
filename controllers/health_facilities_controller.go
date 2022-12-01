@@ -22,6 +22,16 @@ func NewHealthFacilitiesController(healthServ service_h.HealthFacilitiesService,
 	}
 }
 
+// @Summary 	Create HealthFacilities
+// @Description Create data for Health Facilities
+// @Tags 		HealthFacilities
+// @Accept		json
+// @Produce 	json
+// @Param		healthfacilities body 	payload.HealthFacilities	true	"Input data Health Facilities"
+// @Success 	201		{object} 	response.Response{data=payload.HealthFacilities}		"success create health facilities"
+// @Router 		/api/v1/admin/healthfacilities [post]
+// @failure		400		{object}	response.ResponseError	"StatusBadRequest"
+// @failure		500		{object}	response.ResponseError	"StatusInternalServerError"
 func (h *HealthFacilitiesController) CreateHealthFacilities(ctx echo.Context) error {
 	var payloads payload.HealthFacilities
 
@@ -54,6 +64,15 @@ func (h *HealthFacilitiesController) CreateHealthFacilities(ctx echo.Context) er
 	})
 }
 
+// @Summary 	Update HealthFacilities
+// @Description This can only be done by the logged in admin.
+// @Tags 		HealthFacilities
+// @Accept		json
+// @Produce 	json
+// @Param		update body 	payload.HealthFacilities	true	"Input new data health facilities"
+// @Success 	200		{object} 	response.Response{data=payload.HealthFacilities}		"success update health facilities"
+// @Router 		/api/v1/admin/healthfacilities/:id [put]
+// @failure		400		{object}		response.ResponseError	"StatusBadRequest"
 func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) error {
 	var payloads payload.HealthFacilities
 
@@ -79,6 +98,14 @@ func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) er
 	})
 }
 
+// @Summary 	Delete HealthFacilities
+// @Description delete data healthfacilities
+// @Tags 		HealthFacilities
+// @Produce 	json
+// @Param       uuid   path      string  true  "Account ID"
+// @Success 	200		{object} 	response.ResponseDelete	"success delete healthfacilities"
+// @Router 		/api/v1/admin/healthfacilities/:id [delete]
+// @failure		401		{object}		response.ResponseError	"StatusUnauthorized"
 func (h *HealthFacilitiesController) DeleteHealthFacilities(ctx echo.Context) error {
 	id := ctx.Param("id")
 

@@ -2,7 +2,7 @@ package response
 
 import "time"
 
-type AdminsResponse struct {
+type AdminResponse struct {
 	ID                 string
 	IdHealthFacilities string
 	Email              string

@@ -6,7 +6,7 @@ import (
 	"vaksin-id-be/dto/response"
 	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
-	mysqlad "vaksin-id-be/repository/mysql/admins"
+	mysqla "vaksin-id-be/repository/mysql/admins"
 	"vaksin-id-be/util"
 
 	"github.com/google/uuid"
@@ -14,46 +14,48 @@ import (
 
 type AdminService interface {
 	RegisterAdmin(payloads payload.AdminsPayload) error
-	LoginAdmin(payloads payload.LoginAdmin) (response.Login, error)
-	GetAllAdmin() ([]response.AdminsResponse, error)
-	GetAdmin(id string) (response.AdminsResponse, error)
-	UpdateAdmin(payloads payload.AdminsPayload, id string) error
-	DeleteAdmin(id string) error
+	LoginAdmin(payloads payload.Login) (response.Login, error)
+	GetAllAdmins() ([]response.AdminResponse, error)
+	GetAdmins(id string) (response.AdminResponse, error)
+	UpdateAdmins(payloads payload.AdminsPayload, id string) error
+	DeleteAdmins(id string) error
 }
 
 type adminService struct {
-	AdminRepo mysqlad.AdminRepository
+	AdminServ mysqla.AdminsRepository
 }
 
-func NewAdminService(adminServ mysqlad.AdminRepository) *adminService {
+func NewAdminService(adminServ mysqla.AdminsRepository) *adminService {
 	return &adminService{
-		AdminRepo: adminServ,
+		AdminServ: adminServ,
 	}
 }
 
 func (a *adminService) RegisterAdmin(payloads payload.AdminsPayload) error {
-	id := uuid.NewString()
 
-	passAdmin, err := util.HashPassword(payloads.Password)
+	hashPass, err := util.HashPassword(payloads.Password)
 	if err != nil {
 		return err
 	}
 
-	dataAdmin := model.Admins{
+	id := uuid.NewString()
+
+	adminModel := model.Admins{
 		ID:                 id,
 		IdHealthFacilities: payloads.IdHealthFacilities,
 		Email:              payloads.Email,
-		Password:           passAdmin,
+		Password:           hashPass,
 	}
 
-	if err := a.AdminRepo.RegisterAdmin(dataAdmin); err != nil {
+	err = a.AdminServ.RegisterAdmins(adminModel)
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (a *adminService) LoginAdmin(payloads payload.LoginAdmin) (response.Login, error) {
+func (a *adminService) LoginAdmin(payloads payload.Login) (response.Login, error) {
 	var loginResponse response.Login
 
 	adminModel := model.Admins{
@@ -61,17 +63,17 @@ func (a *adminService) LoginAdmin(payloads payload.LoginAdmin) (response.Login, 
 		Password: payloads.Password,
 	}
 
-	userData, err := a.AdminRepo.LoginAdmin(adminModel)
+	adminData, err := a.AdminServ.LoginAdmins(adminModel)
 	if err != nil {
 		return loginResponse, err
 	}
 
-	isValid := util.CheckPasswordHash(payloads.Password, userData.Password)
+	isValid := util.CheckPasswordHash(payloads.Password, adminData.Password)
 	if !isValid {
 		return loginResponse, errors.New("wrong password")
 	}
 
-	token, errToken := m.CreateTokenAdmin(userData.ID, userData.Email)
+	token, errToken := m.CreateTokenAdmin(adminData.ID, adminData.Email)
 
 	if errToken != nil {
 		return loginResponse, err
@@ -84,69 +86,69 @@ func (a *adminService) LoginAdmin(payloads payload.LoginAdmin) (response.Login, 
 	return loginResponse, nil
 }
 
-func (a *adminService) GetAllAdmin() ([]response.AdminsResponse, error) {
-	allAdmins, err := a.AdminRepo.GetAllAdmin()
-	responses := make([]response.AdminsResponse, len(allAdmins))
+func (a *adminService) GetAllAdmins() ([]response.AdminResponse, error) {
+	var adminResponse []response.AdminResponse
 
+	getData, err := a.AdminServ.GetAllAdmins()
 	if err != nil {
-		return responses, err
+		return adminResponse, err
 	}
 
-	for i, val := range allAdmins {
-		responses[i] = response.AdminsResponse{
-			ID:                 val.ID,
-			IdHealthFacilities: val.IdHealthFacilities,
-			Email:              val.Email,
-			CreatedAt:          val.CreatedAt,
-			UpdatedAt:          val.UpdatedAt,
+	adminResponse = make([]response.AdminResponse, len(getData))
+
+	for i, data := range getData {
+		adminResponse[i] = response.AdminResponse{
+			ID:                 data.ID,
+			IdHealthFacilities: data.IdHealthFacilities,
+			Email:              data.Email,
+			CreatedAt:          data.CreatedAt,
+			UpdatedAt:          data.UpdatedAt,
 		}
 	}
 
-	return responses, nil
+	return adminResponse, nil
 }
 
-func (a *adminService) GetAdmin(id string) (response.AdminsResponse, error) {
-	var responses response.AdminsResponse
+func (a *adminService) GetAdmins(id string) (response.AdminResponse, error) {
+	var responseAdmin response.AdminResponse
 
-	dataAdmin, err := a.AdminRepo.GetAdmin(id)
+	getData, err := a.AdminServ.GetAdmins(id)
 	if err != nil {
-		return responses, err
+		return responseAdmin, err
 	}
 
-	responses = response.AdminsResponse{
-		ID:                 dataAdmin.ID,
-		IdHealthFacilities: dataAdmin.IdHealthFacilities,
-		Email:              dataAdmin.Email,
-		CreatedAt:          dataAdmin.CreatedAt,
-		UpdatedAt:          dataAdmin.UpdatedAt,
+	responseAdmin = response.AdminResponse{
+		ID:                 getData.ID,
+		IdHealthFacilities: getData.IdHealthFacilities,
+		Email:              getData.Email,
+		CreatedAt:          getData.CreatedAt,
+		UpdatedAt:          getData.UpdatedAt,
 	}
 
-	return responses, nil
+	return responseAdmin, nil
 }
 
-func (a *adminService) UpdateAdmin(payloads payload.AdminsPayload, id string) error {
-
-	passAdmin, err := util.HashPassword(payloads.Password)
+func (a *adminService) UpdateAdmins(payloads payload.AdminsPayload, id string) error {
+	hashPass, err := util.HashPassword(payloads.Password)
 	if err != nil {
 		return err
 	}
 
-	dataAdmin := model.Admins{
+	adminData := model.Admins{
 		IdHealthFacilities: payloads.IdHealthFacilities,
 		Email:              payloads.Email,
-		Password:           passAdmin,
+		Password:           hashPass,
 	}
 
-	if err := a.AdminRepo.UpdateAdmin(dataAdmin, id); err != nil {
+	if err := a.AdminServ.UpdateAdmins(adminData, id); err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func (a *adminService) DeleteAdmin(id string) error {
+func (a *adminService) DeleteAdmins(id string) error {
 
-	if err := a.AdminRepo.DeleteAdmin(id); err != nil {
+	if err := a.AdminServ.DeleteAdmins(id); err != nil {
 		return err
 	}
 

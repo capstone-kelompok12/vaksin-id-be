@@ -32,9 +32,9 @@ func InitHealthFacilitiesAPI(db *gorm.DB) *controllers.HealthFacilitiesControlle
 	return healthAPI
 }
 
-func InitAdminApi(db *gorm.DB) *controllers.AdminsController {
-	adminRepo := mysql_admin.NewAdminRepository(db)
+func InitAdminAPI(db *gorm.DB) *controllers.AdminController {
+	adminRepo := mysql_admin.NewAdminsRepository(db)
 	adminServ := services_admin.NewAdminService(adminRepo)
-	adminApi := controllers.NewAdminsController(adminServ)
-	return adminApi
+	adminAPI := controllers.NewAdminController(adminServ)
+	return adminAPI
 }

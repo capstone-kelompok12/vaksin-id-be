@@ -75,16 +75,16 @@ func (u *UserController) RegisterUser(ctx echo.Context) error {
 // @failure		400		{object}		response.ResponseError	"StatusBadRequest"
 // @failure		401		{object}	response.ResponseError	"StatusUnauthorized"
 func (u *UserController) LoginUser(ctx echo.Context) error {
-	var payloads payload.Login
+	var payload payload.Login
 
-	if err := ctx.Bind(&payloads); err != nil {
+	if err := ctx.Bind(&payload); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	authUser, err := u.UserService.LoginUser(payloads)
+	authUser, err := u.UserService.LoginUser(payload)
 
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{

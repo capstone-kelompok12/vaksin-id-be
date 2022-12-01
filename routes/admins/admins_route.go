@@ -8,20 +8,20 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func UserUnauthenticated(routes *echo.Group, api *controllers.AdminsController) {
+func AdminUnauthenticated(routes *echo.Group, api *controllers.AdminController) {
 	{
 		routes.POST("/admin/signup", api.RegisterAdmin)
 		routes.POST("/admin/login", api.LoginAdmin)
 	}
 }
 
-func UserAuthenticated(routes *echo.Group, api *controllers.AdminsController) {
+func AdminAuthenticated(routes *echo.Group, api *controllers.AdminController) {
 	authAdmin := routes.Group("/admin")
 	authAdmin.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY_ADMIN"))))
 	{
-		authAdmin.GET("/all", api.GetAllAdmin)
-		authAdmin.GET("/:id", api.GetAdmin)
-		authAdmin.PUT("/:id", api.UpdateAdmin)
-		authAdmin.DELETE("/:id", api.DeleteAdmin)
+		authAdmin.GET("/:id", api.GetAdmins)
+		authAdmin.GET("/all", api.GetAllAdmins)
+		authAdmin.PUT("/:id", api.UpdateAdmins)
+		authAdmin.DELETE("/:id", api.DeleteAdmins)
 	}
 }

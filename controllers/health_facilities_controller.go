@@ -110,7 +110,7 @@ func (h *HealthFacilitiesController) DeleteHealthFacilities(ctx echo.Context) er
 	id := ctx.Param("id")
 
 	if err := h.HealthService.DeleteHealthFacilities(id); err != nil {
-		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})

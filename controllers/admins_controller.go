@@ -18,31 +18,6 @@ func NewAdminController(adminServ service_a.AdminService) *AdminController {
 	}
 }
 
-func (a *AdminController) RegisterAdmin(ctx echo.Context) error {
-	var payloads payload.AdminsPayload
-
-	if err := ctx.Bind(&payloads); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	err := a.AdminServ.RegisterAdmin(payloads)
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	return ctx.JSON(http.StatusCreated, map[string]interface{}{
-		"error":    false,
-		"messages": "success register admin",
-	})
-}
-
 func (a *AdminController) LoginAdmin(ctx echo.Context) error {
 	var payloads payload.Login
 

@@ -24,8 +24,10 @@ func Init() *echo.Echo {
 	routes := echo.New()
 
 	// middleware
+	m.EchoCors(routes)
 	m.RemoveSlash(routes)
 	m.LogMiddleware(routes)
+	m.RecoverEcho(routes)
 
 	// v1
 	// unauthenticated
@@ -39,6 +41,7 @@ func Init() *echo.Echo {
 	users.UserAuthenticated(v1, userApi)
 
 	// health facilities
+	hf.HealthFacilitiesUnauthenticated(v1, healthFacilitiesApi)
 	hf.HealthFacilitiesAuthenticated(v1, healthFacilitiesApi)
 
 	// admins

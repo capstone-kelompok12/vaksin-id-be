@@ -9,6 +9,7 @@ import (
 type HealthFacilitiesRepository interface {
 	CreateHealthFacilities(data model.HealthFacilities) error
 	GetAllHealthFacilities() ([]model.HealthFacilities, error)
+	GetAllHealthFacilitiesByCity(city string) ([]model.HealthFacilities, error)
 	GetHealthFacilities(name string) (model.HealthFacilities, error)
 	UpdateHealthFacilities(data model.HealthFacilities, id string) error
 	DeleteHealthFacilities(id string) error
@@ -31,7 +32,15 @@ func (h *healthFacilitiesRepository) CreateHealthFacilities(data model.HealthFac
 
 func (h *healthFacilitiesRepository) GetAllHealthFacilities() ([]model.HealthFacilities, error) {
 	var healthFacils []model.HealthFacilities
-	if err := h.db.Model(&model.HealthFacilities{}).First(&healthFacils).Error; err != nil {
+	if err := h.db.Preload("Address").Model(&model.HealthFacilities{}).Find(&healthFacils).Error; err != nil {
+		return healthFacils, err
+	}
+	return healthFacils, nil
+}
+func (h *healthFacilitiesRepository) GetAllHealthFacilitiesByCity(city string) ([]model.HealthFacilities, error) {
+	var healthFacils []model.HealthFacilities
+	likeCity := "%" + city + "%"
+	if err := h.db.Preload("Address").Joins("Address").Where("Address.city LIKE ?", likeCity).Find(&healthFacils).Error; err != nil {
 		return healthFacils, err
 	}
 	return healthFacils, nil
@@ -39,7 +48,8 @@ func (h *healthFacilitiesRepository) GetAllHealthFacilities() ([]model.HealthFac
 
 func (h *healthFacilitiesRepository) GetHealthFacilities(name string) (model.HealthFacilities, error) {
 	var healthFacil model.HealthFacilities
-	if err := h.db.Where("name = ?", name).First(&healthFacil).Error; err != nil {
+	likeName := "%" + name + "%"
+	if err := h.db.Where("name LIKE ?", likeName).First(&healthFacil).Error; err != nil {
 		return healthFacil, err
 	}
 	return healthFacil, nil

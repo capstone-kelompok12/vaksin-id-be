@@ -10,7 +10,6 @@ import (
 
 func AdminUnauthenticated(routes *echo.Group, api *controllers.AdminController) {
 	{
-		routes.POST("/admin/signup", api.RegisterAdmin)
 		routes.POST("/admin/login", api.LoginAdmin)
 	}
 }

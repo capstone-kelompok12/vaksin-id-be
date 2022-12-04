@@ -18,6 +18,7 @@ type UserRepository interface {
 	UpdateUserProfile(data model.Users) error
 	GetAgeUser(data model.Users) (response.AgeUser, error)
 	DeleteUser(nik string) error
+	NearbyHealthFacilities(city string) ([]model.Addresses, error)
 }
 
 type userRepository struct {
@@ -109,4 +110,12 @@ func (u *userRepository) DeleteUser(nik string) error {
 		return err
 	}
 	return nil
+}
+
+func (u *userRepository) NearbyHealthFacilities(city string) ([]model.Addresses, error) {
+	var address []model.Addresses
+	if err := u.db.Where("city = ? AND nik_user = ?", city, nil).Find(&address).Error; err != nil {
+		return address, err
+	}
+	return address, nil
 }

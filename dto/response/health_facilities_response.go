@@ -10,6 +10,6 @@ type HealthResponse struct {
 	PhoneNum string
 	Name     string
 	Image    *string
-	Ranges   *int
+	Ranges   int
 	Address  model.Addresses
 }

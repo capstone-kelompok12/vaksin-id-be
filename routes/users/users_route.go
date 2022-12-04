@@ -17,9 +17,7 @@ func UserUnauthenticated(routes *echo.Group, api *controllers.UserController) {
 
 func UserAuthenticated(routes *echo.Group, api *controllers.UserController) {
 	authUser := routes.Group("/profile")
-	// authNearby := routes.Group("/nearby")
 	authUser.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY"))))
-	// authNearby.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY"))))
 	{
 		authUser.GET("", api.GetUserDataByNik)
 		authUser.GET("/address", api.GetUserAddress)
@@ -28,7 +26,4 @@ func UserAuthenticated(routes *echo.Group, api *controllers.UserController) {
 		authUser.PUT("/address", api.UpdateUserAddress)
 		authUser.GET("/nearby", api.UserNearbyHealth)
 	}
-	// {
-	// 	authNearby.GET("", api.UserNearbyHealth)
-	// }
 }

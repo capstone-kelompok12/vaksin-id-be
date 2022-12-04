@@ -24,8 +24,10 @@ func Init() *echo.Echo {
 	routes := echo.New()
 
 	// middleware
+	m.EchoCors(routes)
 	m.RemoveSlash(routes)
 	m.LogMiddleware(routes)
+	m.RecoverEcho(routes)
 
 	// v1
 	// unauthenticated

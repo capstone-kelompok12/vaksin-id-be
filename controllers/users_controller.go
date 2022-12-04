@@ -239,3 +239,21 @@ func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 		"message": "success update address user",
 	})
 }
+
+func (u *UserController) UserNearbyHealth(ctx echo.Context) error {
+	nik := ctx.Request().Header.Get("Authorization")
+	data, err := u.UserService.NearbyHealthFacilities(nik)
+
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "success get nearby health facilities",
+		"data":    data,
+	})
+}

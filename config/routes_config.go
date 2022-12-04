@@ -17,7 +17,8 @@ import (
 func InitUserAPI(db *gorm.DB) *controllers.UserController {
 	userRepo := mysql_user.NewUserRepository(db)
 	addressRepo := mysql_address.NewAddressesRepository(db)
-	userServ := services_user.NewUserService(userRepo, addressRepo)
+	healthRepo := mysql_health.NewHealthFacilitiesRepository(db)
+	userServ := services_user.NewUserService(userRepo, addressRepo, healthRepo)
 	addressServ := services_addresses.NewAddressesService(addressRepo)
 	userAPI := controllers.NewUserController(userServ, addressServ)
 	return userAPI

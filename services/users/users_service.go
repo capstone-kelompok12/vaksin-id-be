@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"sort"
 	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
@@ -22,7 +23,6 @@ type UserService interface {
 	UpdateUserProfile(payloads payload.UpdateUser, nik string) error
 	DeleteUserProfile(nik string) error
 	NearbyHealthFacilities(nik string) (response.UserNearbyHealth, error)
-	// NearbyHealthFacilities(nik string) ([]response.HealthResponse, error)
 }
 
 type userService struct {
@@ -231,11 +231,6 @@ func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHea
 		return result, err
 	}
 
-	// healthAddress, err := u.UserRepo.NearbyHealthFacilities(userProfile.Address.City)
-	// if err != nil {
-	// 	return tempData, err
-	// }
-
 	allHealthFacilities, err := u.HealthRepo.GetAllHealthFacilitiesByCity(userProfile.Address.City)
 	tempData = make([]response.HealthResponse, len(allHealthFacilities))
 	if err != nil {
@@ -250,10 +245,14 @@ func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHea
 			PhoneNum: val.PhoneNum,
 			Name:     val.Name,
 			Image:    nil,
-			Ranges:   &newRanges,
+			Ranges:   newRanges,
 			Address:  *val.Address,
 		}
 	}
+
+	sort.Slice(tempData, func(i, j int) bool {
+		return tempData[i].Ranges < tempData[j].Ranges
+	})
 
 	ageUser, err := u.UserRepo.GetAgeUser(userProfile)
 	if err != nil {
@@ -273,8 +272,6 @@ func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHea
 		},
 		HealthFacilities: tempData,
 	}
-
-	// tempData = response.UserNearbyHealth{}
 
 	return result, nil
 }

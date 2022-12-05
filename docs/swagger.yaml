@@ -1,4 +1,468 @@
+basePath: /api/v1
+definitions:
+  payload.HealthFacilities:
+    properties:
+      city:
+        type: string
+      current_address:
+        type: string
+      district:
+        type: string
+      email:
+        type: string
+      image:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+      phonenum:
+        type: string
+      province:
+        type: string
+    required:
+    - email
+    type: object
+  payload.Login:
+    properties:
+      email:
+        example: user@gmail.com
+        type: string
+      password:
+        example: user123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  payload.RegisterUser:
+    properties:
+      birthdate:
+        example: "2001-05-25"
+        type: string
+      email:
+        example: user@gmail.com
+        type: string
+      fullname:
+        example: user
+        type: string
+      gender:
+        example: L
+        type: string
+      nik:
+        example: "1234567898765432"
+        maxLength: 16
+        minLength: 16
+        type: string
+      password:
+        example: user123
+        minLength: 6
+        type: string
+      phonenum:
+        example: "081234567890"
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - birthdate
+    - email
+    - fullname
+    - gender
+    - nik
+    - password
+    - phonenum
+    type: object
+  payload.UpdateAddress:
+    properties:
+      city:
+        type: string
+      current_address:
+        type: string
+      district:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      province:
+        type: string
+    type: object
+  payload.UpdateUser:
+    properties:
+      birthdate:
+        type: string
+      email:
+        type: string
+      fullname:
+        type: string
+      phonenum:
+        type: string
+      profileimage:
+        type: string
+      username:
+        type: string
+    type: object
+  response.Login:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1hIjoiRmFxaWgifQ.jtYrULLMxWPWfy39r4Qm0gCxo-5–542VhsRDSO5cjQ
+        type: string
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      message:
+        example: success
+        type: string
+    type: object
+  response.ResponseDelete:
+    properties:
+      data:
+        example: ""
+        type: string
+      message:
+        example: success deleted
+        type: string
+    type: object
+  response.ResponseError:
+    properties:
+      data:
+        example: ""
+        type: string
+      error:
+        type: boolean
+      message:
+        example: error
+        type: string
+    type: object
+  response.UserAddresses:
+    properties:
+      city:
+        type: string
+      createdAt:
+        type: string
+      currentAddress:
+        type: string
+      deletedAt:
+        type: string
+      district:
+        type: string
+      id:
+        type: string
+      idHealthFacilities:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      nikUser:
+        type: string
+      province:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  response.UserProfile:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      fullname:
+        type: string
+      gender:
+        type: string
+      nik:
+        type: string
+      phoneNum:
+        type: string
+      vaccineCount:
+        type: integer
+    type: object
 info:
   contact: {}
-paths: {}
-swagger: "2.0"
+  description: |-
+    This is a Booking Vaccine API for manage Booking
+    Capstone Project Kelompok 12
+  title: VAKSIN-ID API
+  version: "1.0"
+paths:
+  /api/v1/admin/healthfacilities:
+    post:
+      consumes:
+      - application/json
+      description: Create data for Health Facilities
+      parameters:
+      - description: Input data Health Facilities
+        in: body
+        name: healthfacilities
+        required: true
+        schema:
+          $ref: '#/definitions/payload.HealthFacilities'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: success create health facilities
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.HealthFacilities'
+              type: object
+        "400":
+          description: StatusBadRequest
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+        "500":
+          description: StatusInternalServerError
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Create HealthFacilities
+      tags:
+      - HealthFacilities
+  /api/v1/admin/healthfacilities/:id:
+    delete:
+      description: delete data healthfacilities
+      parameters:
+      - description: Account ID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete healthfacilities
+          schema:
+            $ref: '#/definitions/response.ResponseDelete'
+        "401":
+          description: StatusUnauthorized
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Delete HealthFacilities
+      tags:
+      - HealthFacilities
+    put:
+      consumes:
+      - application/json
+      description: This can only be done by the logged in admin.
+      parameters:
+      - description: Input new data health facilities
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/payload.HealthFacilities'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success update health facilities
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.HealthFacilities'
+              type: object
+        "400":
+          description: StatusBadRequest
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Update HealthFacilities
+      tags:
+      - HealthFacilities
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Login User
+      parameters:
+      - description: Input Login User
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/payload.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success login user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.Login'
+              type: object
+        "400":
+          description: StatusBadRequest
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+        "401":
+          description: StatusUnauthorized
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Login Users
+      tags:
+      - Authentication
+  /api/v1/profile:
+    delete:
+      description: This can only be done by the logged in user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete user
+          schema:
+            $ref: '#/definitions/response.ResponseDelete'
+        "401":
+          description: StatusUnauthorized
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Delete User
+      tags:
+      - Users
+    get:
+      description: This can only be done by the logged in user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success get user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UserProfile'
+              type: object
+      summary: Get User by NIK
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: This can only be done by the logged in user.
+      parameters:
+      - description: Input new data user
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/payload.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success update user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.UpdateUser'
+              type: object
+        "400":
+          description: StatusBadRequest
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Update User
+      tags:
+      - Users
+  /api/v1/profile/address:
+    get:
+      description: This can only be done by the logged in user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success get user address
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UserAddresses'
+              type: object
+      summary: Get User Address
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: This can only be done by the logged in user.
+      parameters:
+      - description: Input new data user address
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/payload.UpdateAddress'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success update address user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.UpdateUser'
+              type: object
+        "400":
+          description: StatusBadRequest
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+        "401":
+          description: StatusUnauthorized
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Update User Address
+      tags:
+      - Users
+  /api/v1/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register User
+      parameters:
+      - description: Input Register User
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/payload.RegisterUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: success register user
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/payload.RegisterUser'
+              type: object
+        "400":
+          description: StatusBadRequest
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+        "500":
+          description: StatusInternalServerError
+          schema:
+            $ref: '#/definitions/response.ResponseError'
+      summary: Register Users
+      tags:
+      - Authentication
+schemes:
+- http
+- https

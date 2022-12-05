@@ -3,7 +3,12 @@ package routes
 import (
 	"vaksin-id-be/config"
 	m "vaksin-id-be/middleware"
+	adm "vaksin-id-be/routes/admins"
+	hf "vaksin-id-be/routes/health_facilities"
 	users "vaksin-id-be/routes/users"
+	vac "vaksin-id-be/routes/vaccines"
+
+	_ "vaksin-id-be/docs"
 
 	_ "vaksin-id-be/docs"
 
@@ -16,12 +21,17 @@ func Init() *echo.Echo {
 
 	// route config
 	userApi := config.InitUserAPI(dbConfig)
+	healthFacilitiesApi := config.InitHealthFacilitiesAPI(dbConfig)
+	adminApi := config.InitAdminAPI(dbConfig)
+	vaccineApi := config.InitVaccinesAPI(dbConfig)
 
 	routes := echo.New()
 
 	// middleware
+	m.EchoCors(routes)
 	m.RemoveSlash(routes)
 	m.LogMiddleware(routes)
+	m.RecoverEcho(routes)
 
 	// v1
 	// unauthenticated
@@ -33,6 +43,18 @@ func Init() *echo.Echo {
 	// users
 	users.UserUnauthenticated(v1, userApi)
 	users.UserAuthenticated(v1, userApi)
+
+	// health facilities
+	hf.HealthFacilitiesUnauthenticated(v1, healthFacilitiesApi)
+	hf.HealthFacilitiesAuthenticated(v1, healthFacilitiesApi)
+
+	// admins
+	adm.AdminUnauthenticated(v1, adminApi)
+	adm.AdminAuthenticated(v1, adminApi)
+
+	// vaccines
+	vac.VaccinesUnauthenticated(v1, vaccineApi)
+	vac.VaccinesAuthenticated(v1, vaccineApi)
 
 	return routes
 }

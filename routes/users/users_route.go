@@ -24,5 +24,6 @@ func UserAuthenticated(routes *echo.Group, api *controllers.UserController) {
 		authUser.PUT("", api.UpdateUser)
 		authUser.DELETE("", api.DeleteUser)
 		authUser.PUT("/address", api.UpdateUserAddress)
+		authUser.GET("/nearby", api.UserNearbyHealth)
 	}
 }

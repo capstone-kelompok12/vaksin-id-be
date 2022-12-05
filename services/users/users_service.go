@@ -2,12 +2,15 @@ package services
 
 import (
 	"errors"
+	"sort"
 	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
 	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
-	mysql "vaksin-id-be/repository/mysql/users"
+	mysqla "vaksin-id-be/repository/mysql/addresses"
+	mysqlh "vaksin-id-be/repository/mysql/health_facilities"
+	mysqlu "vaksin-id-be/repository/mysql/users"
 	"vaksin-id-be/util"
 
 	"github.com/google/uuid"
@@ -18,18 +21,21 @@ type UserService interface {
 	LoginUser(payloads payload.Login) (response.Login, error)
 	GetUserDataByNik(nik string) (response.UserProfile, error)
 	UpdateUserProfile(payloads payload.UpdateUser, nik string) error
-	GetAddressUser(nik string) (model.Addresses, error)
-	UpdateUserAddress(payloads payload.UpdateAddress, nik string) error
 	DeleteUserProfile(nik string) error
+	NearbyHealthFacilities(nik string) (response.UserNearbyHealth, error)
 }
 
 type userService struct {
-	UserRepo mysql.UserRepository
+	UserRepo    mysqlu.UserRepository
+	AddressRepo mysqla.AddressesRepository
+	HealthRepo  mysqlh.HealthFacilitiesRepository
 }
 
-func NewUserService(userRepo mysql.UserRepository) *userService {
+func NewUserService(userRepo mysqlu.UserRepository, addressRepo mysqla.AddressesRepository, healthRepo mysqlh.HealthFacilitiesRepository) *userService {
 	return &userService{
-		UserRepo: userRepo,
+		UserRepo:    userRepo,
+		AddressRepo: addressRepo,
+		HealthRepo:  healthRepo,
 	}
 }
 
@@ -79,6 +85,7 @@ func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 		Fullname:     payloads.Fullname,
 		PhoneNum:     payloads.PhoneNum,
 		Gender:       payloads.Gender,
+		ProfileImage: nil,
 		VaccineCount: defaultVaccineCount,
 		BirthDate:    dateBirth,
 	}
@@ -96,7 +103,7 @@ func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 		NikUser:            &payloads.NikUser,
 	}
 
-	errAddr := u.UserRepo.CreateAddress(userAddr)
+	errAddr := u.AddressRepo.CreateAddress(userAddr)
 	if errAddr != nil {
 		return errAddr
 	}
@@ -161,6 +168,7 @@ func (u *userService) GetUserDataByNik(nik string) (response.UserProfile, error)
 		Gender:       getData.Gender,
 		VaccineCount: getData.VaccineCount,
 		Age:          ageUser.Age,
+		Address:      *getData.Address,
 	}
 
 	return responseUser, nil
@@ -193,51 +201,13 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 	return nil
 }
 
-func (u *userService) GetAddressUser(nik string) (model.Addresses, error) {
-	var address model.Addresses
-
-	getUserNik, err := m.GetUserNik(nik)
-	if err != nil {
-		return address, err
-	}
-
-	dataAddress, err := u.UserRepo.GetAddress(getUserNik)
-	if err != nil {
-		return address, err
-	}
-
-	return dataAddress, nil
-}
-
-func (u *userService) UpdateUserAddress(payloads payload.UpdateAddress, nik string) error {
-
-	getUserNik, err := m.GetUserNik(nik)
-	if err != nil {
-		return err
-	}
-
-	newAddress := model.Addresses{
-		CurrentAddress: payloads.CurrentAddress,
-		District:       payloads.District,
-		City:           payloads.City,
-		Province:       payloads.Province,
-		Longitude:      payloads.Longitude,
-		Latitude:       payloads.Latitude,
-	}
-
-	if err := u.UserRepo.UpdateAddress(newAddress, getUserNik); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (u *userService) DeleteUserProfile(nik string) error {
 	getUserNik, err := m.GetUserNik(nik)
 	if err != nil {
 		return err
 	}
 
-	if err := u.UserRepo.DeleteAddress(getUserNik); err != nil {
+	if err := u.AddressRepo.DeleteAddressUser(getUserNik); err != nil {
 		return err
 	}
 
@@ -246,4 +216,62 @@ func (u *userService) DeleteUserProfile(nik string) error {
 	}
 
 	return nil
+}
+
+func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHealth, error) {
+	var result response.UserNearbyHealth
+	var tempData []response.HealthResponse
+	getUserNik, err := m.GetUserNik(nik)
+	if err != nil {
+		return result, err
+	}
+
+	userProfile, err := u.UserRepo.GetUserDataByNik(getUserNik)
+	if err != nil {
+		return result, err
+	}
+
+	allHealthFacilities, err := u.HealthRepo.GetAllHealthFacilitiesByCity(userProfile.Address.City)
+	tempData = make([]response.HealthResponse, len(allHealthFacilities))
+	if err != nil {
+		return result, err
+	}
+
+	for i, val := range allHealthFacilities {
+		newRanges := util.FindRange(userProfile.Address.Latitude, userProfile.Address.Longitude, val.Address.Latitude, val.Address.Longitude)
+		tempData[i] = response.HealthResponse{
+			ID:       val.ID,
+			Email:    val.Email,
+			PhoneNum: val.PhoneNum,
+			Name:     val.Name,
+			Image:    nil,
+			Ranges:   newRanges,
+			Address:  *val.Address,
+		}
+	}
+
+	sort.Slice(tempData, func(i, j int) bool {
+		return tempData[i].Ranges < tempData[j].Ranges
+	})
+
+	ageUser, err := u.UserRepo.GetAgeUser(userProfile)
+	if err != nil {
+		return result, err
+	}
+
+	result = response.UserNearbyHealth{
+		User: response.UserProfile{
+			NIK:          userProfile.NIK,
+			Email:        userProfile.Email,
+			Fullname:     userProfile.Fullname,
+			PhoneNum:     userProfile.PhoneNum,
+			Gender:       userProfile.Gender,
+			VaccineCount: userProfile.VaccineCount,
+			Age:          ageUser.Age,
+			Address:      *userProfile.Address,
+		},
+		HealthFacilities: tempData,
+	}
+
+	return result, nil
 }

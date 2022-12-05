@@ -1,6 +1,9 @@
 package response
 
-import "time"
+import (
+	"time"
+	"vaksin-id-be/model"
+)
 
 type UserProfile struct {
 	NIK          string
@@ -10,9 +13,15 @@ type UserProfile struct {
 	Gender       string
 	VaccineCount int
 	Age          int
+	Address      model.Addresses
 }
 
 type AgeUser struct {
 	BirthDate time.Time
 	Age       int
+}
+
+type UserNearbyHealth struct {
+	User             UserProfile
+	HealthFacilities []HealthResponse
 }

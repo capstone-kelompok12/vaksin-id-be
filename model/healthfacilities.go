@@ -7,11 +7,11 @@ import (
 )
 
 type HealthFacilities struct {
-	ID        string `gorm:"type:varchar(255);primary_key"`
-	Email     string `gorm:"type:varchar(255)"`
-	Password  string `gorm:"type:varchar(255)"`
-	PhoneNum  string `gorm:"type:varchar(255)"`
-	Name      string `gorm:"type:varchar(255)"`
+	ID        string  `gorm:"type:varchar(255);primary_key"`
+	Email     string  `gorm:"type:varchar(255)"`
+	PhoneNum  string  `gorm:"type:varchar(255)"`
+	Name      string  `gorm:"type:varchar(255)"`
+	Image     *string `gorm:"type:longtext"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`

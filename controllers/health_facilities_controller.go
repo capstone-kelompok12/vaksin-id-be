@@ -144,7 +144,6 @@ func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) er
 // @failure		401		{object}		response.ResponseError	"StatusUnauthorized"
 func (h *HealthFacilitiesController) DeleteHealthFacilities(ctx echo.Context) error {
 	id := ctx.Param("id")
-
 	if err := h.HealthService.DeleteHealthFacilities(id); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,

@@ -20,7 +20,7 @@ func HealthFacilitiesAuthenticated(routes *echo.Group, api *controllers.HealthFa
 	authAdmin := routes.Group("/admin")
 	authAdmin.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY_ADMIN"))))
 	{
-		authAdmin.PUT("/healthfacilities/:id", api.UpdateHealthFacilities)
+		authAdmin.PUT("/healthfacilities", api.UpdateHealthFacilities)
 		authAdmin.DELETE("/healthfacilities/:id", api.DeleteHealthFacilities)
 	}
 }

@@ -106,7 +106,7 @@ func (v *VaccinesController) UpdateVaccine(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":    false,
-		"messages": "success get update vaccine by admin",
+		"messages": "success update vaccine by admin",
 	})
 }
 

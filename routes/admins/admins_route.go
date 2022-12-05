@@ -18,9 +18,9 @@ func AdminAuthenticated(routes *echo.Group, api *controllers.AdminController) {
 	authAdmin := routes.Group("/admin")
 	authAdmin.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY_ADMIN"))))
 	{
-		authAdmin.GET("/:id", api.GetAdmins)
+		authAdmin.GET("/profile", api.GetAdmins)
 		authAdmin.GET("/all", api.GetAllAdmins)
-		authAdmin.PUT("/:id", api.UpdateAdmins)
-		authAdmin.DELETE("/:id", api.DeleteAdmins)
+		authAdmin.PUT("/profile", api.UpdateAdmins)
+		authAdmin.DELETE("/profile/:id", api.DeleteAdmins)
 	}
 }

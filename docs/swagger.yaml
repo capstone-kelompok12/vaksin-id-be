@@ -1,3 +1,4 @@
+
 basePath: /api/v1
 definitions:
   payload.HealthFacilities:
@@ -466,3 +467,4 @@ paths:
 schemes:
 - http
 - https
+swagger: "2.0"

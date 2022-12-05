@@ -46,6 +46,10 @@ func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 		return err
 	}
 
+	if payloads.Gender != "P" || payloads.Gender != "L" {
+		return errors.New("input gender with P or L")
+	}
+
 	defaultVaccineCount := 0
 
 	dateBirth, err := time.Parse("2006-01-02", payloads.BirthDate)
@@ -183,6 +187,10 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 	dateBirth, err := time.Parse("2006-01-02", payloads.BirthDate)
 	if err != nil {
 		return err
+	}
+
+	if payloads.Gender != "P" || payloads.Gender != "L" {
+		return errors.New("input gender with P or L")
 	}
 
 	dataUser := model.Users{

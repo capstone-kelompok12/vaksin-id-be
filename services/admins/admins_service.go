@@ -91,6 +91,7 @@ func (a *adminService) GetAdmins(id string) (response.AdminResponse, error) {
 	}
 
 	getData, err := a.AdminRepo.GetAdmins(getIdAdmin)
+
 	if err != nil {
 		return responseAdmin, err
 	}

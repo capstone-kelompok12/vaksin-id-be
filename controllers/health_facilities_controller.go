@@ -118,7 +118,9 @@ func (h *HealthFacilitiesController) GetAllHealthFacilities(ctx echo.Context) er
 func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) error {
 	var payloads payload.UpdateHealthFacilities
 
+
 	id := ctx.Request().Header.Get("Authorization")
+
 
 	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -150,6 +152,7 @@ func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) er
 // @failure		401		{object}		response.ResponseError	"StatusUnauthorized"
 func (h *HealthFacilitiesController) DeleteHealthFacilities(ctx echo.Context) error {
 	id := ctx.Param("id")
+
 	if err := h.HealthService.DeleteHealthFacilities(id); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,

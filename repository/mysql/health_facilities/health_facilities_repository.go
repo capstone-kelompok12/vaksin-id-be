@@ -32,7 +32,7 @@ func (h *healthFacilitiesRepository) CreateHealthFacilities(data model.HealthFac
 
 func (h *healthFacilitiesRepository) GetAllHealthFacilities() ([]model.HealthFacilities, error) {
 	var healthFacils []model.HealthFacilities
-	if err := h.db.Preload("Address").Model(&model.HealthFacilities{}).Find(&healthFacils).Error; err != nil {
+	if err := h.db.Preload("Vaccine").Preload("Address").Model(&model.HealthFacilities{}).Find(&healthFacils).Error; err != nil {
 		return healthFacils, err
 	}
 	return healthFacils, nil
@@ -49,7 +49,7 @@ func (h *healthFacilitiesRepository) GetAllHealthFacilitiesByCity(city string) (
 func (h *healthFacilitiesRepository) GetHealthFacilities(name string) (model.HealthFacilities, error) {
 	var healthFacil model.HealthFacilities
 	likeName := "%" + name + "%"
-	if err := h.db.Where("name LIKE ?", likeName).First(&healthFacil).Error; err != nil {
+	if err := h.db.Preload("Vaccine").Preload("Address").Where("name LIKE ?", likeName).First(&healthFacil).Error; err != nil {
 		return healthFacil, err
 	}
 	return healthFacil, nil

@@ -2,6 +2,7 @@ package services
 
 import (
 	"vaksin-id-be/dto/payload"
+	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqla "vaksin-id-be/repository/mysql/addresses"
 	mysqladm "vaksin-id-be/repository/mysql/admins"
@@ -105,6 +106,11 @@ func (h *healthFacilitiesService) GetHealthFacilities(name string) (model.Health
 }
 
 func (h *healthFacilitiesService) UpdateHealthFacilities(payloads payload.UpdateHealthFacilities, id string) error {
+	getIdHealth, err := m.GetIdHealthFacilities(id)
+	if err != nil {
+		return err
+	}
+
 	healthFacil := model.HealthFacilities{
 		Email:    payloads.Email,
 		PhoneNum: payloads.PhoneNum,
@@ -112,7 +118,7 @@ func (h *healthFacilitiesService) UpdateHealthFacilities(payloads payload.Update
 		Image:    payloads.Image,
 	}
 
-	if err := h.HealthRepo.UpdateHealthFacilities(healthFacil, id); err != nil {
+	if err := h.HealthRepo.UpdateHealthFacilities(healthFacil, getIdHealth); err != nil {
 		return err
 	}
 

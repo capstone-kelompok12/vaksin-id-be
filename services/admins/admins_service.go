@@ -19,12 +19,12 @@ type AdminService interface {
 }
 
 type adminService struct {
-	AdminServ mysqla.AdminsRepository
+	AdminRepo mysqla.AdminsRepository
 }
 
-func NewAdminService(adminServ mysqla.AdminsRepository) *adminService {
+func NewAdminService(adminRepo mysqla.AdminsRepository) *adminService {
 	return &adminService{
-		AdminServ: adminServ,
+		AdminRepo: adminRepo,
 	}
 }
 
@@ -36,7 +36,7 @@ func (a *adminService) LoginAdmin(payloads payload.Login) (response.Login, error
 		Password: payloads.Password,
 	}
 
-	adminData, err := a.AdminServ.LoginAdmins(adminModel)
+	adminData, err := a.AdminRepo.LoginAdmins(adminModel)
 	if err != nil {
 		return loginResponse, err
 	}
@@ -62,7 +62,7 @@ func (a *adminService) LoginAdmin(payloads payload.Login) (response.Login, error
 func (a *adminService) GetAllAdmins() ([]response.AdminResponse, error) {
 	var adminResponse []response.AdminResponse
 
-	getData, err := a.AdminServ.GetAllAdmins()
+	getData, err := a.AdminRepo.GetAllAdmins()
 	if err != nil {
 		return adminResponse, err
 	}
@@ -85,7 +85,13 @@ func (a *adminService) GetAllAdmins() ([]response.AdminResponse, error) {
 func (a *adminService) GetAdmins(id string) (response.AdminResponse, error) {
 	var responseAdmin response.AdminResponse
 
-	getData, err := a.AdminServ.GetAdmins(id)
+	getIdAdmin, err := m.GetIdAdmin(id)
+	if err != nil {
+		return responseAdmin, err
+	}
+
+	getData, err := a.AdminRepo.GetAdmins(getIdAdmin)
+
 	if err != nil {
 		return responseAdmin, err
 	}
@@ -107,13 +113,18 @@ func (a *adminService) UpdateAdmins(payloads payload.AdminsPayload, id string) e
 		return err
 	}
 
+	getIdAdmin, err := m.GetIdAdmin(id)
+	if err != nil {
+		return err
+	}
+
 	adminData := model.Admins{
 		IdHealthFacilities: payloads.IdHealthFacilities,
 		Email:              payloads.Email,
 		Password:           hashPass,
 	}
 
-	if err := a.AdminServ.UpdateAdmins(adminData, id); err != nil {
+	if err := a.AdminRepo.UpdateAdmins(adminData, getIdAdmin); err != nil {
 		return err
 	}
 	return nil
@@ -121,7 +132,7 @@ func (a *adminService) UpdateAdmins(payloads payload.AdminsPayload, id string) e
 
 func (a *adminService) DeleteAdmins(id string) error {
 
-	if err := a.AdminServ.DeleteAdmins(id); err != nil {
+	if err := a.AdminRepo.DeleteAdmins(id); err != nil {
 		return err
 	}
 

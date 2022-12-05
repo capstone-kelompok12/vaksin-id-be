@@ -65,6 +65,12 @@ func (h *HealthFacilitiesController) CreateHealthFacilities(ctx echo.Context) er
 	})
 }
 
+// @Summary		Get HealthFacilities by Name
+// @Description This can only be done by the logged in admin.
+// @Tags		HealthFacilities
+// @Produce		json
+// @Success		200	{object}	response.Response{data=response.HealthFacilitiesSwagger}	"Success get health facilities"
+// @Router		/api/v1/healthfacilities/:name [get]
 func (h *HealthFacilitiesController) GetHealthFacilities(ctx echo.Context) error {
 	name := ctx.Param("name")
 	nameLower := strings.ToLower(name)
@@ -95,7 +101,7 @@ func (h *HealthFacilitiesController) GetAllHealthFacilities(ctx echo.Context) er
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
-		"message": "success get user",
+		"message": "success get all health facilites",
 		"data":    data,
 	})
 }
@@ -112,7 +118,9 @@ func (h *HealthFacilitiesController) GetAllHealthFacilities(ctx echo.Context) er
 func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) error {
 	var payloads payload.UpdateHealthFacilities
 
-	id := ctx.Param("id")
+
+	id := ctx.Request().Header.Get("Authorization")
+
 
 	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{

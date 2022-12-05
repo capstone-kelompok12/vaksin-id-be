@@ -735,3 +735,20 @@ const docTemplate = `{
             }
         }
     }
+}`
+
+// SwaggerInfo holds exported Swagger Info so clients can modify it
+var SwaggerInfo = &swag.Spec{
+	Version:          "1.0",
+	Host:             "",
+	BasePath:         "/api/v1",
+	Schemes:          []string{"http", "https"},
+	Title:            "VAKSIN-ID API",
+	Description:      "This is a Booking Vaccine API for manage Booking\nCapstone Project Kelompok 12",
+	InfoInstanceName: "swagger",
+	SwaggerTemplate:  docTemplate,
+}
+
+func init() {
+	swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
+}

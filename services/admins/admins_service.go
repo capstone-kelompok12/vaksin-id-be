@@ -73,7 +73,7 @@ func (a *adminService) LoginAdmin(payloads payload.Login) (response.Login, error
 		return loginResponse, errors.New("wrong password")
 	}
 
-	token, errToken := m.CreateTokenAdmin(adminData.ID, adminData.Email)
+	token, errToken := m.CreateTokenAdmin(adminData.ID, adminData.IdHealthFacilities, adminData.Email)
 
 	if errToken != nil {
 		return loginResponse, err

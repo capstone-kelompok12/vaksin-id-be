@@ -1,7 +1,11 @@
 package payload
 
 type VaccinesPayload struct {
-	IdHealthFacilities string `json:"id_health_facilities"`
-	Name               string `json:"name"`
-	Stock              int    `json:"stock"`
+	Name  string `json:"name" validate:"required"`
+	Stock int    `json:"stock"`
+}
+
+type VaccinesUpdatePayload struct {
+	Name  string `json:"name"`
+	Stock int    `json:"stock"`
 }

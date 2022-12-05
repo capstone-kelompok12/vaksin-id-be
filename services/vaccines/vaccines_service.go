@@ -1,18 +1,21 @@
 package services
 
 import (
+	"errors"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
+	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqlv "vaksin-id-be/repository/mysql/vaccines"
 
 	"github.com/google/uuid"
 )
 
-type AdminService interface {
-	CreateVaccine(payloads payload.VaccinesPayload) error
+type VaccinesService interface {
+	CreateVaccine(authAdmin string, payloads payload.VaccinesPayload) error
 	GetAllVaccines() ([]response.VaccinesResponse, error)
-	UpdateVaccine(payloads payload.VaccinesPayload, id string) error
+	GetVaccineByAdmin(idhealthfacilities string) ([]model.Vaccines, error)
+	UpdateVaccine(id string, payloads payload.VaccinesUpdatePayload) error
 	DeleteVacccine(id string) error
 }
 
@@ -26,17 +29,26 @@ func NewVaccinesService(vaccinesRepo mysqlv.VaccinesRepository) *vaccinesService
 	}
 }
 
-func (v *vaccinesService) CreateVaccine(payloads payload.VaccinesPayload) error {
+func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.VaccinesPayload) error {
 	id := uuid.NewString()
+
+	idHealthFacilities, err := m.GetIdHealthFacilities(authAdmin)
+	if err != nil {
+		return err
+	}
+
+	if err := v.VaccinesRepo.CheckNameExist(idHealthFacilities, payloads.Name); err == nil {
+		return errors.New("vaccine name already exist")
+	}
 
 	vaccineModel := model.Vaccines{
 		ID:                 id,
-		IdHealthFacilities: payloads.IdHealthFacilities,
+		IdHealthFacilities: idHealthFacilities,
 		Name:               payloads.Name,
 		Stock:              payloads.Stock,
 	}
 
-	err := v.VaccinesRepo.CreateVaccine(vaccineModel)
+	err = v.VaccinesRepo.CreateVaccine(vaccineModel)
 	if err != nil {
 		return err
 	}
@@ -66,7 +78,22 @@ func (v *vaccinesService) GetAllVaccines() ([]response.VaccinesResponse, error) 
 	return vaccinesResponse, nil
 }
 
-func (v *vaccinesService) UpdateVaccine(payloads payload.VaccinesPayload, id string) error {
+func (v *vaccinesService) GetVaccineByAdmin(idhealthfacilities string) ([]model.Vaccines, error) {
+	var vaccines []model.Vaccines
+	idHealthFacilities, err := m.GetIdHealthFacilities(idhealthfacilities)
+	if err != nil {
+		return vaccines, err
+	}
+
+	vaccines, err = v.VaccinesRepo.GetVaccinesByIdAdmin(idHealthFacilities)
+	if err != nil {
+		return vaccines, err
+	}
+
+	return vaccines, nil
+}
+
+func (v *vaccinesService) UpdateVaccine(id string, payloads payload.VaccinesUpdatePayload) error {
 	vaccineData := model.Vaccines{
 		Name:  payloads.Name,
 		Stock: payloads.Stock,

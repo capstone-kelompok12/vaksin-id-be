@@ -15,8 +15,9 @@ type ClaimsCustom struct {
 	jwt.StandardClaims
 }
 type ClaimsCustomAdmin struct {
-	Id    string
-	Email string
+	Id                 string
+	IdHealthFacilities string
+	Email              string
 	jwt.StandardClaims
 }
 
@@ -50,11 +51,12 @@ func GetUserNik(auth string) (string, error) {
 	return claims.NikUser, nil
 }
 
-func CreateTokenAdmin(id string, email string) (string, error) {
+func CreateTokenAdmin(id, idhealthfacil, email string) (string, error) {
 	exp := time.Now().Add(time.Hour * 1).Unix()
 	claims := ClaimsCustomAdmin{
-		Id:    id,
-		Email: email,
+		Id:                 id,
+		IdHealthFacilities: idhealthfacil,
+		Email:              email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: exp,
 		},
@@ -78,4 +80,19 @@ func GetIdAdmin(auth string) (string, error) {
 		return "", errors.New("token has expired")
 	}
 	return claims.Id, nil
+}
+
+func GetIdHealthFacilities(auth string) (string, error) {
+	claims := &ClaimsCustomAdmin{}
+	splitToken := strings.Split(auth, "Bearer ")
+	auth = splitToken[1]
+
+	_, err := jwt.ParseWithClaims(auth, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("SECRET_JWT_KEY_ADMIN")), nil
+	})
+
+	if err != nil {
+		return "", errors.New("token has expired")
+	}
+	return claims.IdHealthFacilities, nil
 }

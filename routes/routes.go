@@ -6,6 +6,7 @@ import (
 	adm "vaksin-id-be/routes/admins"
 	hf "vaksin-id-be/routes/health_facilities"
 	users "vaksin-id-be/routes/users"
+	vac "vaksin-id-be/routes/vaccines"
 
 	_ "vaksin-id-be/docs"
 
@@ -20,6 +21,7 @@ func Init() *echo.Echo {
 	userApi := config.InitUserAPI(dbConfig)
 	healthFacilitiesApi := config.InitHealthFacilitiesAPI(dbConfig)
 	adminApi := config.InitAdminAPI(dbConfig)
+	vaccineApi := config.InitVaccinesAPI(dbConfig)
 
 	routes := echo.New()
 
@@ -44,6 +46,10 @@ func Init() *echo.Echo {
 	// admins
 	adm.AdminUnauthenticated(v1, adminApi)
 	adm.AdminAuthenticated(v1, adminApi)
+
+	// vaccines
+	vac.VaccinesUnauthenticated(v1, vaccineApi)
+	vac.VaccinesAuthenticated(v1, vaccineApi)
 
 	return routes
 }

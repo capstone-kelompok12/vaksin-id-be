@@ -10,6 +10,8 @@ import (
 
 	_ "vaksin-id-be/docs"
 
+	_ "vaksin-id-be/docs"
+
 	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )

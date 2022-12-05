@@ -46,7 +46,7 @@ func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 		return err
 	}
 
-	if payloads.Gender != "P" || payloads.Gender != "L" {
+	if payloads.Gender != "P" && payloads.Gender != "L" {
 		return errors.New("input gender with P or L")
 	}
 
@@ -189,7 +189,7 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 		return err
 	}
 
-	if payloads.Gender != "P" || payloads.Gender != "L" {
+	if payloads.Gender != "P" && payloads.Gender != "L" {
 		return errors.New("input gender with P or L")
 	}
 

@@ -6,10 +6,12 @@ import (
 	mysql_admin "vaksin-id-be/repository/mysql/admins"
 	mysql_health "vaksin-id-be/repository/mysql/health_facilities"
 	mysql_user "vaksin-id-be/repository/mysql/users"
+	mysql_vaccines "vaksin-id-be/repository/mysql/vaccines"
 	services_addresses "vaksin-id-be/services/addresses"
 	services_admin "vaksin-id-be/services/admins"
 	services_health "vaksin-id-be/services/health_facilities"
 	services_user "vaksin-id-be/services/users"
+	services_vaccines "vaksin-id-be/services/vaccines"
 
 	"gorm.io/gorm"
 )
@@ -39,4 +41,11 @@ func InitAdminAPI(db *gorm.DB) *controllers.AdminController {
 	adminServ := services_admin.NewAdminService(adminRepo)
 	adminAPI := controllers.NewAdminController(adminServ)
 	return adminAPI
+}
+
+func InitVaccinesAPI(db *gorm.DB) *controllers.VaccinesController {
+	vaccinesRepo := mysql_vaccines.NewVaccinesRepository(db)
+	vaccinesServ := services_vaccines.NewVaccinesService(vaccinesRepo)
+	vaccinesAPI := controllers.NewVaccinesController(vaccinesServ)
+	return vaccinesAPI
 }

@@ -15,3 +15,8 @@ func ValidateHealthFacilities(payloads payload.HealthFacilities) error {
 	validate := validator.New()
 	return validate.Struct(payloads)
 }
+
+func ValidateVaccine(payloads payload.VaccinesPayload) error {
+	validate := validator.New()
+	return validate.Struct(payloads)
+}

@@ -92,7 +92,8 @@ func (a *AdminController) UpdateAdmins(ctx echo.Context) error {
 		})
 	}
 
-	if err := a.AdminServ.UpdateAdmins(payloads, id); err != nil {
+	data, err := a.AdminServ.UpdateAdmins(payloads, id)
+	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
@@ -102,6 +103,7 @@ func (a *AdminController) UpdateAdmins(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
 		"message": "success update admin",
+		"data":    data,
 	})
 }
 

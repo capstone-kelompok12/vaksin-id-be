@@ -118,9 +118,7 @@ func (h *HealthFacilitiesController) GetAllHealthFacilities(ctx echo.Context) er
 func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) error {
 	var payloads payload.UpdateHealthFacilities
 
-
 	id := ctx.Request().Header.Get("Authorization")
-
 
 	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -129,7 +127,8 @@ func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) er
 		})
 	}
 
-	if err := h.HealthService.UpdateHealthFacilities(payloads, id); err != nil {
+	data, err := h.HealthService.UpdateHealthFacilities(payloads, id)
+	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
@@ -139,6 +138,7 @@ func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) er
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
 		"message": "success update health facilities",
+		"data":    data,
 	})
 }
 

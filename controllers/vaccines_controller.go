@@ -38,8 +38,9 @@ func (v *VaccinesController) CreateVaccine(ctx echo.Context) error {
 
 	authAdmin := ctx.Request().Header.Get("Authorization")
 
-	if err := v.VaccineService.CreateVaccine(authAdmin, payloads); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+	data, err := v.VaccineService.CreateVaccine(authAdmin, payloads)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -48,6 +49,7 @@ func (v *VaccinesController) CreateVaccine(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, map[string]interface{}{
 		"error":    false,
 		"messages": "success create vaccine by admin",
+		"data":     data,
 	})
 }
 
@@ -97,7 +99,8 @@ func (v *VaccinesController) UpdateVaccine(ctx echo.Context) error {
 
 	id := ctx.Param("id")
 
-	if err := v.VaccineService.UpdateVaccine(id, payloads); err != nil {
+	data, err := v.VaccineService.UpdateVaccine(id, payloads)
+	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
@@ -107,6 +110,7 @@ func (v *VaccinesController) UpdateVaccine(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":    false,
 		"messages": "success update vaccine by admin",
+		"data":     data,
 	})
 }
 

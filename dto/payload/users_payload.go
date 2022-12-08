@@ -12,8 +12,7 @@ type RegisterUser struct {
 
 type UpdateUser struct {
 	Fullname     string `json:"fullname" gorm:"size:255"`
-	Email        string `json:"email" gorm:"size:100"`
-	Gender       string `json:"username" gorm:"size:1"`
+	Gender       string `json:"gender" gorm:"size:1"`
 	PhoneNum     string `json:"phonenum" gorm:"size:15"`
 	ProfileImage string `json:"profileimage"`
 	BirthDate    string `json:"birthdate"`

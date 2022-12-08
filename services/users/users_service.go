@@ -20,7 +20,7 @@ type UserService interface {
 	RegisterUser(payloads payload.RegisterUser) error
 	LoginUser(payloads payload.Login) (response.Login, error)
 	GetUserDataByNik(nik string) (response.UserProfile, error)
-	UpdateUserProfile(payloads payload.UpdateUser, nik string) error
+	UpdateUserProfile(payloads payload.UpdateUser, nik string) (payload.UpdateUser, error)
 	DeleteUserProfile(nik string) error
 	NearbyHealthFacilities(payloads payload.NearbyHealth, nik string) (response.UserNearbyHealth, error)
 }
@@ -47,7 +47,7 @@ func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 	}
 
 	if payloads.Gender != "P" && payloads.Gender != "L" {
-		return errors.New("input gender with P or L")
+		return errors.New("input gender must P or L")
 	}
 
 	defaultVaccineCount := 0
@@ -178,35 +178,37 @@ func (u *userService) GetUserDataByNik(nik string) (response.UserProfile, error)
 	return responseUser, nil
 }
 
-func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string) error {
+func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string) (payload.UpdateUser, error) {
+	var dataResp payload.UpdateUser
 	userNik, err := m.GetUserNik(nik)
 	if err != nil {
-		return err
+		return dataResp, err
+	}
+
+	if payloads.Gender != "P" && payloads.Gender != "L" {
+		return dataResp, errors.New("input gender must P or L")
 	}
 
 	dateBirth, err := time.Parse("2006-01-02", payloads.BirthDate)
 	if err != nil {
-		return err
-	}
-
-	if payloads.Gender != "P" && payloads.Gender != "L" {
-		return errors.New("input gender with P or L")
+		return dataResp, err
 	}
 
 	dataUser := model.Users{
 		Fullname:  payloads.Fullname,
 		NIK:       userNik,
-		Email:     payloads.Email,
 		Gender:    payloads.Gender,
 		PhoneNum:  payloads.PhoneNum,
 		BirthDate: dateBirth,
 	}
 
 	if err := u.UserRepo.UpdateUserProfile(dataUser); err != nil {
-		return err
+		return dataResp, err
 	}
 
-	return nil
+	dataResp = payloads
+
+	return dataResp, nil
 }
 
 func (u *userService) DeleteUserProfile(nik string) error {

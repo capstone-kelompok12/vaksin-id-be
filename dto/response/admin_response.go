@@ -9,3 +9,8 @@ type AdminResponse struct {
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
 }
+
+type AdminProfileResponse struct {
+	ID    string
+	Email string
+}

@@ -12,10 +12,10 @@ import (
 )
 
 type VaccinesService interface {
-	CreateVaccine(authAdmin string, payloads payload.VaccinesPayload) error
+	CreateVaccine(authAdmin string, payloads payload.VaccinesPayload) (model.Vaccines, error)
 	GetAllVaccines() ([]response.VaccinesResponse, error)
 	GetVaccineByAdmin(idhealthfacilities string) ([]model.Vaccines, error)
-	UpdateVaccine(id string, payloads payload.VaccinesUpdatePayload) error
+	UpdateVaccine(id string, payloads payload.VaccinesUpdatePayload) (response.VaccinesResponse, error)
 	DeleteVacccine(id string) error
 }
 
@@ -29,19 +29,21 @@ func NewVaccinesService(vaccinesRepo mysqlv.VaccinesRepository) *vaccinesService
 	}
 }
 
-func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.VaccinesPayload) error {
+func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.VaccinesPayload) (model.Vaccines, error) {
+	var vaccineModel model.Vaccines
+
 	id := uuid.NewString()
 
 	idHealthFacilities, err := m.GetIdHealthFacilities(authAdmin)
 	if err != nil {
-		return err
+		return vaccineModel, err
 	}
 
 	if err := v.VaccinesRepo.CheckNameExist(idHealthFacilities, payloads.Name); err == nil {
-		return errors.New("vaccine name already exist")
+		return vaccineModel, errors.New("vaccine name already exist")
 	}
 
-	vaccineModel := model.Vaccines{
+	vaccineModel = model.Vaccines{
 		ID:                 id,
 		IdHealthFacilities: idHealthFacilities,
 		Name:               payloads.Name,
@@ -50,10 +52,10 @@ func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.Vacci
 
 	err = v.VaccinesRepo.CreateVaccine(vaccineModel)
 	if err != nil {
-		return err
+		return vaccineModel, err
 	}
 
-	return nil
+	return vaccineModel, nil
 }
 
 func (v *vaccinesService) GetAllVaccines() ([]response.VaccinesResponse, error) {
@@ -93,16 +95,25 @@ func (v *vaccinesService) GetVaccineByAdmin(idhealthfacilities string) ([]model.
 	return vaccines, nil
 }
 
-func (v *vaccinesService) UpdateVaccine(id string, payloads payload.VaccinesUpdatePayload) error {
+func (v *vaccinesService) UpdateVaccine(id string, payloads payload.VaccinesUpdatePayload) (response.VaccinesResponse, error) {
+	var dataResp response.VaccinesResponse
+
 	vaccineData := model.Vaccines{
 		Name:  payloads.Name,
 		Stock: payloads.Stock,
 	}
 
 	if err := v.VaccinesRepo.UpdateVaccine(vaccineData, id); err != nil {
-		return err
+		return dataResp, err
 	}
-	return nil
+
+	dataResp = response.VaccinesResponse{
+		ID:    id,
+		Name:  payloads.Name,
+		Stock: payloads.Stock,
+	}
+
+	return dataResp, nil
 }
 
 func (v *vaccinesService) DeleteVacccine(id string) error {

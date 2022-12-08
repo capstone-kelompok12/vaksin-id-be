@@ -145,8 +145,9 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 
 	nik := ctx.Request().Header.Get("Authorization")
 
-	if err := u.UserService.UpdateUserProfile(payloads, nik); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+	data, err := u.UserService.UpdateUserProfile(payloads, nik)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -155,6 +156,7 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
 		"message": "success update user",
+		"data":    data,
 	})
 }
 
@@ -227,8 +229,9 @@ func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 
 	nik := ctx.Request().Header.Get("Authorization")
 
-	if err := u.AddressService.UpdateUserAddress(payloads, nik); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+	data, err := u.AddressService.UpdateUserAddress(payloads, nik)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -237,6 +240,7 @@ func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
 		"message": "success update address user",
+		"data":    data,
 	})
 }
 

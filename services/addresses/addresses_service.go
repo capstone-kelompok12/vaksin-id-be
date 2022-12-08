@@ -9,7 +9,7 @@ import (
 
 type AddressService interface {
 	GetAddressUser(nik string) (model.Addresses, error)
-	UpdateUserAddress(payloads payload.UpdateAddress, nik string) error
+	UpdateUserAddress(payloads payload.UpdateAddress, nik string) (payload.UpdateAddress, error)
 }
 
 type addressService struct {
@@ -38,11 +38,11 @@ func (a *addressService) GetAddressUser(nik string) (model.Addresses, error) {
 	return dataAddress, nil
 }
 
-func (a *addressService) UpdateUserAddress(payloads payload.UpdateAddress, nik string) error {
-
+func (a *addressService) UpdateUserAddress(payloads payload.UpdateAddress, nik string) (payload.UpdateAddress, error) {
+	var addressResp payload.UpdateAddress
 	getUserNik, err := m.GetUserNik(nik)
 	if err != nil {
-		return err
+		return addressResp, err
 	}
 
 	newAddress := model.Addresses{
@@ -55,7 +55,9 @@ func (a *addressService) UpdateUserAddress(payloads payload.UpdateAddress, nik s
 	}
 
 	if err := a.AddressRepo.UpdateAddressUser(newAddress, getUserNik); err != nil {
-		return err
+		return addressResp, err
 	}
-	return nil
+
+	addressResp = payloads
+	return addressResp, nil
 }

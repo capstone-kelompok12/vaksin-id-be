@@ -9,9 +9,10 @@ type Sessions struct {
 	IdHealthFacilities string `gorm:"type:varchar(255)"`
 	SessionName        string `gorm:"type:varchar(255)"`
 	Capacity           int    `gorm:"type:int(11)"`
-	SessionStatus      bool   `gorm:"type:boolean"`
-	StartSession       time.Time
-	EndSession         time.Time
+	Dose               string `gorm:"type:varchar(2)"`
+	IsClose            bool   `gorm:"type:boolean"`
+	StartSession       string `gorm:"type:varchar(5)"`
+	EndSession         string `gorm:"type:varchar(5)"`
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
 }

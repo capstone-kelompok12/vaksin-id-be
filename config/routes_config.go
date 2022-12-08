@@ -5,11 +5,13 @@ import (
 	mysql_address "vaksin-id-be/repository/mysql/addresses"
 	mysql_admin "vaksin-id-be/repository/mysql/admins"
 	mysql_health "vaksin-id-be/repository/mysql/health_facilities"
+	mysql_sessions "vaksin-id-be/repository/mysql/sessions"
 	mysql_user "vaksin-id-be/repository/mysql/users"
 	mysql_vaccines "vaksin-id-be/repository/mysql/vaccines"
 	services_addresses "vaksin-id-be/services/addresses"
 	services_admin "vaksin-id-be/services/admins"
 	services_health "vaksin-id-be/services/health_facilities"
+	services_sessions "vaksin-id-be/services/sessions"
 	services_user "vaksin-id-be/services/users"
 	services_vaccines "vaksin-id-be/services/vaccines"
 
@@ -48,4 +50,11 @@ func InitVaccinesAPI(db *gorm.DB) *controllers.VaccinesController {
 	vaccinesServ := services_vaccines.NewVaccinesService(vaccinesRepo)
 	vaccinesAPI := controllers.NewVaccinesController(vaccinesServ)
 	return vaccinesAPI
+}
+
+func InitSessionsAPI(db *gorm.DB) *controllers.SessionsController {
+	sessionsRepo := mysql_sessions.NewSessionsRepository(db)
+	sessionsServ := services_sessions.NewSessionsService(sessionsRepo)
+	sessionsAPI := controllers.NewSessionsController(sessionsServ)
+	return sessionsAPI
 }

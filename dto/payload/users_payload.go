@@ -27,3 +27,8 @@ type UpdateAddress struct {
 	Latitude       float64 `json:"latitude" gorm:"type:numeric(11,7)"`
 	Longitude      float64 `json:"longitude" gorm:"type:numeric(11,7)"`
 }
+
+type NearbyHealth struct {
+	Latitude  float64 `json:"latitude" gorm:"type:numeric(11,7)"`
+	Longitude float64 `json:"longitude" gorm:"type:numeric(11,7)"`
+}

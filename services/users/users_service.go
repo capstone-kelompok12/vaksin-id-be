@@ -22,7 +22,7 @@ type UserService interface {
 	GetUserDataByNik(nik string) (response.UserProfile, error)
 	UpdateUserProfile(payloads payload.UpdateUser, nik string) error
 	DeleteUserProfile(nik string) error
-	NearbyHealthFacilities(nik string) (response.UserNearbyHealth, error)
+	NearbyHealthFacilities(payloads payload.NearbyHealth, nik string) (response.UserNearbyHealth, error)
 }
 
 type userService struct {
@@ -226,9 +226,10 @@ func (u *userService) DeleteUserProfile(nik string) error {
 	return nil
 }
 
-func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHealth, error) {
+func (u *userService) NearbyHealthFacilities(payloads payload.NearbyHealth, nik string) (response.UserNearbyHealth, error) {
 	var result response.UserNearbyHealth
 	var tempData []response.HealthResponse
+	var tempRes []response.HealthResponse
 	getUserNik, err := m.GetUserNik(nik)
 	if err != nil {
 		return result, err
@@ -239,28 +240,38 @@ func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHea
 		return result, err
 	}
 
-	allHealthFacilities, err := u.HealthRepo.GetAllHealthFacilitiesByCity(userProfile.Address.City)
+	allHealthFacilities, err := u.HealthRepo.GetAllHealthFacilities()
 	tempData = make([]response.HealthResponse, len(allHealthFacilities))
 	if err != nil {
 		return result, err
 	}
 
 	for i, val := range allHealthFacilities {
-		newRanges := util.FindRange(userProfile.Address.Latitude, userProfile.Address.Longitude, val.Address.Latitude, val.Address.Longitude)
-		tempData[i] = response.HealthResponse{
-			ID:       val.ID,
-			Email:    val.Email,
-			PhoneNum: val.PhoneNum,
-			Name:     val.Name,
-			Image:    nil,
-			Ranges:   newRanges,
-			Address:  *val.Address,
+		newRanges := util.FindRange(payloads.Latitude, payloads.Longitude, val.Address.Latitude, val.Address.Longitude)
+		if newRanges < 10 {
+			tempData[i] = response.HealthResponse{
+				ID:       val.ID,
+				Email:    val.Email,
+				PhoneNum: val.PhoneNum,
+				Name:     val.Name,
+				Image:    val.Image,
+				Ranges:   newRanges,
+				Address:  *val.Address,
+			}
 		}
 	}
 
 	sort.Slice(tempData, func(i, j int) bool {
 		return tempData[i].Ranges < tempData[j].Ranges
 	})
+
+	length := 0
+	for _, val := range tempData {
+		if val.ID == "" {
+			length += 1
+		}
+	}
+	tempRes = append(tempRes, tempData[length:]...)
 
 	ageUser, err := u.UserRepo.GetAgeUser(userProfile)
 	if err != nil {
@@ -278,7 +289,7 @@ func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHea
 			Age:          ageUser.Age,
 			Address:      *userProfile.Address,
 		},
-		HealthFacilities: tempData,
+		HealthFacilities: tempRes,
 	}
 
 	return result, nil

@@ -87,7 +87,7 @@ func (u *UserController) LoginUser(ctx echo.Context) error {
 	authUser, err := u.UserService.LoginUser(payload)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -242,7 +242,16 @@ func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 
 func (u *UserController) UserNearbyHealth(ctx echo.Context) error {
 	nik := ctx.Request().Header.Get("Authorization")
-	data, err := u.UserService.NearbyHealthFacilities(nik)
+	var payloads payload.NearbyHealth
+
+	if err := ctx.Bind(&payloads); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	data, err := u.UserService.NearbyHealthFacilities(payloads, nik)
 
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{

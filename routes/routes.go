@@ -4,6 +4,7 @@ import (
 	"vaksin-id-be/config"
 	m "vaksin-id-be/middleware"
 	adm "vaksin-id-be/routes/admins"
+	bookings "vaksin-id-be/routes/bookings"
 	hf "vaksin-id-be/routes/health_facilities"
 	sessions "vaksin-id-be/routes/sessions"
 	users "vaksin-id-be/routes/users"
@@ -24,6 +25,7 @@ func Init() *echo.Echo {
 	adminApi := config.InitAdminAPI(dbConfig)
 	vaccineApi := config.InitVaccinesAPI(dbConfig)
 	sessionApi := config.InitSessionsAPI(dbConfig)
+	bookingApi := config.InitBookingsAPI(dbConfig)
 
 	routes := echo.New()
 
@@ -59,6 +61,10 @@ func Init() *echo.Echo {
 	// sessions
 	sessions.SessionsUnauthenticated(v1, sessionApi)
 	sessions.SessionsAuthenticated(v1, sessionApi)
+
+	// bookings
+	bookings.BookingsAuthenticated(v1, bookingApi)
+	bookings.BookingsUnauthenticated(v1, bookingApi)
 
 	return routes
 }

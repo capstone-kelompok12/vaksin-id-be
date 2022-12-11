@@ -4,12 +4,14 @@ import (
 	"vaksin-id-be/controllers"
 	mysql_address "vaksin-id-be/repository/mysql/addresses"
 	mysql_admin "vaksin-id-be/repository/mysql/admins"
+	mysql_bookings "vaksin-id-be/repository/mysql/bookings"
 	mysql_health "vaksin-id-be/repository/mysql/health_facilities"
 	mysql_sessions "vaksin-id-be/repository/mysql/sessions"
 	mysql_user "vaksin-id-be/repository/mysql/users"
 	mysql_vaccines "vaksin-id-be/repository/mysql/vaccines"
 	services_addresses "vaksin-id-be/services/addresses"
 	services_admin "vaksin-id-be/services/admins"
+	services_bookings "vaksin-id-be/services/bookings"
 	services_health "vaksin-id-be/services/health_facilities"
 	services_sessions "vaksin-id-be/services/sessions"
 	services_user "vaksin-id-be/services/users"
@@ -57,4 +59,11 @@ func InitSessionsAPI(db *gorm.DB) *controllers.SessionsController {
 	sessionsServ := services_sessions.NewSessionsService(sessionsRepo)
 	sessionsAPI := controllers.NewSessionsController(sessionsServ)
 	return sessionsAPI
+}
+
+func InitBookingsAPI(db *gorm.DB) *controllers.BookingsController {
+	bookingsRepo := mysql_bookings.NewBookingRepository(db)
+	bookingsServ := services_bookings.NewBookingService(bookingsRepo)
+	bookingsAPI := controllers.NewBookingController(bookingsServ)
+	return bookingsAPI
 }

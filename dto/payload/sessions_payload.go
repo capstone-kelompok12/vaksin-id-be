@@ -4,7 +4,7 @@ type SessionsPayload struct {
 	// IdHealthFacilities string `json:"id_health_facilities"`
 	SessionName  string `json:"session_name" validate:"required"`
 	Capacity     int    `json:"capacity" validate:"required"`
-	Dose         string `json:"dose" validate:"required"`
+	Dose         int    `json:"dose" validate:"required,max=1"`
 	StartSession string `json:"start" validate:"required,max=5"`
 	EndSession   string `json:"end" validate:"required,max=5"`
 }

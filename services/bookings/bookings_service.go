@@ -13,6 +13,7 @@ type BookingService interface {
 	CreateBooking(payloads payload.BookingPayload) (payload.BookingPayload, error)
 	UpdateBooking(payloads payload.BookingUpdate, id string) (response.BookingResponse, error)
 	GetAllBooking() ([]response.BookingResponse, error)
+	GetBookingDashboard() (response.Dashboard, error)
 	GetBooking(id string) (response.BookingResponse, error)
 	DeleteBooking(id string) error
 }
@@ -121,4 +122,20 @@ func (b *bookingService) DeleteBooking(id string) error {
 	}
 
 	return nil
+}
+
+func (b *bookingService) GetBookingDashboard() (response.Dashboard, error) {
+	var bookingResponse response.Dashboard
+
+	getBooking, err := b.BookingRepo.GetAllBooking()
+
+	if err != nil {
+		return bookingResponse, err
+	}
+
+	count := len(getBooking)
+
+	bookingResponse = response.Dashboard{Booking: count}
+
+	return bookingResponse, nil
 }

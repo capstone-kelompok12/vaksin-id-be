@@ -118,3 +118,19 @@ func (b *BookingsController) DeleteBooking(ctx echo.Context) error {
 		"message": "success delete booking",
 	})
 }
+
+func (b *BookingsController) GetBookingDashboard(ctx echo.Context) error {
+	allData, err := b.BookingService.GetBookingDashboard()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":    false,
+		"messages": "success get all data booking",
+		"data":     allData,
+	})
+}

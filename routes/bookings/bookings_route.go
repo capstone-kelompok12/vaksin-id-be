@@ -12,6 +12,7 @@ func BookingsUnauthenticated(routes *echo.Group, api *controllers.BookingsContro
 	{
 		routes.GET("/bookings", api.GetAllBookings)
 		routes.GET("/bookings/:id", api.GetBooking)
+		routes.GET("/admin/dashboard", api.GetBookingDashboard)
 		routes.POST("/bookings", api.CreateBooking)
 		routes.PUT("/bookings/:id", api.UpdateBooking)
 		routes.DELETE("/bookings/:id", api.DeleteBooking)

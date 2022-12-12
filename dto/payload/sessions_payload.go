@@ -1,7 +1,6 @@
 package payload
 
 type SessionsPayload struct {
-	// IdHealthFacilities string `json:"id_health_facilities"`
 	SessionName  string `json:"session_name" validate:"required"`
 	Capacity     int    `json:"capacity" validate:"required"`
 	Dose         int    `json:"dose" validate:"required"`

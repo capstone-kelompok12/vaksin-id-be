@@ -4,6 +4,7 @@ import (
 	"vaksin-id-be/model"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type SessionsRepository interface {
@@ -34,7 +35,7 @@ func (s *sessionsRepository) CreateSession(data model.Sessions) error {
 
 func (s *sessionsRepository) GetAllSessions() ([]model.Sessions, error) {
 	var session []model.Sessions
-	if err := s.db.Model(&model.Sessions{}).Find(&session).Error; err != nil {
+	if err := s.db.Preload(clause.Associations).Preload("Booking." + clause.Associations).Model(&model.Sessions{}).Find(&session).Error; err != nil {
 		return session, err
 	}
 
@@ -43,7 +44,7 @@ func (s *sessionsRepository) GetAllSessions() ([]model.Sessions, error) {
 
 func (s *sessionsRepository) GetSessionAdminById(auth, id string) (model.Sessions, error) {
 	var session model.Sessions
-	if err := s.db.Where("id_health_facilities = ? AND id = ?", auth, id).First(&session).Error; err != nil {
+	if err := s.db.Preload(clause.Associations).Preload("Booking."+clause.Associations).Where("id_health_facilities = ? AND id = ?", auth, id).First(&session).Error; err != nil {
 		return session, err
 	}
 	return session, nil
@@ -51,7 +52,7 @@ func (s *sessionsRepository) GetSessionAdminById(auth, id string) (model.Session
 
 func (s *sessionsRepository) GetSessionsByAdmin(auth string) ([]model.Sessions, error) {
 	var session []model.Sessions
-	if err := s.db.Where("id_health_facilities = ?", auth).Find(&session).Error; err != nil {
+	if err := s.db.Preload(clause.Associations).Preload("Booking."+clause.Associations).Where("id_health_facilities = ?", auth).Find(&session).Error; err != nil {
 		return session, err
 	}
 	return session, nil

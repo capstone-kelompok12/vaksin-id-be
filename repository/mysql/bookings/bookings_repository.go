@@ -4,6 +4,7 @@ import (
 	"vaksin-id-be/model"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type BookingRepository interface {
@@ -38,7 +39,7 @@ func (b *bookingRepository) UpdateBooking(data model.BookingSessions, id string)
 
 func (b *bookingRepository) GetAllBooking() ([]model.BookingSessions, error) {
 	var booking []model.BookingSessions
-	if err := b.db.Model(&model.BookingSessions{}).Find(&booking).Error; err != nil {
+	if err := b.db.Preload(clause.Associations).Preload("User." + clause.Associations).Preload("Session").Model(&model.BookingSessions{}).Find(&booking).Error; err != nil {
 		return booking, err
 	}
 	return booking, nil
@@ -46,7 +47,7 @@ func (b *bookingRepository) GetAllBooking() ([]model.BookingSessions, error) {
 
 func (b *bookingRepository) GetBooking(id string) (model.BookingSessions, error) {
 	var booking model.BookingSessions
-	if err := b.db.Where("id = ?", id).First(&booking).Error; err != nil {
+	if err := b.db.Preload(clause.Associations).Preload("User."+clause.Associations).Preload("Session").Where("id = ?", id).First(&booking).Error; err != nil {
 		return booking, err
 	}
 	return booking, nil

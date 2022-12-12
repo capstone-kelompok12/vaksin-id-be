@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
 	m "vaksin-id-be/middleware"
@@ -39,13 +38,10 @@ func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.Vacci
 		return vaccineModel, err
 	}
 
-	if err := v.VaccinesRepo.CheckNameExist(idHealthFacilities, payloads.Name); err == nil {
-		return vaccineModel, errors.New("vaccine name already exist")
-	}
-
 	vaccineModel = model.Vaccines{
 		ID:                 id,
 		IdHealthFacilities: idHealthFacilities,
+		Dose:               payloads.Dose,
 		Name:               payloads.Name,
 		Stock:              payloads.Stock,
 	}

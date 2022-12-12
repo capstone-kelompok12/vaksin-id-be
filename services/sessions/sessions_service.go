@@ -78,11 +78,13 @@ func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
 			ID:           v.ID,
 			SessionName:  v.SessionName,
 			Capacity:     v.Capacity,
+			Dose:         v.Dose,
 			IsClose:      v.IsClose,
 			StartSession: v.StartSession,
 			EndSession:   v.EndSession,
 			CreatedAt:    v.CreatedAt,
 			UpdatedAt:    v.UpdatedAt,
+			Booking:      v.Booking,
 		}
 	}
 
@@ -106,11 +108,13 @@ func (s *sessionService) GetSessionsAdminById(auth, id string) (response.Session
 		ID:           getData.ID,
 		SessionName:  getData.SessionName,
 		Capacity:     getData.Capacity,
+		Dose:         getData.Dose,
 		IsClose:      getData.IsClose,
 		StartSession: getData.StartSession,
 		EndSession:   getData.EndSession,
 		CreatedAt:    getData.CreatedAt,
 		UpdatedAt:    getData.UpdatedAt,
+		Booking:      getData.Booking,
 	}
 
 	return responseSession, nil
@@ -136,11 +140,13 @@ func (s *sessionService) GetSessionByAdmin(auth string) ([]response.SessionsResp
 			ID:           val.ID,
 			SessionName:  val.SessionName,
 			Capacity:     val.Capacity,
+			Dose:         val.Dose,
 			IsClose:      val.IsClose,
 			StartSession: val.StartSession,
 			EndSession:   val.EndSession,
 			CreatedAt:    val.CreatedAt,
 			UpdatedAt:    val.UpdatedAt,
+			Booking:      val.Booking,
 		}
 	}
 

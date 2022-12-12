@@ -4,6 +4,7 @@ import (
 	"vaksin-id-be/model"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type HealthFacilitiesRepository interface {
@@ -32,7 +33,7 @@ func (h *healthFacilitiesRepository) CreateHealthFacilities(data model.HealthFac
 
 func (h *healthFacilitiesRepository) GetAllHealthFacilities() ([]model.HealthFacilities, error) {
 	var healthFacils []model.HealthFacilities
-	if err := h.db.Preload("Vaccine").Preload("Session").Preload("Address").Model(&model.HealthFacilities{}).Find(&healthFacils).Error; err != nil {
+	if err := h.db.Preload(clause.Associations).Preload("Vaccine").Preload("Session." + clause.Associations).Preload("Address").Model(&model.HealthFacilities{}).Find(&healthFacils).Error; err != nil {
 		return healthFacils, err
 	}
 	return healthFacils, nil

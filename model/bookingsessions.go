@@ -14,8 +14,8 @@ type BookingSessions struct {
 	Status    string `gorm:"type:varchar(255)"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	User      *Users         `gorm:"foreignKey:NikUser"` // belong to relationship
-	// Session   *Sessions          `gorm:"foreignKey:IdSession"` // belong to relationship
-	Histroy []VaccineHistories `gorm:"foreignKey:IdBooking"` // has many relationship
+	DeletedAt gorm.DeletedAt     `gorm:"index"`
+	User      *Users             `gorm:"foreignKey:NikUser"`   // belong to relationship
+	Session   *Sessions          `gorm:"foreignKey:IdSession"` // belong to relationship
+	History   []VaccineHistories `gorm:"foreignKey:IdBooking"` // has many relationship
 }

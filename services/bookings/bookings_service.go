@@ -85,6 +85,8 @@ func (b *bookingService) GetAllBooking() ([]response.BookingResponse, error) {
 			Status:    v.Status,
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
+			User:      *v.User,
+			Session:   *v.Session,
 		}
 	}
 
@@ -107,6 +109,7 @@ func (b *bookingService) GetBooking(id string) (response.BookingResponse, error)
 		Status:    getData.Status,
 		CreatedAt: getData.CreatedAt,
 		UpdatedAt: getData.UpdatedAt,
+		User:      *getData.User,
 	}
 
 	return responseBooking, nil

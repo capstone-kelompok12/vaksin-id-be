@@ -10,6 +10,7 @@ type VaccinesRepository interface {
 	CreateVaccine(data model.Vaccines) error
 	GetAllVaccines() ([]model.Vaccines, error)
 	GetVaccinesByIdAdmin(idhealthfacil string) ([]model.Vaccines, error)
+	GetVaccineByName() ([]model.Vaccines, error)
 	UpdateVaccine(data model.Vaccines, id string) error
 	DeleteVacccine(id string) error
 	CheckNameExist(idhealthfacil, name string) error
@@ -33,7 +34,7 @@ func (v *vaccinesRepository) CreateVaccine(data model.Vaccines) error {
 
 func (v *vaccinesRepository) GetAllVaccines() ([]model.Vaccines, error) {
 	var vaccines []model.Vaccines
-	if err := v.db.Model(&model.Vaccines{}).Find(&vaccines).Error; err != nil {
+	if err := v.db.Model(&model.Vaccines{}).Order("name").Find(&vaccines).Error; err != nil {
 		return vaccines, err
 	}
 	return vaccines, nil
@@ -42,6 +43,14 @@ func (v *vaccinesRepository) GetAllVaccines() ([]model.Vaccines, error) {
 func (v *vaccinesRepository) GetVaccinesByIdAdmin(idhealthfacil string) ([]model.Vaccines, error) {
 	var vaccines []model.Vaccines
 	if err := v.db.Model(&model.Vaccines{}).Where("id_health_facilities = ?", idhealthfacil).Find(&vaccines).Error; err != nil {
+		return vaccines, err
+	}
+	return vaccines, nil
+}
+
+func (v *vaccinesRepository) GetVaccineByName() ([]model.Vaccines, error) {
+	var vaccines []model.Vaccines
+	if err := v.db.Raw("SELECT name, SUM(stock) AS stock FROM vaccines GROUP BY name").Scan(&vaccines).Error; err != nil {
 		return vaccines, err
 	}
 	return vaccines, nil

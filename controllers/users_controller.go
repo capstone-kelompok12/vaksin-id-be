@@ -124,6 +124,24 @@ func (u *UserController) GetUserDataByNik(ctx echo.Context) error {
 	})
 }
 
+func (u *UserController) GetUserDataByNikCheck(ctx echo.Context) error {
+	nik := ctx.Param("nik")
+	data, err := u.UserService.GetUserDataByNikNoAddress(nik)
+
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "success check user nik",
+		"data":    data,
+	})
+}
+
 // @Summary 	Update User
 // @Description This can only be done by the logged in user.
 // @Tags 		Users

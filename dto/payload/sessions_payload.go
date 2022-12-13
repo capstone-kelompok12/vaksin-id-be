@@ -1,10 +1,9 @@
 package payload
 
 type SessionsPayload struct {
-	// IdHealthFacilities string `json:"id_health_facilities"`
 	SessionName  string `json:"session_name" validate:"required"`
 	Capacity     int    `json:"capacity" validate:"required"`
-	Dose         int    `json:"dose" validate:"required,max=1"`
+	Dose         int    `json:"dose" validate:"required"`
 	StartSession string `json:"start" validate:"required,max=5"`
 	EndSession   string `json:"end" validate:"required,max=5"`
 }
@@ -12,7 +11,7 @@ type SessionsPayload struct {
 type SessionsUpdate struct {
 	SessionName  string `json:"session_name"`
 	Capacity     int    `json:"capacity"`
-	Dose         string `json:"dose"`
+	Dose         int    `json:"dose"`
 	StartSession string `json:"start"`
 	EndSession   string `json:"end"`
 }

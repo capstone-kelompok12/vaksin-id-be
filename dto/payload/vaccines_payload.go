@@ -2,7 +2,7 @@ package payload
 
 type VaccinesPayload struct {
 	Name  string `json:"name" validate:"required"`
-	Dose  int    `json:"dose" validate:"required,max=1"`
+	Dose  int    `json:"dose" validate:"required"`
 	Stock int    `json:"stock"`
 }
 

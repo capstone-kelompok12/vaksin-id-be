@@ -20,3 +20,8 @@ func ValidateVaccine(payloads payload.VaccinesPayload) error {
 	validate := validator.New()
 	return validate.Struct(payloads)
 }
+
+func ValidateSession(payloads payload.SessionsPayload) error {
+	validate := validator.New()
+	return validate.Struct(payloads)
+}

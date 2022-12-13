@@ -13,7 +13,7 @@ type UserProfile struct {
 	Gender       string
 	VaccineCount int
 	Age          int
-	Address      model.Addresses
+	Address      *model.Addresses
 }
 
 type AgeUser struct {
@@ -24,4 +24,14 @@ type AgeUser struct {
 type UserNearbyHealth struct {
 	User             UserProfile
 	HealthFacilities []HealthResponse
+}
+
+type UpdateUser struct {
+	Fullname  string
+	NikUser   string
+	Email     string
+	Gender    string
+	Password  string
+	PhoneNum  string
+	BirthDate time.Time
 }

@@ -22,7 +22,7 @@ type ClaimsCustomAdmin struct {
 }
 
 func CreateToken(nikUser string, email string) (string, error) {
-	exp := time.Now().Add(time.Hour * 1).Unix()
+	exp := time.Now().Add(time.Hour * 72).Unix()
 	claims := ClaimsCustom{
 		NikUser: nikUser,
 		Email:   email,
@@ -52,7 +52,7 @@ func GetUserNik(auth string) (string, error) {
 }
 
 func CreateTokenAdmin(id, idhealthfacil, email string) (string, error) {
-	exp := time.Now().Add(time.Hour * 1).Unix()
+	exp := time.Now().Add(time.Hour * 72).Unix()
 	claims := ClaimsCustomAdmin{
 		Id:                 id,
 		IdHealthFacilities: idhealthfacil,

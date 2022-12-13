@@ -31,7 +31,7 @@ func (a *AdminController) LoginAdmin(ctx echo.Context) error {
 	authAdmin, err := a.AdminServ.LoginAdmin(payloads)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+		return ctx.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -85,7 +85,6 @@ func (a *AdminController) UpdateAdmins(ctx echo.Context) error {
 
 	id := ctx.Request().Header.Get("Authorization")
 
-
 	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
@@ -93,7 +92,8 @@ func (a *AdminController) UpdateAdmins(ctx echo.Context) error {
 		})
 	}
 
-	if err := a.AdminServ.UpdateAdmins(payloads, id); err != nil {
+	data, err := a.AdminServ.UpdateAdmins(payloads, id)
+	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
@@ -103,6 +103,7 @@ func (a *AdminController) UpdateAdmins(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
 		"message": "success update admin",
+		"data":    data,
 	})
 }
 

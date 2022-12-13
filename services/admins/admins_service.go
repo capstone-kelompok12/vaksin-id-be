@@ -14,7 +14,7 @@ type AdminService interface {
 	LoginAdmin(payloads payload.Login) (response.Login, error)
 	GetAllAdmins() ([]response.AdminResponse, error)
 	GetAdmins(id string) (response.AdminResponse, error)
-	UpdateAdmins(payloads payload.AdminsPayload, id string) error
+	UpdateAdmins(payloads payload.AdminsPayload, id string) (response.AdminProfileResponse, error)
 	DeleteAdmins(id string) error
 }
 
@@ -107,15 +107,16 @@ func (a *adminService) GetAdmins(id string) (response.AdminResponse, error) {
 	return responseAdmin, nil
 }
 
-func (a *adminService) UpdateAdmins(payloads payload.AdminsPayload, id string) error {
+func (a *adminService) UpdateAdmins(payloads payload.AdminsPayload, id string) (response.AdminProfileResponse, error) {
+	var dataResp response.AdminProfileResponse
 	hashPass, err := util.HashPassword(payloads.Password)
 	if err != nil {
-		return err
+		return dataResp, err
 	}
 
 	getIdAdmin, err := m.GetIdAdmin(id)
 	if err != nil {
-		return err
+		return dataResp, err
 	}
 
 	adminData := model.Admins{
@@ -124,10 +125,15 @@ func (a *adminService) UpdateAdmins(payloads payload.AdminsPayload, id string) e
 		Password:           hashPass,
 	}
 
-	if err := a.AdminRepo.UpdateAdmins(adminData, getIdAdmin); err != nil {
-		return err
+	dataResp = response.AdminProfileResponse{
+		ID:    getIdAdmin,
+		Email: payloads.Email,
 	}
-	return nil
+
+	if err := a.AdminRepo.UpdateAdmins(adminData, getIdAdmin); err != nil {
+		return dataResp, err
+	}
+	return dataResp, nil
 }
 
 func (a *adminService) DeleteAdmins(id string) error {

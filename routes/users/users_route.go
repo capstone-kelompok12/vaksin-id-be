@@ -21,9 +21,10 @@ func UserAuthenticated(routes *echo.Group, api *controllers.UserController) {
 	{
 		authUser.GET("", api.GetUserDataByNik)
 		authUser.GET("/address", api.GetUserAddress)
+		authUser.GET("/check/:nik", api.GetUserDataByNikCheck)
 		authUser.PUT("", api.UpdateUser)
 		authUser.DELETE("", api.DeleteUser)
 		authUser.PUT("/address", api.UpdateUserAddress)
-		authUser.GET("/nearby", api.UserNearbyHealth)
+		authUser.POST("/nearby", api.UserNearbyHealth)
 	}
 }

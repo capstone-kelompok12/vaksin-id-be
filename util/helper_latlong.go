@@ -9,13 +9,14 @@ type coordinate struct {
 	lng float64
 }
 
-func FindRange(userLat, userLong, healthLat, healthLong float64) int {
+func FindRange(userLat, userLong, healthLat, healthLong float64) float64 {
 
 	rs := coordinate{userLat, userLong}
 	user := coordinate{healthLat, healthLong}
 
 	kilo := distance(rs.lat, rs.lng, user.lat, user.lng, "K")
-	result := int(math.Ceil(kilo))
+	kilo /= 1000
+	result := roundFloat(kilo, 2)
 
 	return result
 }
@@ -45,4 +46,9 @@ func distance(lat1 float64, lng1 float64, lat2 float64, lng2 float64, unit ...st
 	}
 
 	return dist
+}
+
+func roundFloat(val float64, precision uint) float64 {
+	ratio := math.Pow(10, float64(precision))
+	return math.Round(val*ratio) / ratio
 }

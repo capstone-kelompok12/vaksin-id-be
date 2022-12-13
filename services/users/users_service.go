@@ -20,9 +20,10 @@ type UserService interface {
 	RegisterUser(payloads payload.RegisterUser) error
 	LoginUser(payloads payload.Login) (response.Login, error)
 	GetUserDataByNik(nik string) (response.UserProfile, error)
-	UpdateUserProfile(payloads payload.UpdateUser, nik string) error
+	GetUserDataByNikNoAddress(nik string) (response.UserProfile, error)
+	UpdateUserProfile(payloads payload.UpdateUser, nik string) (response.UpdateUser, error)
 	DeleteUserProfile(nik string) error
-	NearbyHealthFacilities(nik string) (response.UserNearbyHealth, error)
+	NearbyHealthFacilities(payloads payload.NearbyHealth, nik string) (response.UserNearbyHealth, error)
 }
 
 type userService struct {
@@ -47,7 +48,7 @@ func (u *userService) RegisterUser(payloads payload.RegisterUser) error {
 	}
 
 	if payloads.Gender != "P" && payloads.Gender != "L" {
-		return errors.New("input gender with P or L")
+		return errors.New("input gender must P or L")
 	}
 
 	defaultVaccineCount := 0
@@ -172,41 +173,90 @@ func (u *userService) GetUserDataByNik(nik string) (response.UserProfile, error)
 		Gender:       getData.Gender,
 		VaccineCount: getData.VaccineCount,
 		Age:          ageUser.Age,
-		Address:      *getData.Address,
+		Address:      getData.Address,
 	}
 
 	return responseUser, nil
 }
 
-func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string) error {
-	userNik, err := m.GetUserNik(nik)
+func (u *userService) GetUserDataByNikNoAddress(nik string) (response.UserProfile, error) {
+	var responseUser response.UserProfile
+
+	getData, err := u.UserRepo.GetUserDataByNikNoAddress(nik)
 	if err != nil {
-		return err
+		return responseUser, err
+	}
+
+	ageUser, err := u.UserRepo.GetAgeUser(getData)
+	if err != nil {
+		return responseUser, err
+	}
+
+	responseUser = response.UserProfile{
+		NIK:          getData.NIK,
+		Email:        getData.Email,
+		Fullname:     getData.Fullname,
+		PhoneNum:     getData.PhoneNum,
+		Gender:       getData.Gender,
+		VaccineCount: getData.VaccineCount,
+		Age:          ageUser.Age,
+	}
+
+	return responseUser, nil
+}
+
+func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string) (response.UpdateUser, error) {
+	var dataResp response.UpdateUser
+
+	getNikUser, err := m.GetUserNik(nik)
+	if err != nil {
+		return dataResp, err
+	}
+
+	if payloads.Gender != "P" && payloads.Gender != "L" {
+		return dataResp, errors.New("input gender must P or L")
 	}
 
 	dateBirth, err := time.Parse("2006-01-02", payloads.BirthDate)
 	if err != nil {
-		return err
+		return dataResp, err
 	}
 
-	if payloads.Gender != "P" && payloads.Gender != "L" {
-		return errors.New("input gender with P or L")
+	hashPass, err := util.HashPassword(payloads.Password)
+	if err != nil {
+		return dataResp, err
+	}
+
+	data, err := u.GetUserDataByNikNoAddress(getNikUser)
+	if err != nil {
+		return dataResp, err
 	}
 
 	dataUser := model.Users{
-		Fullname:  payloads.Fullname,
-		NIK:       userNik,
+		NIK:       payloads.NikUser,
 		Email:     payloads.Email,
-		Gender:    payloads.Gender,
+		Password:  hashPass,
+		Fullname:  payloads.Fullname,
 		PhoneNum:  payloads.PhoneNum,
+		Gender:    payloads.Gender,
 		BirthDate: dateBirth,
 	}
 
 	if err := u.UserRepo.UpdateUserProfile(dataUser); err != nil {
-		return err
+		return dataResp, err
 	}
 
-	return nil
+	dataResp = response.UpdateUser{
+		Fullname:  data.Fullname,
+		NikUser:   data.NIK,
+		Email:     data.Email,
+		Password:  hashPass,
+		PhoneNum:  data.PhoneNum,
+		Gender:    data.Gender,
+		BirthDate: dateBirth,
+	}
+
+	return dataResp, nil
 }
 
 func (u *userService) DeleteUserProfile(nik string) error {
@@ -226,9 +276,10 @@ func (u *userService) DeleteUserProfile(nik string) error {
 	return nil
 }
 
-func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHealth, error) {
+func (u *userService) NearbyHealthFacilities(payloads payload.NearbyHealth, nik string) (response.UserNearbyHealth, error) {
 	var result response.UserNearbyHealth
 	var tempData []response.HealthResponse
+	var tempRes []response.HealthResponse
 	getUserNik, err := m.GetUserNik(nik)
 	if err != nil {
 		return result, err
@@ -239,28 +290,39 @@ func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHea
 		return result, err
 	}
 
-	allHealthFacilities, err := u.HealthRepo.GetAllHealthFacilitiesByCity(userProfile.Address.City)
+	allHealthFacilities, err := u.HealthRepo.GetAllHealthFacilities()
 	tempData = make([]response.HealthResponse, len(allHealthFacilities))
 	if err != nil {
 		return result, err
 	}
 
 	for i, val := range allHealthFacilities {
-		newRanges := util.FindRange(userProfile.Address.Latitude, userProfile.Address.Longitude, val.Address.Latitude, val.Address.Longitude)
-		tempData[i] = response.HealthResponse{
-			ID:       val.ID,
-			Email:    val.Email,
-			PhoneNum: val.PhoneNum,
-			Name:     val.Name,
-			Image:    nil,
-			Ranges:   newRanges,
-			Address:  *val.Address,
+		newRanges := util.FindRange(payloads.Latitude, payloads.Longitude, val.Address.Latitude, val.Address.Longitude)
+		if newRanges < 10 {
+			tempData[i] = response.HealthResponse{
+				ID:       val.ID,
+				Email:    val.Email,
+				PhoneNum: val.PhoneNum,
+				Name:     val.Name,
+				Image:    val.Image,
+				Ranges:   newRanges,
+				Address:  *val.Address,
+				Session:  val.Session,
+			}
 		}
 	}
 
 	sort.Slice(tempData, func(i, j int) bool {
 		return tempData[i].Ranges < tempData[j].Ranges
 	})
+
+	length := 0
+	for _, val := range tempData {
+		if val.ID == "" {
+			length += 1
+		}
+	}
+	tempRes = append(tempRes, tempData[length:]...)
 
 	ageUser, err := u.UserRepo.GetAgeUser(userProfile)
 	if err != nil {
@@ -276,9 +338,9 @@ func (u *userService) NearbyHealthFacilities(nik string) (response.UserNearbyHea
 			Gender:       userProfile.Gender,
 			VaccineCount: userProfile.VaccineCount,
 			Age:          ageUser.Age,
-			Address:      *userProfile.Address,
+			Address:      userProfile.Address,
 		},
-		HealthFacilities: tempData,
+		HealthFacilities: tempRes,
 	}
 
 	return result, nil

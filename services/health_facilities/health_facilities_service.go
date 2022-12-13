@@ -2,6 +2,7 @@ package services
 
 import (
 	"vaksin-id-be/dto/payload"
+	"vaksin-id-be/dto/response"
 	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqla "vaksin-id-be/repository/mysql/addresses"
@@ -16,7 +17,7 @@ type HealthFacilitiesService interface {
 	CreateHealthFacilities(payloads payload.HealthFacilities) error
 	GetAllHealthFacilities() ([]model.HealthFacilities, error)
 	GetHealthFacilities(name string) (model.HealthFacilities, error)
-	UpdateHealthFacilities(payloads payload.UpdateHealthFacilities, id string) error
+	UpdateHealthFacilities(payloads payload.UpdateHealthFacilities, id string) (response.UpdateHealthFacilities, error)
 	DeleteHealthFacilities(id string) error
 }
 
@@ -105,10 +106,11 @@ func (h *healthFacilitiesService) GetHealthFacilities(name string) (model.Health
 	return data, nil
 }
 
-func (h *healthFacilitiesService) UpdateHealthFacilities(payloads payload.UpdateHealthFacilities, id string) error {
+func (h *healthFacilitiesService) UpdateHealthFacilities(payloads payload.UpdateHealthFacilities, id string) (response.UpdateHealthFacilities, error) {
+	var dataResp response.UpdateHealthFacilities
 	getIdHealth, err := m.GetIdHealthFacilities(id)
 	if err != nil {
-		return err
+		return dataResp, err
 	}
 
 	healthFacil := model.HealthFacilities{
@@ -119,7 +121,7 @@ func (h *healthFacilitiesService) UpdateHealthFacilities(payloads payload.Update
 	}
 
 	if err := h.HealthRepo.UpdateHealthFacilities(healthFacil, getIdHealth); err != nil {
-		return err
+		return dataResp, err
 	}
 
 	address := model.Addresses{
@@ -132,9 +134,22 @@ func (h *healthFacilitiesService) UpdateHealthFacilities(payloads payload.Update
 	}
 
 	if err := h.AddressRepo.UpdateAddressHealthFacilities(address, id); err != nil {
-		return err
+		return dataResp, err
 	}
-	return nil
+
+	dataResp = response.UpdateHealthFacilities{
+		Email:          payloads.Email,
+		PhoneNum:       payloads.PhoneNum,
+		Name:           payloads.Name,
+		Image:          payloads.Image,
+		CurrentAddress: payloads.CurrentAddress,
+		District:       payloads.District,
+		City:           payloads.City,
+		Province:       payloads.Province,
+		Latitude:       payloads.Latitude,
+		Longitude:      payloads.Longitude,
+	}
+	return dataResp, nil
 }
 
 func (h *healthFacilitiesService) DeleteHealthFacilities(id string) error {

@@ -11,6 +11,7 @@ import (
 func SessionsUnauthenticated(routes *echo.Group, api *controllers.SessionsController) {
 	{
 		routes.GET("/sessions", api.GetAllSessions)
+		routes.GET("/sessions/dashboard", api.GetSessionActive)
 	}
 }
 

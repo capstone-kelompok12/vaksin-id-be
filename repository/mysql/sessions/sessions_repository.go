@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"vaksin-id-be/dto/response"
 	"vaksin-id-be/model"
 
 	"gorm.io/gorm"
@@ -15,6 +16,7 @@ type SessionsRepository interface {
 	UpdateSession(data model.Sessions, id string) error
 	CloseSession(data model.Sessions, id string) error
 	DeleteSession(id string) error
+	IsCloseFalse() (response.IsCloseFalse, error)
 }
 
 type sessionsRepository struct {
@@ -78,4 +80,15 @@ func (s *sessionsRepository) DeleteSession(id string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *sessionsRepository) IsCloseFalse() (response.IsCloseFalse, error) {
+	var active response.IsCloseFalse
+
+	var count int64
+
+	s.db.Model(&model.Sessions{}).Where("is_close = ?", false).Count(&count)
+
+	active.Active = int(count)
+	return active, nil
 }

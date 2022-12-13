@@ -171,3 +171,19 @@ func (s *SessionsController) DeleteSession(ctx echo.Context) error {
 		"message": "success delete session by admin",
 	})
 }
+
+func (s *SessionsController) GetSessionActive(ctx echo.Context) error {
+	data, err := s.SessionService.GetSessionActive()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "success get all sessions",
+		"data":    data,
+	})
+}

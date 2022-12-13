@@ -15,6 +15,7 @@ type SessionsService interface {
 	GetAllSessions() ([]response.SessionsResponse, error)
 	GetSessionsAdminById(auth, id string) (response.SessionsResponse, error)
 	GetSessionByAdmin(auth string) ([]response.SessionsResponse, error)
+	GetSessionActive() (response.IsCloseFalse, error)
 	UpdateSession(payloads payload.SessionsUpdate, id string) (response.SessionsUpdate, error)
 	IsCloseSession(payloads payload.SessionsIsClose, auth, id string) (response.SessionsResponse, error)
 	DeleteSession(id string) error
@@ -204,4 +205,18 @@ func (s *sessionService) DeleteSession(id string) error {
 	}
 
 	return nil
+}
+
+func (s *sessionService) GetSessionActive() (response.IsCloseFalse, error) {
+	var sessionResponse response.IsCloseFalse
+
+	getSession, err := s.SessionsRepo.IsCloseFalse()
+
+	if err != nil {
+		return sessionResponse, err
+	}
+
+	sessionResponse = response.IsCloseFalse{Active: getSession.Active}
+
+	return sessionResponse, nil
 }

@@ -14,6 +14,7 @@ type VaccinesService interface {
 	CreateVaccine(authAdmin string, payloads payload.VaccinesPayload) (model.Vaccines, error)
 	GetAllVaccines() ([]response.VaccinesResponse, error)
 	GetVaccineByAdmin(idhealthfacilities string) ([]model.Vaccines, error)
+	GetVaccineDashboard() ([]response.DashboardVaccine, error)
 	UpdateVaccine(id string, payloads payload.VaccinesUpdatePayload) (response.VaccinesResponse, error)
 	DeleteVacccine(id string) error
 }
@@ -118,4 +119,25 @@ func (v *vaccinesService) DeleteVacccine(id string) error {
 	}
 
 	return nil
+}
+
+func (v *vaccinesService) GetVaccineDashboard() ([]response.DashboardVaccine, error) {
+	var vaccinesResponse []response.DashboardVaccine
+
+	getVaccine, err := v.VaccinesRepo.GetAllVaccines()
+
+	if err != nil {
+		return vaccinesResponse, err
+	}
+
+	vaccinesResponse = make([]response.DashboardVaccine, len(getVaccine))
+
+	for i, v := range getVaccine {
+		vaccinesResponse[i] = response.DashboardVaccine{
+			Name: v.Name,
+			Dose: v.Dose,
+		}
+	}
+
+	return vaccinesResponse, nil
 }

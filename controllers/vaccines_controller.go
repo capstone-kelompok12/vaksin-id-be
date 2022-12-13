@@ -129,3 +129,19 @@ func (v *VaccinesController) DeleteVacccine(ctx echo.Context) error {
 		"message": "success delete vaccine by admin",
 	})
 }
+
+func (v *VaccinesController) GetVaccineDashboard(ctx echo.Context) error {
+	dataAllVaccine, err := v.VaccineService.GetVaccineDashboard()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":    false,
+		"messages": "success get all vaccines",
+		"data":     dataAllVaccine,
+	})
+}

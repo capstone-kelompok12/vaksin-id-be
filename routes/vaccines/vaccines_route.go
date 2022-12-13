@@ -11,7 +11,11 @@ import (
 func VaccinesUnauthenticated(routes *echo.Group, api *controllers.VaccinesController) {
 	{
 		routes.GET("/vaccines", api.GetAllVaccines)
+<<<<<<< Updated upstream
 		routes.GET("/vaccines/dashboard", api.GetVaccineDashboard)
+=======
+		routes.GET("/vaccines/all", api.GetAllVaccinesCount)
+>>>>>>> Stashed changes
 	}
 }
 

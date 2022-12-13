@@ -15,6 +15,7 @@ type VaccinesService interface {
 	GetAllVaccines() ([]response.VaccinesResponse, error)
 	GetVaccineByAdmin(idhealthfacilities string) ([]model.Vaccines, error)
 	GetVaccineDashboard() ([]response.DashboardVaccine, error)
+	GetVaccinesCount() ([]response.VaccinesStockResponse, error)
 	UpdateVaccine(id string, payloads payload.VaccinesUpdatePayload) (response.VaccinesResponse, error)
 	DeleteVacccine(id string) error
 }
@@ -55,6 +56,26 @@ func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.Vacci
 	return vaccineModel, nil
 }
 
+func (v *vaccinesService) GetVaccinesCount() ([]response.VaccinesStockResponse, error) {
+	var vaccinesResponse []response.VaccinesStockResponse
+
+	getName, err := v.VaccinesRepo.GetVaccineByName()
+	if err != nil {
+		return vaccinesResponse, err
+	}
+
+	vaccinesResponse = make([]response.VaccinesStockResponse, len(getName))
+
+	for i, val := range getName {
+		vaccinesResponse[i] = response.VaccinesStockResponse{
+			Name:  val.Name,
+			Stock: val.Stock,
+		}
+	}
+
+	return vaccinesResponse, nil
+}
+
 func (v *vaccinesService) GetAllVaccines() ([]response.VaccinesResponse, error) {
 	var vaccinesResponse []response.VaccinesResponse
 
@@ -70,6 +91,7 @@ func (v *vaccinesService) GetAllVaccines() ([]response.VaccinesResponse, error) 
 		vaccinesResponse[i] = response.VaccinesResponse{
 			ID:    v.ID,
 			Name:  v.Name,
+			Dose:  v.Dose,
 			Stock: v.Stock,
 		}
 	}
@@ -97,6 +119,7 @@ func (v *vaccinesService) UpdateVaccine(id string, payloads payload.VaccinesUpda
 
 	vaccineData := model.Vaccines{
 		Name:  payloads.Name,
+		Dose:  payloads.Dose,
 		Stock: payloads.Stock,
 	}
 
@@ -107,6 +130,7 @@ func (v *vaccinesService) UpdateVaccine(id string, payloads payload.VaccinesUpda
 	dataResp = response.VaccinesResponse{
 		ID:    id,
 		Name:  payloads.Name,
+		Dose:  payloads.Dose,
 		Stock: payloads.Stock,
 	}
 

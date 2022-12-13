@@ -6,6 +6,7 @@ import (
 	mysql_admin "vaksin-id-be/repository/mysql/admins"
 	mysql_bookings "vaksin-id-be/repository/mysql/bookings"
 	mysql_health "vaksin-id-be/repository/mysql/health_facilities"
+	mysql_histories "vaksin-id-be/repository/mysql/histories"
 	mysql_sessions "vaksin-id-be/repository/mysql/sessions"
 	mysql_user "vaksin-id-be/repository/mysql/users"
 	mysql_vaccines "vaksin-id-be/repository/mysql/vaccines"
@@ -63,7 +64,9 @@ func InitSessionsAPI(db *gorm.DB) *controllers.SessionsController {
 
 func InitBookingsAPI(db *gorm.DB) *controllers.BookingsController {
 	bookingsRepo := mysql_bookings.NewBookingRepository(db)
-	bookingsServ := services_bookings.NewBookingService(bookingsRepo)
+	historyRepo := mysql_histories.NewHistoryRepository(db)
+	sessionsRepo := mysql_sessions.NewSessionsRepository(db)
+	bookingsServ := services_bookings.NewBookingService(bookingsRepo, historyRepo, sessionsRepo)
 	bookingsAPI := controllers.NewBookingController(bookingsServ)
 	return bookingsAPI
 }

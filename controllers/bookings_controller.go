@@ -53,7 +53,7 @@ func (b *BookingsController) GetBooking(ctx echo.Context) error {
 }
 
 func (b *BookingsController) CreateBooking(ctx echo.Context) error {
-	var payloads payload.BookingPayload
+	var payloads []payload.BookingPayload
 
 	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -80,6 +80,7 @@ func (b *BookingsController) CreateBooking(ctx echo.Context) error {
 func (b *BookingsController) UpdateBooking(ctx echo.Context) error {
 	var payloads payload.BookingUpdate
 	id := ctx.Param("id")
+	nik := ctx.Param("nik")
 
 	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -88,7 +89,7 @@ func (b *BookingsController) UpdateBooking(ctx echo.Context) error {
 		})
 	}
 
-	data, err := b.BookingService.UpdateBooking(payloads, id)
+	data, err := b.BookingService.UpdateBooking(payloads, id, nik)
 	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,

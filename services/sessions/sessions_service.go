@@ -11,7 +11,7 @@ import (
 )
 
 type SessionsService interface {
-	CreateSessions(payloads payload.SessionsPayload, auth string) (payload.SessionsPayload, error)
+	CreateSessions(payloads payload.SessionsPayload, auth string) (model.Sessions, error)
 	GetAllSessions() ([]response.SessionsResponse, error)
 	GetSessionsAdminById(auth, id string) (response.SessionsResponse, error)
 	GetSessionByAdmin(auth string) ([]response.SessionsResponse, error)
@@ -31,19 +31,19 @@ func NewSessionsService(sessionRepo mysqls.SessionsRepository) *sessionService {
 	}
 }
 
-func (s *sessionService) CreateSessions(payloads payload.SessionsPayload, auth string) (payload.SessionsPayload, error) {
-	var sessionResp payload.SessionsPayload
+func (s *sessionService) CreateSessions(payloads payload.SessionsPayload, auth string) (model.Sessions, error) {
+	var sessionModel model.Sessions
 
 	getIdHealthFacilities, err := m.GetIdHealthFacilities(auth)
 	if err != nil {
-		return sessionResp, err
+		return sessionModel, err
 	}
 
 	defaultStatus := false
 
 	id := uuid.NewString()
 
-	sessionModel := model.Sessions{
+	sessionModel = model.Sessions{
 		ID:                 id,
 		IdHealthFacilities: getIdHealthFacilities,
 		SessionName:        payloads.SessionName,
@@ -56,11 +56,10 @@ func (s *sessionService) CreateSessions(payloads payload.SessionsPayload, auth s
 
 	err = s.SessionsRepo.CreateSession(sessionModel)
 	if err != nil {
-		return sessionResp, err
+		return sessionModel, err
 	}
-	sessionResp = payloads
 
-	return sessionResp, nil
+	return sessionModel, nil
 }
 
 func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
@@ -85,7 +84,7 @@ func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
 			EndSession:   v.EndSession,
 			CreatedAt:    v.CreatedAt,
 			UpdatedAt:    v.UpdatedAt,
-			Booking:      v.Booking,
+			// Booking:      v.Booking,
 		}
 	}
 
@@ -115,7 +114,7 @@ func (s *sessionService) GetSessionsAdminById(auth, id string) (response.Session
 		EndSession:   getData.EndSession,
 		CreatedAt:    getData.CreatedAt,
 		UpdatedAt:    getData.UpdatedAt,
-		Booking:      getData.Booking,
+		// Booking:      getData.Booking,
 	}
 
 	return responseSession, nil

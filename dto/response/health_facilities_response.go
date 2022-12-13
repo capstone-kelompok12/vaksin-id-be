@@ -12,6 +12,7 @@ type HealthResponse struct {
 	Image    *string
 	Ranges   float64
 	Address  model.Addresses
+	Session  []model.Sessions
 }
 
 type UpdateHealthFacilities struct {

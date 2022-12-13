@@ -69,6 +69,22 @@ func (v *VaccinesController) GetAllVaccines(ctx echo.Context) error {
 	})
 }
 
+func (v *VaccinesController) GetAllVaccinesCount(ctx echo.Context) error {
+	data, err := v.VaccineService.GetVaccinesCount()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":    false,
+		"messages": "success get all vaccines dose",
+		"data":     data,
+	})
+}
+
 func (v *VaccinesController) GetVaccineByAdmin(ctx echo.Context) error {
 	authAdmin := ctx.Request().Header.Get("Authorization")
 

@@ -9,10 +9,13 @@ import (
 
 type BookingRepository interface {
 	CreateBooking(data model.BookingSessions) error
-	UpdateBooking(data model.BookingSessions, id, nik string) error
-	UpdateBookingAcc(data []model.BookingSessions, id string) error
+	UpdateBooking(data model.BookingSessions) error
+	UpdateBookingAcc(data model.BookingSessions) (model.BookingSessions, error)
 	GetAllBooking() ([]model.BookingSessions, error)
-	GetBooking(id string) ([]model.BookingSessions, error)
+	GetBooking(id string) (model.BookingSessions, error)
+	GetBookingBySession(id string) ([]model.BookingSessions, error)
+	GetBookingBySessionDen(id string) ([]model.BookingSessions, error)
+	FindMaxQueue(is_session string) (model.BookingSessions, error)
 	DeleteBooking(id string) error
 }
 
@@ -31,31 +34,56 @@ func (b *bookingRepository) CreateBooking(data model.BookingSessions) error {
 	return nil
 }
 
-func (b *bookingRepository) UpdateBooking(data model.BookingSessions, id, nik string) error {
-	if err := b.db.Preload("Session").Preload("History").Joins("History").Model(&model.BookingSessions{}).Where("History.nik_user = ? AND id = ?", nik, id).Updates(&data).Error; err != nil {
+func (b *bookingRepository) UpdateBooking(data model.BookingSessions) error {
+	if err := b.db.Preload("Session.Vaccine").Preload("History").Model(&model.BookingSessions{}).Where("id_session = ? AND id = ?", data.IdSession, data.ID).Updates(&data).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (b *bookingRepository) UpdateBookingAcc(data []model.BookingSessions, id string) error {
-	if err := b.db.Model(&model.BookingSessions{}).Where("id = ?", id).Updates(&data).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-func (b *bookingRepository) GetAllBooking() ([]model.BookingSessions, error) {
-	var booking []model.BookingSessions
-	if err := b.db.Preload(clause.Associations).Preload("Session").Preload("History." + clause.Associations).Model(&model.BookingSessions{}).Find(&booking).Error; err != nil {
+func (b *bookingRepository) UpdateBookingAcc(data model.BookingSessions) (model.BookingSessions, error) {
+	var booking model.BookingSessions
+	if err := b.db.Preload("Session.Vaccine").Preload("History").Model(&booking).Where("id = ?", data.ID).Updates(&data).Error; err != nil {
 		return booking, err
 	}
 	return booking, nil
 }
 
-func (b *bookingRepository) GetBooking(id string) ([]model.BookingSessions, error) {
+func (b *bookingRepository) GetAllBooking() ([]model.BookingSessions, error) {
 	var booking []model.BookingSessions
-	if err := b.db.Where("id = ?", id).Order("queue desc").Find(&booking).Error; err != nil {
+	if err := b.db.Preload(clause.Associations).Preload("Session.Vaccine").Preload("History." + clause.Associations).Model(&model.BookingSessions{}).Find(&booking).Error; err != nil {
+		return booking, err
+	}
+	return booking, nil
+}
+
+func (b *bookingRepository) GetBooking(id string) (model.BookingSessions, error) {
+	var booking model.BookingSessions
+	if err := b.db.Preload("Session.Vaccine").Where("id = ?", id).First(&booking).Error; err != nil {
+		return booking, err
+	}
+	return booking, nil
+}
+
+func (b *bookingRepository) GetBookingBySession(id string) ([]model.BookingSessions, error) {
+	var booking []model.BookingSessions
+	if err := b.db.Preload("Session.Vaccine").Where("id_session = ? AND NOT status = ?", id, "Rejected").Find(&booking).Error; err != nil {
+		return booking, err
+	}
+	return booking, nil
+}
+
+func (b *bookingRepository) GetBookingBySessionDen(id string) ([]model.BookingSessions, error) {
+	var booking []model.BookingSessions
+	if err := b.db.Preload("Session.Vaccine").Where("id_session = ? AND NOT status = ?", id, "Rejected").Find(&booking).Error; err != nil {
+		return booking, err
+	}
+	return booking, nil
+}
+
+func (b *bookingRepository) FindMaxQueue(id_session string) (model.BookingSessions, error) {
+	var booking model.BookingSessions
+	if err := b.db.Model(&booking).Where("id_session = ?", id_session).Order("queue desc").First(&booking).Error; err != nil {
 		return booking, err
 	}
 	return booking, nil

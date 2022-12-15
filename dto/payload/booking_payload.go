@@ -6,6 +6,8 @@ type BookingPayload struct {
 }
 
 type BookingUpdate struct {
-	ID     string `json:"booking_id"`
-	Status string `json:"status"`
+	ID        string `json:"booking_id"`
+	NikUser   string `json:"nik"`
+	IdSession string `json:"id_session"`
+	Status    string `json:"status"`
 }

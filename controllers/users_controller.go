@@ -52,7 +52,7 @@ func (u *UserController) RegisterUser(ctx echo.Context) error {
 	err := u.UserService.RegisterUser(payloads)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
@@ -129,7 +129,7 @@ func (u *UserController) GetUserDataByNikCheck(ctx echo.Context) error {
 	data, err := u.UserService.GetUserDataByNikNoAddress(nik)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})

@@ -57,16 +57,18 @@ func InitVaccinesAPI(db *gorm.DB) *controllers.VaccinesController {
 
 func InitSessionsAPI(db *gorm.DB) *controllers.SessionsController {
 	sessionsRepo := mysql_sessions.NewSessionsRepository(db)
-	sessionsServ := services_sessions.NewSessionsService(sessionsRepo)
+	vaccinesRepo := mysql_vaccines.NewVaccinesRepository(db)
+	sessionsServ := services_sessions.NewSessionsService(sessionsRepo, vaccinesRepo)
 	sessionsAPI := controllers.NewSessionsController(sessionsServ)
 	return sessionsAPI
 }
 
 func InitBookingsAPI(db *gorm.DB) *controllers.BookingsController {
 	bookingsRepo := mysql_bookings.NewBookingRepository(db)
+	userRepo := mysql_user.NewUserRepository(db)
 	historyRepo := mysql_histories.NewHistoryRepository(db)
 	sessionsRepo := mysql_sessions.NewSessionsRepository(db)
-	bookingsServ := services_bookings.NewBookingService(bookingsRepo, historyRepo, sessionsRepo)
+	bookingsServ := services_bookings.NewBookingService(bookingsRepo, historyRepo, sessionsRepo, userRepo)
 	bookingsAPI := controllers.NewBookingController(bookingsServ)
 	return bookingsAPI
 }

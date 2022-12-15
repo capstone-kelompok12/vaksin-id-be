@@ -11,6 +11,7 @@ import (
 type SessionsRepository interface {
 	CreateSession(data model.Sessions) (model.Sessions, error)
 	GetAllSessions() ([]model.Sessions, error)
+	GetSumOfCapacity(id string) (response.SessionSumCap, error)
 	GetSessionById(id string) (model.Sessions, error)
 	GetSessionsByAdmin(auth string) ([]model.Sessions, error)
 	GetSessionAdminById(auth, id string) (model.Sessions, error)
@@ -43,6 +44,14 @@ func (s *sessionsRepository) GetAllSessions() ([]model.Sessions, error) {
 		return session, err
 	}
 
+	return session, nil
+}
+
+func (s *sessionsRepository) GetSumOfCapacity(id string) (response.SessionSumCap, error) {
+	var session response.SessionSumCap
+	if err := s.db.Preload("Vaccine").Raw("SELECT id, SUM(capacity) AS total_capacity FROM sessions WHERE id_vaccine = ?", id).Scan(&session).Error; err != nil {
+		return session, err
+	}
 	return session, nil
 }
 

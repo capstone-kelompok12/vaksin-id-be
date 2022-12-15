@@ -31,3 +31,9 @@ type SessionsUpdate struct {
 	StartSession string
 	EndSession   string
 }
+
+type SessionSumCap struct {
+	ID string
+	// IdVaccine     string
+	TotalCapacity int
+}

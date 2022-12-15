@@ -5,8 +5,7 @@ import (
 )
 
 type Sessions struct {
-	ID string `gorm:"type:varchar(255);primary_key"`
-	// IdHealthFacilities string    `gorm:"type:varchar(255)"`
+	ID           string    `gorm:"type:varchar(255);primary_key"`
 	IdVaccine    string    `gorm:"type:varchar(255)"`
 	SessionName  string    `gorm:"type:varchar(255)"`
 	Capacity     int       `gorm:"type:int(11)"`

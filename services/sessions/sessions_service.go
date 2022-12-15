@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
@@ -39,11 +40,6 @@ func (s *sessionService) CreateSessions(payloads payload.SessionsPayload, auth s
 	var sessionModel model.Sessions
 	var sessionResponse response.SessionsResponse
 
-	// getIdHealthFacilities, err := m.GetIdHealthFacilities(auth)
-	// if err != nil {
-	// 	return sessionModel, err
-	// }
-
 	defaultStatus := false
 
 	id := uuid.NewString()
@@ -59,8 +55,7 @@ func (s *sessionService) CreateSessions(payloads payload.SessionsPayload, auth s
 	}
 
 	sessionModel = model.Sessions{
-		ID: id,
-		// IdHealthFacilities: getIdHealthFacilities,
+		ID:           id,
 		IdVaccine:    payloads.IdVaccine,
 		SessionName:  payloads.SessionName,
 		Capacity:     payloads.Capacity,
@@ -74,6 +69,19 @@ func (s *sessionService) CreateSessions(payloads payload.SessionsPayload, auth s
 	_, err = s.SessionsRepo.CreateSession(sessionModel)
 	if err != nil {
 		return sessionResponse, err
+	}
+
+	totalCap, err := s.SessionsRepo.GetSumOfCapacity(getDoseFromVaccine.ID)
+	if err != nil {
+		return sessionResponse, err
+	}
+
+	if totalCap.TotalCapacity > getDoseFromVaccine.Stock {
+		err := s.SessionsRepo.DeleteSession(id)
+		if err != nil {
+			return sessionResponse, err
+		}
+		return sessionResponse, errors.New("total capacity all sessions exceed of stock vaccine")
 	}
 
 	newData, err := s.SessionsRepo.GetSessionById(id)

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
 	m "vaksin-id-be/middleware"
@@ -40,11 +41,38 @@ func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.Vacci
 		return vaccineModel, err
 	}
 
+	// check dosis dan name
+	vaccineData, err := v.VaccinesRepo.CheckNameDosisExist(idHealthFacilities, payloads.Name, payloads.Dose)
+	if err == nil {
+		fmt.Println(vaccineData.ID)
+		addStock := payloads.Stock + vaccineData.Stock
+		payloadUpdate := payload.VaccinesUpdatePayload{
+			Stock: addStock,
+		}
+
+		dataUpdate, err := v.UpdateVaccine(vaccineData.ID, payloadUpdate)
+		if err != nil {
+			return vaccineModel, err
+		}
+
+		vaccineModel = model.Vaccines{
+			ID:                 dataUpdate.ID,
+			IdHealthFacilities: idHealthFacilities,
+			Name:               payloads.Name,
+			Stock:              addStock,
+			Dose:               payloads.Dose,
+			CreatedAt:          vaccineData.CreatedAt,
+			UpdatedAt:          vaccineData.UpdatedAt,
+		}
+
+		return vaccineModel, nil
+	}
+
 	vaccineModel = model.Vaccines{
 		ID:                 id,
 		IdHealthFacilities: idHealthFacilities,
-		Dose:               payloads.Dose,
 		Name:               payloads.Name,
+		Dose:               payloads.Dose,
 		Stock:              payloads.Stock,
 	}
 

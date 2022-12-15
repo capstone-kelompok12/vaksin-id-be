@@ -13,7 +13,8 @@ type HistoriesRepository interface {
 	GetHistoryById(id string) (model.VaccineHistories, error)
 	GetHistoryByIdBooking(id string) ([]model.VaccineHistories, error)
 	GetHistoryByIdSameBook(id string) ([]model.VaccineHistories, error)
-	GetHistoryByNIK(id string) (model.VaccineHistories, error)
+	GetHistoryByNIK(id, nik string) (model.VaccineHistories, error)
+	UpdateHistoryByNik(data model.VaccineHistories, nik, id string) (model.VaccineHistories, error)
 	UpdateHistory(data model.VaccineHistories, id string) (model.VaccineHistories, error)
 }
 
@@ -65,9 +66,9 @@ func (h *historiesRepository) GetHistoryByIdSameBook(id string) ([]model.Vaccine
 	return history, nil
 }
 
-func (h *historiesRepository) GetHistoryByNIK(id string) (model.VaccineHistories, error) {
+func (h *historiesRepository) GetHistoryByNIK(id, nik string) (model.VaccineHistories, error) {
 	var history model.VaccineHistories
-	if err := h.db.Where("nik_user = ?", id).First(&history).Error; err != nil {
+	if err := h.db.Where("nik_user = ? AND id_booking = ?", nik, id).First(&history).Error; err != nil {
 		return history, err
 	}
 	return history, nil
@@ -76,6 +77,14 @@ func (h *historiesRepository) GetHistoryByNIK(id string) (model.VaccineHistories
 func (h *historiesRepository) UpdateHistory(data model.VaccineHistories, id string) (model.VaccineHistories, error) {
 	var history model.VaccineHistories
 	if err := h.db.Model(&model.VaccineHistories{}).Where("id = ?", id).Updates(&data).Error; err != nil {
+		return history, err
+	}
+	return history, nil
+}
+
+func (h *historiesRepository) UpdateHistoryByNik(data model.VaccineHistories, nik, id string) (model.VaccineHistories, error) {
+	var history model.VaccineHistories
+	if err := h.db.Model(&history).Where("nik_user  = ? AND id_booking = ?", nik, id).Updates(&data).Error; err != nil {
 		return history, err
 	}
 	return history, nil

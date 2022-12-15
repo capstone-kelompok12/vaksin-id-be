@@ -9,6 +9,7 @@ import (
 type VaccinesRepository interface {
 	CreateVaccine(data model.Vaccines) error
 	GetAllVaccines() ([]model.Vaccines, error)
+	GetVaccinesById(id string) (model.Vaccines, error)
 	GetVaccinesByIdAdmin(idhealthfacil string) ([]model.Vaccines, error)
 	GetVaccineByName() ([]model.Vaccines, error)
 	UpdateVaccine(data model.Vaccines, id string) error
@@ -35,6 +36,14 @@ func (v *vaccinesRepository) CreateVaccine(data model.Vaccines) error {
 func (v *vaccinesRepository) GetAllVaccines() ([]model.Vaccines, error) {
 	var vaccines []model.Vaccines
 	if err := v.db.Model(&model.Vaccines{}).Order("name").Find(&vaccines).Error; err != nil {
+		return vaccines, err
+	}
+	return vaccines, nil
+}
+
+func (v *vaccinesRepository) GetVaccinesById(id string) (model.Vaccines, error) {
+	var vaccines model.Vaccines
+	if err := v.db.Model(&model.Vaccines{}).Where("id = ?", id).Find(&vaccines).Error; err != nil {
 		return vaccines, err
 	}
 	return vaccines, nil

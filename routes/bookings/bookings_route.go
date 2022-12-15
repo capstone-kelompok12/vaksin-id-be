@@ -23,7 +23,7 @@ func BookingsAuthenticated(routes *echo.Group, api *controllers.BookingsControll
 	authAdmin.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY_ADMIN"))))
 	authUser.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY"))))
 	{
-		authAdmin.PUT("/bookings/:id/:nik", api.UpdateBooking)
+		authAdmin.PUT("/bookings/acc", api.UpdateBooking)
 		authUser.POST("/bookings", api.CreateBooking)
 	}
 }

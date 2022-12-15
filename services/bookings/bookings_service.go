@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
@@ -15,11 +14,12 @@ import (
 )
 
 type BookingService interface {
-	CreateBooking(payloads []payload.BookingPayload) ([]model.VaccineHistories, error)
-	UpdateBooking(payloads payload.BookingUpdate, id, nik string) ([]response.BookingResponse, error)
+	CreateBooking(payloads []payload.BookingPayload) ([]response.BookingResponseCustom, error)
+	UpdateBooking(payloads []payload.BookingUpdate) ([]response.BookingResponseCustom, error)
 	GetAllBooking() ([]response.BookingResponse, error)
+	GetBookingBysSession(id string) ([]response.BookingResponse, error)
 	GetBookingDashboard() (response.Dashboard, error)
-	GetBooking(id string) ([]response.BookingResponse, error)
+	GetBooking(id string) (response.BookingResponse, error)
 	DeleteBooking(id string) error
 }
 
@@ -37,170 +37,314 @@ func NewBookingService(bookingRepo mysqlb.BookingRepository, historyRepo mysqlh.
 	}
 }
 
-func (b *bookingService) CreateBooking(payloads []payload.BookingPayload) ([]model.VaccineHistories, error) {
-	var historyData []model.VaccineHistories = make([]model.VaccineHistories, len(payloads))
-	var bookingModel []model.BookingSessions = make([]model.BookingSessions, len(payloads))
+func (b *bookingService) CreateBooking(payloads []payload.BookingPayload) ([]response.BookingResponseCustom, error) {
+	historyData := make([]model.VaccineHistories, len(payloads))
+	bookingModel := make([]model.BookingSessions, len(payloads))
+	resBooking := make([]response.BookingResponseCustom, len(payloads))
+
 	idSameBooked := uuid.NewString()
 	createdData := time.Now()
 	updatedData := time.Now()
+	idBooking := ""
+	statusData := "OnProccess"
 
 	for i, val := range payloads {
 		defValue := 0
+		idBooking = uuid.NewString()
+		defId := idBooking
 
-		_, err := b.HistoryRepo.GetHistoryByNIK(payloads[i].NikUser)
+		_, err := b.HistoryRepo.GetHistoryByNIK(defId, val.NikUser)
 		if err == nil {
-			return historyData, errors.New("already booked")
+			return resBooking, errors.New("already booked")
 		}
 
 		bookingModel[i] = model.BookingSessions{
-			ID:        uuid.NewString(),
+			ID:        idBooking,
 			IdSession: val.IdSession,
-			Queue:     &defValue,
+			Queue:     defValue,
+			Status:    &statusData,
 			CreatedAt: createdData,
 			UpdatedAt: updatedData,
 		}
 
 		historyData[i] = model.VaccineHistories{
 			ID:         uuid.NewString(),
-			IdBooking:  bookingModel[i].ID,
+			IdBooking:  defId,
 			NikUser:    val.NikUser,
 			IdSameBook: idSameBooked,
+			Status:     &statusData,
 			CreatedAt:  createdData,
 			UpdatedAt:  updatedData,
 		}
 		err = b.BookingRepo.CreateBooking(bookingModel[i])
 		if err != nil {
-			return historyData, err
+			return resBooking, err
 		}
 	}
 
 	for _, v := range historyData {
 		err := b.HistoryRepo.CreateHistory(v)
 		if err != nil {
-			return historyData, err
+			return resBooking, err
 		}
 	}
 
 	getSession, err := b.SessionRepo.GetSessionById(payloads[0].IdSession)
 	if err != nil {
-		return historyData, err
+		return resBooking, err
 	}
 
-	countBook := getSession.Capacity - len(payloads)
-
-	updateSession := model.Sessions{
-		Capacity: countBook,
-	}
-
-	err = b.SessionRepo.UpdateSession(updateSession, payloads[0].IdSession)
+	getBookedByIdSession, err := b.BookingRepo.GetBookingBySession(payloads[0].IdSession)
 	if err != nil {
-		return historyData, err
+		return resBooking, err
 	}
 
-	getData, err := b.HistoryRepo.GetHistoryByIdSameBook(idSameBooked)
-	if err != nil {
-		return historyData, err
-	}
+	countBook := getSession.Capacity - len(getBookedByIdSession)
 
-	return getData, nil
-}
-
-func (b *bookingService) UpdateBooking(payloads payload.BookingUpdate, id, nik string) ([]response.BookingResponse, error) {
-	var data []response.BookingResponse
-	var bookingData []model.BookingSessions
-
-	if payloads.Status != "Accepted" && payloads.Status != "Denied" {
-		return data, errors.New("input status must Accepted or Denied")
-	}
-
-	dataById, err := b.GetBooking(id)
-	if err != nil {
-		return data, err
-	}
-	getSession, err := b.SessionRepo.GetSessionById(dataById[0].IdSession)
-	if err != nil {
-		return data, err
-	}
-	getbackCap := getSession.Capacity + len(dataById)
-
-	data = make([]response.BookingResponse, len(dataById))
-	bookingData = make([]model.BookingSessions, len(dataById))
-
-	if payloads.Status == "Denied" {
-
-		updateSession := model.Sessions{
-			Capacity: getbackCap,
+	for i, val := range bookingModel {
+		getSessionId, err := b.SessionRepo.GetSessionById(val.IdSession)
+		if err != nil {
+			return resBooking, err
+		}
+		getHistorySame, err := b.HistoryRepo.GetHistoryByIdSameBook(idSameBooked)
+		if err != nil {
+			return resBooking, err
+		}
+		sessionData := response.BookingSessionCustom{
+			ID: getSessionId.ID,
+			// IdHealthFacilities: getSessionId.IdHealthFacilities,
+			IdVaccine:    getSessionId.IdVaccine,
+			SessionName:  getSessionId.SessionName,
+			Capacity:     countBook,
+			Dose:         getSessionId.Dose,
+			Date:         getSessionId.Date,
+			IsClose:      getSession.IsClose,
+			StartSession: getSessionId.StartSession,
+			EndSession:   getSessionId.EndSession,
+			CreatedAt:    getSessionId.CreatedAt,
+			UpdatedAt:    getSessionId.UpdatedAt,
+			Vaccine:      getSession.Vaccine,
 		}
 
-		err = b.SessionRepo.UpdateSession(updateSession, dataById[0].IdSession)
+		historyData := make([]response.BookingHistoryCustom, len(getHistorySame))
+		if len(historyData) != 0 {
+			historyData[i] = response.BookingHistoryCustom{
+				ID:         getHistorySame[i].ID,
+				IdBooking:  getHistorySame[i].IdBooking,
+				NikUser:    getHistorySame[i].NikUser,
+				IdSameBook: getHistorySame[i].IdSameBook,
+				Status:     getHistorySame[i].Status,
+				CreatedAt:  getHistorySame[i].CreatedAt,
+				UpdatedAt:  getHistorySame[i].UpdatedAt,
+				User:       getHistorySame[i].User,
+			}
+		}
+
+		resBooking[i] = response.BookingResponseCustom{
+			ID:        val.ID,
+			IdSession: val.IdSession,
+			Queue:     &val.Queue,
+			Status:    val.Status,
+			CreatedAt: val.CreatedAt,
+			UpdatedAt: val.UpdatedAt,
+			Session:   sessionData,
+			History:   historyData,
+		}
+	}
+
+	return resBooking, nil
+}
+
+func (b *bookingService) UpdateBooking(payloads []payload.BookingUpdate) ([]response.BookingResponseCustom, error) {
+	var data []response.BookingResponseCustom
+	var bookingData []model.BookingSessions
+
+	data = make([]response.BookingResponseCustom, len(payloads))
+	bookingData = make([]model.BookingSessions, len(payloads))
+	newRes := make([]response.BookingResponseCustom, len(payloads))
+	newResReject := make([]response.BookingResponseCustom, len(payloads))
+
+	var newQueue int
+	var initQueu int = 0
+	var getbackCap int
+
+	for i, v := range payloads {
+
+		getSession, err := b.SessionRepo.GetSessionById(v.IdSession)
 		if err != nil {
 			return data, err
 		}
 
-		bookingData := model.BookingSessions{
-			ID:     payloads.ID,
-			Status: &payloads.Status,
+		if v.Status != "Accepted" && v.Status != "Rejected" {
+			return data, errors.New("input status must Accepted or Rejected")
 		}
 
-		if err := b.BookingRepo.UpdateBooking(bookingData, id, nik); err != nil {
+		if v.Status == "Rejected" {
+
+			bookingData := model.BookingSessions{
+				ID:        v.ID,
+				IdSession: v.IdSession,
+				Status:    &v.Status,
+			}
+
+			if err := b.BookingRepo.UpdateBooking(bookingData); err != nil {
+				return data, err
+			}
+
+			dataHistoryUpdate := model.VaccineHistories{
+				Status: &v.Status,
+			}
+
+			idSameBook, err := b.HistoryRepo.GetHistoryByNIK(v.ID, v.NikUser)
+			if err != nil {
+				return data, err
+			}
+
+			newData, err := b.BookingRepo.GetBooking(v.ID)
+			if err != nil {
+				return data, err
+			}
+
+			getBookedByIdSession, err := b.BookingRepo.GetBookingBySessionDen(v.IdSession)
+			if err != nil {
+				return data, err
+			}
+			getbackCap = getSession.Capacity - len(getBookedByIdSession)
+
+			getHistorySame, err := b.HistoryRepo.GetHistoryByIdSameBook(idSameBook.IdSameBook)
+			if err != nil {
+				return data, err
+			}
+
+			_, err = b.HistoryRepo.UpdateHistoryByNik(dataHistoryUpdate, v.NikUser, v.ID)
+			if err != nil {
+				return data, err
+			}
+
+			sessionData := response.BookingSessionCustom{
+				ID:           getSession.ID,
+				IdVaccine:    getSession.IdVaccine,
+				SessionName:  getSession.SessionName,
+				Capacity:     getbackCap,
+				Dose:         getSession.Dose,
+				Date:         getSession.Date,
+				IsClose:      getSession.IsClose,
+				StartSession: getSession.StartSession,
+				EndSession:   getSession.EndSession,
+				CreatedAt:    getSession.CreatedAt,
+				UpdatedAt:    getSession.UpdatedAt,
+				Vaccine:      getSession.Vaccine,
+			}
+
+			historyData := make([]response.BookingHistoryCustom, len(getHistorySame))
+			if len(getHistorySame) != 0 {
+				historyData[i] = response.BookingHistoryCustom{
+					ID:         getHistorySame[i].ID,
+					IdBooking:  getHistorySame[i].IdBooking,
+					NikUser:    getHistorySame[i].NikUser,
+					IdSameBook: getHistorySame[i].IdSameBook,
+					Status:     getHistorySame[i].Status,
+					CreatedAt:  getHistorySame[i].CreatedAt,
+					UpdatedAt:  getHistorySame[i].UpdatedAt,
+					User:       getHistorySame[i].User,
+				}
+			}
+
+			newResReject[i] = response.BookingResponseCustom{
+				ID:        newData.ID,
+				IdSession: newData.IdSession,
+				Queue:     &newData.Queue,
+				Status:    newData.Status,
+				CreatedAt: newData.CreatedAt,
+				UpdatedAt: newData.UpdatedAt,
+				Session:   sessionData,
+				History:   historyData,
+			}
+
+			return newResReject, nil
+		}
+
+		checkStatus, err := b.BookingRepo.GetBooking(v.ID)
+		if err != nil {
 			return data, err
 		}
-		return data, nil
-	}
 
-	// countData, err := b.HistoryRepo.GetHistoryByIdBooking(id)
-	// if err != nil {
-	// 	return data, nil
-	// }
-
-	for i, val := range data {
-		var tempQueu int
-		// manyCount := len(countData)
-		def := 0
-		if val.Queue == &def {
-			tempQueu = 1
+		if *checkStatus.Status == "Accepted" {
+			return data, errors.New("you already accept users")
 		}
-		// else {
-		// 	tempQueu = manyCount + 1
-		// }
-		fmt.Println(tempQueu)
+
+		lastQueue, err := b.BookingRepo.FindMaxQueue(v.IdSession)
+		if err != nil {
+			return data, err
+		}
+		newQueue = lastQueue.Queue
+
+		if newQueue != 0 {
+			initQueu = newQueue + 1
+		} else {
+			initQueu += 1
+		}
+
 		bookingData[i] = model.BookingSessions{
-			ID:     val.ID,
-			Status: val.Status,
-			Queue:  val.Queue,
+			ID:        v.ID,
+			IdSession: v.IdSession,
+			Queue:     initQueu,
+			Status:    &v.Status,
 		}
-
-		if err := b.BookingRepo.UpdateBookingAcc(bookingData, id); err != nil {
+		initQueu += 1
+		updateData, err := b.BookingRepo.UpdateBookingAcc(bookingData[i])
+		if err != nil {
 			return data, err
 		}
-		// if data[0].Queue == nil {
-		// 	bookingData = model.BookingSessions{
-		// 		ID:     payloads.ID,
-		// 		Status: &payloads.Status,
-		// 		Queue:  &tempQueue,
-		// 	}
-		// } else if !data[0] {
-		// 	tempQueue += 1
-		// 	bookingData = model.BookingSessions{
-		// 		ID:     payloads.ID,
-		// 		Status: &payloads.Status,
-		// 		Queue:  &tempQueue,
-		// 	}
-		// }
+
+		idSameBook, err := b.HistoryRepo.GetHistoryByNIK(v.ID, v.NikUser)
+		if err != nil {
+			return data, err
+		}
+
+		getHistorySame, err := b.HistoryRepo.GetHistoryByIdSameBook(idSameBook.IdSameBook)
+		if err != nil {
+			return data, err
+		}
+		sessionData := response.BookingSessionCustom{
+			ID:           getSession.ID,
+			IdVaccine:    getSession.IdVaccine,
+			SessionName:  getSession.SessionName,
+			Capacity:     getbackCap,
+			Dose:         getSession.Dose,
+			Date:         getSession.Date,
+			IsClose:      getSession.IsClose,
+			StartSession: getSession.StartSession,
+			EndSession:   getSession.EndSession,
+			CreatedAt:    getSession.CreatedAt,
+			UpdatedAt:    getSession.UpdatedAt,
+			Vaccine:      getSession.Vaccine,
+		}
+		historyData := make([]response.BookingHistoryCustom, len(getHistorySame))
+		if len(getHistorySame) != 0 {
+			historyData[i] = response.BookingHistoryCustom{
+				ID:         getHistorySame[i].ID,
+				IdBooking:  getHistorySame[i].IdBooking,
+				NikUser:    getHistorySame[i].NikUser,
+				IdSameBook: getHistorySame[i].IdSameBook,
+				Status:     getHistorySame[i].Status,
+				CreatedAt:  getHistorySame[i].CreatedAt,
+				UpdatedAt:  getHistorySame[i].UpdatedAt,
+				User:       getHistorySame[i].User,
+			}
+		}
+		newRes[i] = response.BookingResponseCustom{
+			ID:        updateData.ID,
+			IdSession: updateData.IdSession,
+			Queue:     &updateData.Queue,
+			Status:    updateData.Status,
+			CreatedAt: updateData.CreatedAt,
+			UpdatedAt: updateData.UpdatedAt,
+			Session:   sessionData,
+			History:   historyData,
+		}
 	}
-	// newQueue := dataById[0]
-
-	// bookingData := model.BookingSessions{
-	// 	ID:     payloads.ID,
-	// 	Status: &payloads.Status,
-	// }
-
-	// data, err = b.GetBooking(id)
-	// if err != nil {
-	// 	return data, err
-	// }
-
-	return dataById, nil
+	return newRes, nil
 }
 
 func (b *bookingService) GetAllBooking() ([]response.BookingResponse, error) {
@@ -218,7 +362,7 @@ func (b *bookingService) GetAllBooking() ([]response.BookingResponse, error) {
 		bookingResponse[i] = response.BookingResponse{
 			ID:        v.ID,
 			IdSession: v.IdSession,
-			Queue:     v.Queue,
+			Queue:     &v.Queue,
 			Status:    v.Status,
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
@@ -230,10 +374,10 @@ func (b *bookingService) GetAllBooking() ([]response.BookingResponse, error) {
 	return bookingResponse, nil
 }
 
-func (b *bookingService) GetBooking(id string) ([]response.BookingResponse, error) {
+func (b *bookingService) GetBookingBysSession(id string) ([]response.BookingResponse, error) {
 	var responseBooking []response.BookingResponse
 
-	getData, err := b.BookingRepo.GetBooking(id)
+	getData, err := b.BookingRepo.GetBookingBySession(id)
 	if err != nil {
 		return responseBooking, err
 	}
@@ -244,11 +388,31 @@ func (b *bookingService) GetBooking(id string) ([]response.BookingResponse, erro
 		responseBooking[i] = response.BookingResponse{
 			ID:        val.ID,
 			IdSession: val.IdSession,
-			Queue:     val.Queue,
+			Queue:     &val.Queue,
 			Status:    val.Status,
 			CreatedAt: val.CreatedAt,
 			UpdatedAt: val.UpdatedAt,
 		}
+	}
+
+	return responseBooking, nil
+}
+
+func (b *bookingService) GetBooking(id string) (response.BookingResponse, error) {
+	var responseBooking response.BookingResponse
+
+	getData, err := b.BookingRepo.GetBooking(id)
+	if err != nil {
+		return responseBooking, err
+	}
+
+	responseBooking = response.BookingResponse{
+		ID:        getData.ID,
+		IdSession: getData.IdSession,
+		Queue:     &getData.Queue,
+		Status:    getData.Status,
+		CreatedAt: getData.CreatedAt,
+		UpdatedAt: getData.UpdatedAt,
 	}
 
 	return responseBooking, nil

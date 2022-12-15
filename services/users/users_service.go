@@ -307,7 +307,7 @@ func (u *userService) NearbyHealthFacilities(payloads payload.NearbyHealth, nik 
 				Image:    val.Image,
 				Ranges:   newRanges,
 				Address:  *val.Address,
-				Session:  val.Session,
+				// Session:  val.Session,
 			}
 		}
 	}

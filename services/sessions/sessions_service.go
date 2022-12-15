@@ -1,17 +1,19 @@
 package services
 
 import (
+	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
 	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqls "vaksin-id-be/repository/mysql/sessions"
+	mysqlv "vaksin-id-be/repository/mysql/vaccines"
 
 	"github.com/google/uuid"
 )
 
 type SessionsService interface {
-	CreateSessions(payloads payload.SessionsPayload, auth string) (model.Sessions, error)
+	CreateSessions(payloads payload.SessionsPayload, auth string) (response.SessionsResponse, error)
 	GetAllSessions() ([]response.SessionsResponse, error)
 	GetSessionsAdminById(auth, id string) (response.SessionsResponse, error)
 	GetSessionByAdmin(auth string) ([]response.SessionsResponse, error)
@@ -23,43 +25,79 @@ type SessionsService interface {
 
 type sessionService struct {
 	SessionsRepo mysqls.SessionsRepository
+	VaccineRepo  mysqlv.VaccinesRepository
 }
 
-func NewSessionsService(sessionRepo mysqls.SessionsRepository) *sessionService {
+func NewSessionsService(sessionRepo mysqls.SessionsRepository, vaccineRepo mysqlv.VaccinesRepository) *sessionService {
 	return &sessionService{
 		SessionsRepo: sessionRepo,
+		VaccineRepo:  vaccineRepo,
 	}
 }
 
-func (s *sessionService) CreateSessions(payloads payload.SessionsPayload, auth string) (model.Sessions, error) {
+func (s *sessionService) CreateSessions(payloads payload.SessionsPayload, auth string) (response.SessionsResponse, error) {
 	var sessionModel model.Sessions
+	var sessionResponse response.SessionsResponse
 
-	getIdHealthFacilities, err := m.GetIdHealthFacilities(auth)
-	if err != nil {
-		return sessionModel, err
-	}
+	// getIdHealthFacilities, err := m.GetIdHealthFacilities(auth)
+	// if err != nil {
+	// 	return sessionModel, err
+	// }
 
 	defaultStatus := false
 
 	id := uuid.NewString()
 
-	sessionModel = model.Sessions{
-		ID:                 id,
-		IdHealthFacilities: getIdHealthFacilities,
-		SessionName:        payloads.SessionName,
-		Capacity:           payloads.Capacity,
-		Dose:               payloads.Dose,
-		IsClose:            defaultStatus,
-		StartSession:       payloads.StartSession,
-		EndSession:         payloads.EndSession,
-	}
-
-	err = s.SessionsRepo.CreateSession(sessionModel)
+	dateSession, err := time.Parse("2006-01-02", payloads.Date)
 	if err != nil {
-		return sessionModel, err
+		return sessionResponse, err
 	}
 
-	return sessionModel, nil
+	getDoseFromVaccine, err := s.VaccineRepo.GetVaccinesById(payloads.IdVaccine)
+	if err != nil {
+		return sessionResponse, err
+	}
+
+	sessionModel = model.Sessions{
+		ID: id,
+		// IdHealthFacilities: getIdHealthFacilities,
+		IdVaccine:    payloads.IdVaccine,
+		SessionName:  payloads.SessionName,
+		Capacity:     payloads.Capacity,
+		Dose:         getDoseFromVaccine.Dose,
+		Date:         dateSession,
+		IsClose:      defaultStatus,
+		StartSession: payloads.StartSession,
+		EndSession:   payloads.EndSession,
+	}
+
+	_, err = s.SessionsRepo.CreateSession(sessionModel)
+	if err != nil {
+		return sessionResponse, err
+	}
+
+	newData, err := s.SessionsRepo.GetSessionById(id)
+	if err != nil {
+		return sessionResponse, err
+	}
+
+	sessionResponse = response.SessionsResponse{
+		ID:           newData.ID,
+		IdVaccine:    newData.IdVaccine,
+		SessionName:  newData.SessionName,
+		Capacity:     newData.Capacity,
+		IsClose:      newData.IsClose,
+		Dose:         newData.Dose,
+		Date:         newData.Date,
+		StartSession: newData.StartSession,
+		EndSession:   newData.EndSession,
+		CreatedAt:    newData.CreatedAt,
+		UpdatedAt:    newData.UpdatedAt,
+		Vaccine:      newData.Vaccine,
+		Booking:      newData.Booking,
+	}
+
+	return sessionResponse, nil
 }
 
 func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
@@ -76,14 +114,17 @@ func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
 	for i, v := range getSessions {
 		sessionsResponse[i] = response.SessionsResponse{
 			ID:           v.ID,
+			IdVaccine:    v.IdVaccine,
 			SessionName:  v.SessionName,
 			Capacity:     v.Capacity,
 			Dose:         v.Dose,
+			Date:         v.Date,
 			IsClose:      v.IsClose,
 			StartSession: v.StartSession,
 			EndSession:   v.EndSession,
 			CreatedAt:    v.CreatedAt,
 			UpdatedAt:    v.UpdatedAt,
+			Vaccine:      v.Vaccine,
 			// Booking:      v.Booking,
 		}
 	}
@@ -106,14 +147,17 @@ func (s *sessionService) GetSessionsAdminById(auth, id string) (response.Session
 
 	responseSession = response.SessionsResponse{
 		ID:           getData.ID,
+		IdVaccine:    getData.IdVaccine,
 		SessionName:  getData.SessionName,
 		Capacity:     getData.Capacity,
 		Dose:         getData.Dose,
+		Date:         getData.Date,
 		IsClose:      getData.IsClose,
 		StartSession: getData.StartSession,
 		EndSession:   getData.EndSession,
 		CreatedAt:    getData.CreatedAt,
 		UpdatedAt:    getData.UpdatedAt,
+		Vaccine:      getData.Vaccine,
 		// Booking:      getData.Booking,
 	}
 
@@ -138,14 +182,17 @@ func (s *sessionService) GetSessionByAdmin(auth string) ([]response.SessionsResp
 	for i, val := range getData {
 		responseSession[i] = response.SessionsResponse{
 			ID:           val.ID,
+			IdVaccine:    val.IdVaccine,
 			SessionName:  val.SessionName,
 			Capacity:     val.Capacity,
 			Dose:         val.Dose,
+			Date:         val.Date,
 			IsClose:      val.IsClose,
 			StartSession: val.StartSession,
 			EndSession:   val.EndSession,
 			CreatedAt:    val.CreatedAt,
 			UpdatedAt:    val.UpdatedAt,
+			Vaccine:      val.Vaccine,
 			Booking:      val.Booking,
 		}
 	}
@@ -156,9 +203,21 @@ func (s *sessionService) GetSessionByAdmin(auth string) ([]response.SessionsResp
 func (s *sessionService) UpdateSession(payloads payload.SessionsUpdate, id string) (response.SessionsUpdate, error) {
 	var respData response.SessionsUpdate
 
+	dateSession, err := time.Parse("2006-01-02", payloads.Date)
+	if err != nil {
+		return respData, err
+	}
+
+	getDoseFromVaccine, err := s.VaccineRepo.GetVaccinesById(payloads.IdVaccine)
+	if err != nil {
+		return respData, err
+	}
+
 	sessionData := model.Sessions{
 		SessionName:  payloads.SessionName,
 		Capacity:     payloads.Capacity,
+		Dose:         getDoseFromVaccine.Dose,
+		Date:         dateSession,
 		StartSession: payloads.StartSession,
 		EndSession:   payloads.EndSession,
 	}
@@ -169,8 +228,11 @@ func (s *sessionService) UpdateSession(payloads payload.SessionsUpdate, id strin
 
 	respData = response.SessionsUpdate{
 		ID:           id,
+		IdVaccine:    payloads.IdVaccine,
 		SessionName:  payloads.SessionName,
 		Capacity:     payloads.Capacity,
+		Dose:         getDoseFromVaccine.Dose,
+		Date:         dateSession,
 		StartSession: payloads.StartSession,
 		EndSession:   payloads.EndSession,
 	}

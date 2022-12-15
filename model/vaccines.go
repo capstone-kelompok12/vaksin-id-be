@@ -10,4 +10,5 @@ type Vaccines struct {
 	Dose               int    `gorm:"type:int(1)"`
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
+	Session            []Sessions `gorm:"foreignKey:IdVaccine"`
 }

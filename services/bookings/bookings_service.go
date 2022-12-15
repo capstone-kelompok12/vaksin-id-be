@@ -374,20 +374,11 @@ func (b *bookingService) UpdateAccAttendend(payloads []payload.UpdateAccHistory)
 			Status: &val.Status,
 		}
 
-		dataUpdated, err := b.HistoryRepo.UpdateHistory(updateModel, val.ID)
+		_, err := b.HistoryRepo.UpdateHistory(updateModel, val.ID)
 		if err != nil {
 			return updateData, err
 		}
 
-		updateData[i] = response.HistoryResponse{
-			ID:         dataUpdated.ID,
-			IdBooking:  dataUpdated.IdBooking,
-			NikUser:    dataUpdated.NikUser,
-			IdSameBook: dataUpdated.IdBooking,
-			Status:     dataUpdated.Status,
-			CreatedAt:  dataUpdated.CreatedAt,
-			UpdatedAt:  dataUpdated.UpdatedAt,
-		}
 		dataNik, err := b.HistoryRepo.CheckVaccineCount(val.NikUser)
 		if err != nil {
 			return updateData, err
@@ -402,6 +393,22 @@ func (b *bookingService) UpdateAccAttendend(payloads []payload.UpdateAccHistory)
 
 		if err := b.UserRepo.UpdateUserProfile(updateUserCount); err != nil {
 			return updateData, err
+		}
+
+		dataHistory, err := b.HistoryRepo.GetHistoryById(val.ID)
+		if err != nil {
+			return updateData, err
+		}
+
+		updateData[i] = response.HistoryResponse{
+			ID:         dataHistory.ID,
+			IdBooking:  dataHistory.IdBooking,
+			NikUser:    dataHistory.NikUser,
+			IdSameBook: dataHistory.IdBooking,
+			Status:     dataHistory.Status,
+			CreatedAt:  dataHistory.CreatedAt,
+			UpdatedAt:  dataHistory.UpdatedAt,
+			User:       *dataHistory.User,
 		}
 	}
 	return updateData, nil

@@ -20,6 +20,7 @@ func UserAuthenticated(routes *echo.Group, api *controllers.UserController) {
 	authUser.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY"))))
 	{
 		authUser.GET("", api.GetUserDataByNik)
+		authUser.GET("/history", api.GetUserHistoryByNikCheck)
 		authUser.GET("/address", api.GetUserAddress)
 		authUser.GET("/check/:nik", api.GetUserDataByNikCheck)
 		authUser.PUT("", api.UpdateUser)

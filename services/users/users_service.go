@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 	"time"
 	"vaksin-id-be/dto/payload"
@@ -21,6 +22,7 @@ type UserService interface {
 	LoginUser(payloads payload.Login) (response.Login, error)
 	GetUserDataByNik(nik string) (response.UserProfile, error)
 	GetUserDataByNikNoAddress(nik string) (response.UserProfile, error)
+	GetUserHistory(nik string) (response.UserHistory, error)
 	UpdateUserProfile(payloads payload.UpdateUser, nik string) (response.UpdateUser, error)
 	DeleteUserProfile(nik string) error
 	NearbyHealthFacilities(payloads payload.NearbyHealth, nik string) (response.UserNearbyHealth, error)
@@ -207,6 +209,47 @@ func (u *userService) GetUserDataByNikNoAddress(nik string) (response.UserProfil
 	return responseUser, nil
 }
 
+func (u *userService) GetUserHistory(nik string) (response.UserHistory, error) {
+	var historyUser response.UserHistory
+
+	nikUser, err := m.GetUserNik(nik)
+	if err != nil {
+		return historyUser, err
+	}
+
+	fmt.Println(nikUser)
+
+	getData, err := u.UserRepo.GetUserHistoryByNik(nikUser)
+	if err != nil {
+		return historyUser, err
+	}
+
+	getDataUser, err := u.UserRepo.GetUserDataByNikNoAddress(nikUser)
+	if err != nil {
+		return historyUser, err
+	}
+
+	ageUser, err := u.UserRepo.GetAgeUser(getDataUser)
+	if err != nil {
+		return historyUser, err
+	}
+
+	historyUser = response.UserHistory{
+		NIK:          getData.NIK,
+		Email:        getData.Email,
+		Fullname:     getData.Fullname,
+		PhoneNum:     getData.PhoneNum,
+		Gender:       getData.Gender,
+		VaccineCount: getData.VaccineCount,
+		BirthDate:    getData.BirthDate,
+		Age:          ageUser.Age,
+		Address:      getData.Address,
+		History:      getData.History,
+	}
+
+	return historyUser, nil
+}
+
 func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string) (response.UpdateUser, error) {
 	var dataResp response.UpdateUser
 
@@ -309,6 +352,7 @@ func (u *userService) NearbyHealthFacilities(payloads payload.NearbyHealth, nik 
 				Image:    val.Image,
 				Ranges:   newRanges,
 				Address:  *val.Address,
+				Vaccine:  val.Vaccine,
 				// Session:  val.Session,
 			}
 		}

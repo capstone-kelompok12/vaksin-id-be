@@ -106,8 +106,8 @@ func (h *historiesService) UpdateHistory(id string, payloads payload.UpdateAccHi
 		Status:  &payloads.Status,
 	}
 
-	if data, err := h.HistoriesRepo.UpdateHistory(historyData, id); err != nil {
-		return data, err
+	if _, err := h.HistoriesRepo.UpdateHistory(historyData, id); err != nil {
+		return responseHistory, err
 	}
 	return responseHistory, nil
 }

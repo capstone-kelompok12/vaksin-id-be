@@ -5,6 +5,7 @@ import (
 	"vaksin-id-be/model"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserRepository interface {
@@ -16,6 +17,7 @@ type UserRepository interface {
 	LoginUser(data model.Users) (model.Users, error)
 	GetUserDataByNik(nik string) (model.Users, error)
 	GetUserDataByNikNoAddress(nik string) (model.Users, error)
+	GetUserHistoryByNik(nik string) (model.Users, error)
 	UpdateUserProfile(data model.Users) error
 	GetAgeUser(data model.Users) (response.AgeUser, error)
 	DeleteUser(nik string) error
@@ -83,6 +85,15 @@ func (u *userRepository) GetUserDataByNik(nik string) (model.Users, error) {
 	var user model.Users
 
 	if err := u.db.Preload("Address").Where("nik = ?", nik).First(&user).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
+func (u *userRepository) GetUserHistoryByNik(nik string) (model.Users, error) {
+	var user model.Users
+
+	if err := u.db.Preload(clause.Associations).Preload("History."+clause.Associations).Preload("History.Booking.Session.Vaccine").Preload("Address").Where("nik = ?", nik).First(&user).Error; err != nil {
 		return user, err
 	}
 	return user, nil

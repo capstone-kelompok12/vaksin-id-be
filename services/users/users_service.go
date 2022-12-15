@@ -172,6 +172,7 @@ func (u *userService) GetUserDataByNik(nik string) (response.UserProfile, error)
 		PhoneNum:     getData.PhoneNum,
 		Gender:       getData.Gender,
 		VaccineCount: getData.VaccineCount,
+		BirthDate:    ageUser.BirthDate,
 		Age:          ageUser.Age,
 		Address:      getData.Address,
 	}
@@ -199,6 +200,7 @@ func (u *userService) GetUserDataByNikNoAddress(nik string) (response.UserProfil
 		PhoneNum:     getData.PhoneNum,
 		Gender:       getData.Gender,
 		VaccineCount: getData.VaccineCount,
+		BirthDate:    getData.BirthDate,
 		Age:          ageUser.Age,
 	}
 

@@ -20,6 +20,7 @@ type UserRepository interface {
 	GetAgeUser(data model.Users) (response.AgeUser, error)
 	DeleteUser(nik string) error
 	NearbyHealthFacilities(city string) ([]model.Addresses, error)
+	// UpdateVaccineHistory()
 }
 
 type userRepository struct {

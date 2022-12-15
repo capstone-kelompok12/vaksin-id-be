@@ -9,17 +9,19 @@ import (
 	mysqlb "vaksin-id-be/repository/mysql/bookings"
 	mysqlh "vaksin-id-be/repository/mysql/histories"
 	mysqls "vaksin-id-be/repository/mysql/sessions"
+	mysqlu "vaksin-id-be/repository/mysql/users"
 
 	"github.com/google/uuid"
 )
 
 type BookingService interface {
 	CreateBooking(payloads []payload.BookingPayload) ([]response.BookingResponseCustom, error)
-	UpdateBooking(payloads []payload.BookingUpdate) ([]response.BookingResponseCustom, error)
 	GetAllBooking() ([]response.BookingResponse, error)
 	GetBookingBysSession(id string) ([]response.BookingResponse, error)
 	GetBookingDashboard() (response.Dashboard, error)
 	GetBooking(id string) (response.BookingResponse, error)
+	UpdateAccAttendend(payloads []payload.UpdateAccHistory) ([]response.HistoryResponse, error)
+	UpdateBooking(payloads []payload.BookingUpdate) ([]response.BookingResponseCustom, error)
 	DeleteBooking(id string) error
 }
 
@@ -27,13 +29,15 @@ type bookingService struct {
 	BookingRepo mysqlb.BookingRepository
 	HistoryRepo mysqlh.HistoriesRepository
 	SessionRepo mysqls.SessionsRepository
+	UserRepo    mysqlu.UserRepository
 }
 
-func NewBookingService(bookingRepo mysqlb.BookingRepository, historyRepo mysqlh.HistoriesRepository, sessionRepo mysqls.SessionsRepository) *bookingService {
+func NewBookingService(bookingRepo mysqlb.BookingRepository, historyRepo mysqlh.HistoriesRepository, sessionRepo mysqls.SessionsRepository, userRepo mysqlu.UserRepository) *bookingService {
 	return &bookingService{
 		BookingRepo: bookingRepo,
 		HistoryRepo: historyRepo,
 		SessionRepo: sessionRepo,
+		UserRepo:    userRepo,
 	}
 }
 
@@ -111,8 +115,7 @@ func (b *bookingService) CreateBooking(payloads []payload.BookingPayload) ([]res
 			return resBooking, err
 		}
 		sessionData := response.BookingSessionCustom{
-			ID: getSessionId.ID,
-			// IdHealthFacilities: getSessionId.IdHealthFacilities,
+			ID:           getSessionId.ID,
 			IdVaccine:    getSessionId.IdVaccine,
 			SessionName:  getSessionId.SessionName,
 			Capacity:     countBook,
@@ -292,6 +295,7 @@ func (b *bookingService) UpdateBooking(payloads []payload.BookingUpdate) ([]resp
 			Status:    &v.Status,
 		}
 		initQueu += 1
+
 		updateData, err := b.BookingRepo.UpdateBookingAcc(bookingData[i])
 		if err != nil {
 			return data, err
@@ -306,6 +310,13 @@ func (b *bookingService) UpdateBooking(payloads []payload.BookingUpdate) ([]resp
 		if err != nil {
 			return data, err
 		}
+
+		getBookedByIdSession, err := b.BookingRepo.GetBookingBySessionDen(v.IdSession)
+		if err != nil {
+			return data, err
+		}
+		getbackCap = getSession.Capacity - len(getBookedByIdSession)
+
 		sessionData := response.BookingSessionCustom{
 			ID:           getSession.ID,
 			IdVaccine:    getSession.IdVaccine,
@@ -345,6 +356,55 @@ func (b *bookingService) UpdateBooking(payloads []payload.BookingUpdate) ([]resp
 		}
 	}
 	return newRes, nil
+}
+
+func (b *bookingService) UpdateAccAttendend(payloads []payload.UpdateAccHistory) ([]response.HistoryResponse, error) {
+	updateData := make([]response.HistoryResponse, len(payloads))
+
+	var defaultVaccineCount int
+
+	for i, val := range payloads {
+		// update history berdasarkan id
+		if val.Status != "Attended" && val.Status != "Absent" {
+			return updateData, errors.New("input status must Attended or Absent")
+		}
+
+		updateModel := model.VaccineHistories{
+			ID:     val.ID,
+			Status: &val.Status,
+		}
+
+		dataUpdated, err := b.HistoryRepo.UpdateHistory(updateModel, val.ID)
+		if err != nil {
+			return updateData, err
+		}
+
+		updateData[i] = response.HistoryResponse{
+			ID:         dataUpdated.ID,
+			IdBooking:  dataUpdated.IdBooking,
+			NikUser:    dataUpdated.NikUser,
+			IdSameBook: dataUpdated.IdBooking,
+			Status:     dataUpdated.Status,
+			CreatedAt:  dataUpdated.CreatedAt,
+			UpdatedAt:  dataUpdated.UpdatedAt,
+		}
+		dataNik, err := b.HistoryRepo.CheckVaccineCount(val.NikUser)
+		if err != nil {
+			return updateData, err
+		}
+
+		defaultVaccineCount = len(dataNik)
+
+		updateUserCount := model.Users{
+			NIK:          val.NikUser,
+			VaccineCount: defaultVaccineCount,
+		}
+
+		if err := b.UserRepo.UpdateUserProfile(updateUserCount); err != nil {
+			return updateData, err
+		}
+	}
+	return updateData, nil
 }
 
 func (b *bookingService) GetAllBooking() ([]response.BookingResponse, error) {

@@ -65,9 +65,10 @@ func InitSessionsAPI(db *gorm.DB) *controllers.SessionsController {
 
 func InitBookingsAPI(db *gorm.DB) *controllers.BookingsController {
 	bookingsRepo := mysql_bookings.NewBookingRepository(db)
+	userRepo := mysql_user.NewUserRepository(db)
 	historyRepo := mysql_histories.NewHistoryRepository(db)
 	sessionsRepo := mysql_sessions.NewSessionsRepository(db)
-	bookingsServ := services_bookings.NewBookingService(bookingsRepo, historyRepo, sessionsRepo)
+	bookingsServ := services_bookings.NewBookingService(bookingsRepo, historyRepo, sessionsRepo, userRepo)
 	bookingsAPI := controllers.NewBookingController(bookingsServ)
 	return bookingsAPI
 }

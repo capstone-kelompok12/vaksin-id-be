@@ -16,6 +16,7 @@ type HistoriesRepository interface {
 	GetHistoryByNIK(id, nik string) (model.VaccineHistories, error)
 	UpdateHistoryByNik(data model.VaccineHistories, nik, id string) (model.VaccineHistories, error)
 	UpdateHistory(data model.VaccineHistories, id string) (model.VaccineHistories, error)
+	CheckVaccineCount(nik string) ([]model.VaccineHistories, error)
 }
 
 type historiesRepository struct {
@@ -85,6 +86,14 @@ func (h *historiesRepository) UpdateHistory(data model.VaccineHistories, id stri
 func (h *historiesRepository) UpdateHistoryByNik(data model.VaccineHistories, nik, id string) (model.VaccineHistories, error) {
 	var history model.VaccineHistories
 	if err := h.db.Model(&history).Where("nik_user  = ? AND id_booking = ?", nik, id).Updates(&data).Error; err != nil {
+		return history, err
+	}
+	return history, nil
+}
+
+func (h *historiesRepository) CheckVaccineCount(nik string) ([]model.VaccineHistories, error) {
+	var history []model.VaccineHistories
+	if err := h.db.Model(&history).Where("nik_user = ? AND status = ?", nik, "Attended").Find(&history).Error; err != nil {
 		return history, err
 	}
 	return history, nil

@@ -12,6 +12,7 @@ type UserProfile struct {
 	PhoneNum     string
 	Gender       string
 	VaccineCount int
+	BirthDate    time.Time
 	Age          int
 	Address      *model.Addresses
 }

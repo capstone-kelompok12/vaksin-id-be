@@ -5,7 +5,6 @@ import (
 	"vaksin-id-be/model"
 
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type UserRepository interface {
@@ -93,7 +92,7 @@ func (u *userRepository) GetUserDataByNik(nik string) (model.Users, error) {
 func (u *userRepository) GetUserHistoryByNik(nik string) (model.Users, error) {
 	var user model.Users
 
-	if err := u.db.Preload(clause.Associations).Preload("History."+clause.Associations).Preload("History.Booking.Session.Vaccine").Preload("Address").Where("nik = ?", nik).First(&user).Error; err != nil {
+	if err := u.db.Preload("History.Booking.Session.Vaccine").Preload("Address").Where("nik = ?", nik).First(&user).Error; err != nil {
 		return user, err
 	}
 	return user, nil

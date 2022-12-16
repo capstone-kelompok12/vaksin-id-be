@@ -14,7 +14,7 @@ type SessionsRepository interface {
 	GetSumOfCapacity(id string) (response.SessionSumCap, error)
 	GetSessionById(id string) (model.Sessions, error)
 	GetSessionsByAdmin(auth string) ([]model.Sessions, error)
-	GetSessionAdminById(auth, id string) (model.Sessions, error)
+	GetAllFinishedSessionCount() (response.SessionFinished, error)
 	UpdateSession(data model.Sessions, id string) error
 	CloseSession(data model.Sessions, id string) error
 	DeleteSession(id string) error
@@ -63,9 +63,9 @@ func (s *sessionsRepository) GetSessionById(id string) (model.Sessions, error) {
 	return session, nil
 }
 
-func (s *sessionsRepository) GetSessionAdminById(auth, id string) (model.Sessions, error) {
-	var session model.Sessions
-	if err := s.db.Preload(clause.Associations).Preload("Booking."+clause.Associations).Preload("Vaccine").Where("id_health_facilities = ? AND id = ?", auth, id).First(&session).Error; err != nil {
+func (s *sessionsRepository) GetAllFinishedSessionCount() (response.SessionFinished, error) {
+	var session response.SessionFinished
+	if err := s.db.Raw("SELECT id, COUNT(is_close) AS amount FROM sessions WHERE is_close = ?", true).Scan(&session).Error; err != nil {
 		return session, err
 	}
 	return session, nil

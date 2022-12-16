@@ -12,3 +12,11 @@ type DashboardVaccine struct {
 type IsCloseFalse struct {
 	Active int
 }
+
+type SessionFinished struct {
+	Amount int
+}
+
+type VaccinatedUser struct {
+	Vaccinated int
+}

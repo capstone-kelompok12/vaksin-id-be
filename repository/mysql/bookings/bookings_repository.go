@@ -14,6 +14,7 @@ type BookingRepository interface {
 	GetAllBooking() ([]model.BookingSessions, error)
 	GetBooking(id string) (model.BookingSessions, error)
 	GetBookingBySession(id string) ([]model.BookingSessions, error)
+	GetAllBookingBySession(id string) ([]model.BookingSessions, error)
 	GetBookingBySessionDen(id string) ([]model.BookingSessions, error)
 	FindMaxQueue(is_session string) (model.BookingSessions, error)
 	DeleteBooking(id string) error
@@ -60,6 +61,14 @@ func (b *bookingRepository) GetAllBooking() ([]model.BookingSessions, error) {
 func (b *bookingRepository) GetBooking(id string) (model.BookingSessions, error) {
 	var booking model.BookingSessions
 	if err := b.db.Preload("Session.Vaccine").Where("id = ?", id).First(&booking).Error; err != nil {
+		return booking, err
+	}
+	return booking, nil
+}
+
+func (b *bookingRepository) GetAllBookingBySession(id string) ([]model.BookingSessions, error) {
+	var booking []model.BookingSessions
+	if err := b.db.Preload("Session.Vaccine").Where("id_session = ?", id).Find(&booking).Error; err != nil {
 		return booking, err
 	}
 	return booking, nil

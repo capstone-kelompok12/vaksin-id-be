@@ -69,10 +69,9 @@ func (s *SessionsController) GetAllSessions(ctx echo.Context) error {
 	})
 }
 
-func (s *SessionsController) GetSessionByAdmin(ctx echo.Context) error {
-	authAdmin := ctx.Request().Header.Get("Authorization")
+func (s *SessionsController) GetAllFinishedSessionCount(ctx echo.Context) error {
 
-	data, err := s.SessionService.GetSessionByAdmin(authAdmin)
+	data, err := s.SessionService.GetAllFinishedSessionCount()
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
@@ -81,16 +80,15 @@ func (s *SessionsController) GetSessionByAdmin(ctx echo.Context) error {
 	}
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
-		"message": "success get all sessions by admin",
+		"message": "success get all amount finished sessions",
 		"data":    data,
 	})
 }
 
-func (s *SessionsController) GetSessionsAdminById(ctx echo.Context) error {
-	authAdmin := ctx.Request().Header.Get("Authorization")
+func (s *SessionsController) GetSessionsById(ctx echo.Context) error {
 	id := ctx.Param("id")
 
-	data, err := s.SessionService.GetSessionsAdminById(authAdmin, id)
+	data, err := s.SessionService.GetSessionsById(id)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
@@ -99,7 +97,7 @@ func (s *SessionsController) GetSessionsAdminById(ctx echo.Context) error {
 	}
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
-		"message": "success get session admin by id",
+		"message": "success get session by id",
 		"data":    data,
 	})
 }
@@ -132,7 +130,6 @@ func (s *SessionsController) UpdateSession(ctx echo.Context) error {
 
 func (s *SessionsController) IsCloseSession(ctx echo.Context) error {
 	var payloads payload.SessionsIsClose
-	authAdmin := ctx.Request().Header.Get("Authorization")
 	id := ctx.Param("id")
 
 	if err := ctx.Bind(&payloads); err != nil {
@@ -142,9 +139,9 @@ func (s *SessionsController) IsCloseSession(ctx echo.Context) error {
 		})
 	}
 
-	data, err := s.SessionService.IsCloseSession(payloads, authAdmin, id)
+	data, err := s.SessionService.IsCloseSession(payloads, id)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})

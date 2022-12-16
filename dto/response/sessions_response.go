@@ -10,6 +10,7 @@ type SessionsResponse struct {
 	IdVaccine    string
 	SessionName  string
 	Capacity     int
+	CapacityLeft int
 	IsClose      bool
 	Dose         int
 	Date         time.Time
@@ -18,13 +19,24 @@ type SessionsResponse struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	Vaccine      model.Vaccines
-	Booking      []model.BookingSessions
+	Booking      []BookingInSession
 }
+
+type BookingInSession struct {
+	ID        string
+	IdSession string
+	Queue     int
+	Status    *string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type SessionsUpdate struct {
 	ID           string
 	IdVaccine    string
 	SessionName  string
 	Capacity     int
+	CapacityLeft int
 	Dose         int
 	Date         time.Time
 	IsClose      bool
@@ -33,7 +45,6 @@ type SessionsUpdate struct {
 }
 
 type SessionSumCap struct {
-	ID string
-	// IdVaccine     string
+	ID            string
 	TotalCapacity int
 }

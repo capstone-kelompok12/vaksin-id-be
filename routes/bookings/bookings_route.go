@@ -12,7 +12,7 @@ func BookingsUnauthenticated(routes *echo.Group, api *controllers.BookingsContro
 	{
 		routes.GET("/bookings", api.GetAllBookings)
 		routes.GET("/bookings/:id", api.GetBooking)
-		routes.GET("/admin/dashboard", api.GetBookingDashboard)
+		routes.GET("/dashboard/bookings", api.GetBookingDashboard)
 		routes.DELETE("/bookings/:id", api.DeleteBooking)
 	}
 }
@@ -26,5 +26,6 @@ func BookingsAuthenticated(routes *echo.Group, api *controllers.BookingsControll
 		authAdmin.PUT("/bookings/acc", api.UpdateBooking)
 		authAdmin.PUT("/bookings/history/acc", api.UpdateAccAttendend)
 		authUser.POST("/bookings", api.CreateBooking)
+		authUser.PUT("/bookings/:nik/cancel", api.UpdateCanceledBooking)
 	}
 }

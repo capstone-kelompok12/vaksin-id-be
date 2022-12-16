@@ -16,6 +16,18 @@ type UserProfile struct {
 	Age          int
 	Address      *model.Addresses
 }
+type UserHistory struct {
+	NIK          string
+	Email        string
+	Fullname     string
+	PhoneNum     string
+	Gender       string
+	VaccineCount int
+	BirthDate    time.Time
+	Age          int
+	Address      *model.Addresses
+	History      []*model.VaccineHistories
+}
 
 type AgeUser struct {
 	BirthDate time.Time

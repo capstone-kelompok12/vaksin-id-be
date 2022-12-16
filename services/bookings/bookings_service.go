@@ -315,6 +315,7 @@ func (b *bookingService) UpdateBooking(payloads []payload.BookingUpdate) ([]resp
 		if err != nil {
 			return data, err
 		}
+
 		getbackCap = getSession.Capacity - len(getBookedByIdSession)
 
 		sessionData := response.BookingSessionCustom{

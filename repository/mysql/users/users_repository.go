@@ -5,7 +5,6 @@ import (
 	"vaksin-id-be/model"
 
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type UserRepository interface {

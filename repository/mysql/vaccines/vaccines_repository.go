@@ -59,7 +59,7 @@ func (v *vaccinesRepository) GetVaccinesByIdAdmin(idhealthfacil string) ([]model
 
 func (v *vaccinesRepository) GetVaccineByName() ([]model.Vaccines, error) {
 	var vaccines []model.Vaccines
-	if err := v.db.Raw("SELECT name, SUM(stock) AS stock FROM vaccines GROUP BY name").Scan(&vaccines).Error; err != nil {
+	if err := v.db.Raw("SELECT name, SUM(stock) AS stock FROM vaccines GROUP BY name ORDER BY created_at DESC").Scan(&vaccines).Error; err != nil {
 		return vaccines, err
 	}
 	return vaccines, nil

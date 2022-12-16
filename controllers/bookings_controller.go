@@ -102,6 +102,33 @@ func (b *BookingsController) UpdateBooking(ctx echo.Context) error {
 	})
 }
 
+func (b *BookingsController) UpdateCanceledBooking(ctx echo.Context) error {
+	var payloads payload.BookingCancel
+
+	nik := ctx.Param("nik")
+
+	if err := ctx.Bind(&payloads); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	data, err := b.BookingService.UpdateCancelBooking(payloads, nik)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":    false,
+		"messages": "success update data booking",
+		"data":     data,
+	})
+}
+
 func (b *BookingsController) UpdateAccAttendend(ctx echo.Context) error {
 	var payloads []payload.UpdateAccHistory
 

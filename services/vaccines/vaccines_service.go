@@ -41,7 +41,6 @@ func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.Vacci
 		return vaccineModel, err
 	}
 
-	// check dosis dan name
 	vaccineData, err := v.VaccinesRepo.CheckNameDosisExist(idHealthFacilities, payloads.Name, payloads.Dose)
 	if err == nil {
 		fmt.Println(vaccineData.ID)

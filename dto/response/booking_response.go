@@ -34,11 +34,11 @@ type BookingFindQueue struct {
 }
 
 type BookingSessionCustom struct {
-	ID string
-	// IdHealthFacilities string
+	ID           string
 	IdVaccine    string
 	SessionName  string
 	Capacity     int
+	CapacityLeft int
 	Dose         int
 	Date         time.Time
 	IsClose      bool

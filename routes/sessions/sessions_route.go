@@ -10,20 +10,27 @@ import (
 
 func SessionsUnauthenticated(routes *echo.Group, api *controllers.SessionsController) {
 	{
-		routes.GET("/sessions", api.GetAllSessions)
-		routes.GET("/sessions/dashboard", api.GetSessionActive)
+		routes.GET("/dashboard/sessions", api.GetSessionActive)
+		routes.GET("/dashboard/sessions/amount", api.GetAllFinishedSessionCount)
 	}
 }
 
 func SessionsAuthenticated(routes *echo.Group, api *controllers.SessionsController) {
 	authAdmin := routes.Group("/admin")
+	authUser := routes.Group("/users")
+	authUser.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY"))))
 	authAdmin.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY_ADMIN"))))
 	{
+		// authAdmin.GET("/sessions", api.GetSessionByAdmin)
+		// admin
+		authAdmin.GET("/sessions", api.GetAllSessions)
+		authAdmin.GET("/sessions/:id", api.GetSessionsById)
 		authAdmin.POST("/sessions", api.CreateSession)
-		authAdmin.GET("/sessions", api.GetSessionByAdmin)
-		authAdmin.GET("/sessions/:id", api.GetSessionsAdminById)
 		authAdmin.PUT("/sessions/:id", api.UpdateSession)
-		authAdmin.PUT("/sessions/status/:id", api.IsCloseSession)
+		authAdmin.PUT("/sessions/:id/close", api.IsCloseSession)
 		authAdmin.DELETE("/sessions/:id", api.DeleteSession)
+		// users
+		authUser.GET("/sessions", api.GetAllSessions)
+		authUser.GET("/sessions/:id", api.GetSessionsById)
 	}
 }

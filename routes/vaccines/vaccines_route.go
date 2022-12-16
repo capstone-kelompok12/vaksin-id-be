@@ -11,8 +11,8 @@ import (
 func VaccinesUnauthenticated(routes *echo.Group, api *controllers.VaccinesController) {
 	{
 		routes.GET("/vaccines", api.GetAllVaccines)
-		routes.GET("/vaccines/dashboard", api.GetVaccineDashboard)
-		routes.GET("/vaccines/all", api.GetAllVaccinesCount)
+		routes.GET("/dashboard/vaccines", api.GetVaccineDashboard)
+		routes.GET("/dashboard/vaccines/amount", api.GetAllVaccinesCount)
 	}
 }
 

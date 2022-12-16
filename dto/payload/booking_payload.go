@@ -11,3 +11,8 @@ type BookingUpdate struct {
 	IdSession string `json:"id_session"`
 	Status    string `json:"status"`
 }
+
+type BookingCancel struct {
+	ID        string `json:"booking_id"`
+	IdSession string `json:"id_session"`
+}

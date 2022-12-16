@@ -11,6 +11,7 @@ type HistoriesRepository interface {
 	CreateHistory(data model.VaccineHistories) error
 	GetAllHistory() ([]model.VaccineHistories, error)
 	GetHistoryById(id string) (model.VaccineHistories, error)
+	GetHistoriesById(id string) ([]model.VaccineHistories, error)
 	GetHistoryByIdBooking(id string) ([]model.VaccineHistories, error)
 	GetHistoryByIdSameBook(id string) ([]model.VaccineHistories, error)
 	GetHistoryByNIK(id, nik string) (model.VaccineHistories, error)
@@ -45,7 +46,15 @@ func (h *historiesRepository) GetAllHistory() ([]model.VaccineHistories, error) 
 
 func (h *historiesRepository) GetHistoryById(id string) (model.VaccineHistories, error) {
 	var history model.VaccineHistories
-	if err := h.db.Preload(clause.Associations).Preload("Booking."+clause.Associations).Where("id = ?", id).First(&history).Error; err != nil {
+	if err := h.db.Preload(clause.Associations).Preload("Booking."+clause.Associations).Preload("User."+clause.Associations).Where("id = ?", id).First(&history).Error; err != nil {
+		return history, err
+	}
+	return history, nil
+}
+
+func (h *historiesRepository) GetHistoriesById(id string) ([]model.VaccineHistories, error) {
+	var history []model.VaccineHistories
+	if err := h.db.Preload(clause.Associations).Preload("Booking."+clause.Associations).Where("id = ?", id).Find(&history).Error; err != nil {
 		return history, err
 	}
 	return history, nil

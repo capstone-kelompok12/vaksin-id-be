@@ -6,6 +6,7 @@ import (
 	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
+	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqlb "vaksin-id-be/repository/mysql/bookings"
 	mysqls "vaksin-id-be/repository/mysql/sessions"
@@ -184,12 +185,7 @@ func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
 func (s *sessionService) GetAllSessionsByAdmin(auth string) ([]response.SessionsResponse, error) {
 	var sessionsResponse []response.SessionsResponse
 
-	getData, err := s.SessionsRepo.GetSessionById(id)
-	if err != nil {
-		return responseSession, err
-	}
-
-	countBooking, err := s.BookingRepo.GetAllBookingBySession(id)
+	getIdHealthFacilities, err := m.GetIdHealthFacilities(auth)
 	if err != nil {
 		return sessionsResponse, err
 	}

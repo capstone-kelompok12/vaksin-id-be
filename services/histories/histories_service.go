@@ -13,7 +13,8 @@ type HistoriesRepository interface {
 	CreateHistory(payloads payload.HistoriesPayload) error
 	GetAllHistory() ([]response.HistoryResponse, error)
 	GetHistoryById(id string) (response.HistoryResponse, error)
-	UpdateHistory(payloads payload.UpdateAccHistory, id string) (response.HistoryResponse, error)
+	UpdateHistory(id string, payloads payload.UpdateAccHistory) (response.HistoryResponse, error)
+	GetTotalUserVaccinated() (response.VaccinatedUser, error)
 }
 
 type historiesService struct {
@@ -109,5 +110,18 @@ func (h *historiesService) UpdateHistory(id string, payloads payload.UpdateAccHi
 	if _, err := h.HistoriesRepo.UpdateHistory(historyData, id); err != nil {
 		return responseHistory, err
 	}
+	return responseHistory, nil
+}
+
+func (h *historiesService) GetTotalUserVaccinated() (response.VaccinatedUser, error) {
+	var responseHistory response.VaccinatedUser
+
+	data, err := h.HistoriesRepo.GetTotalUserVaccinated()
+	if err != nil {
+		return responseHistory, err
+	}
+
+	responseHistory = data
+
 	return responseHistory, nil
 }

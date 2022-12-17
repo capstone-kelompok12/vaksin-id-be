@@ -22,6 +22,7 @@ type BookingService interface {
 	GetBooking(id string) (response.BookingResponse, error)
 	UpdateAccAttendend(payloads []payload.UpdateAccHistory) ([]response.HistoryResponse, error)
 	UpdateBooking(payloads []payload.BookingUpdate) ([]response.BookingResponseCustom, error)
+	UpdateCancelBooking(payloads payload.BookingCancel, nik string) (response.BookingResponseCustom, error)
 	DeleteBooking(id string) error
 }
 
@@ -118,7 +119,8 @@ func (b *bookingService) CreateBooking(payloads []payload.BookingPayload) ([]res
 			ID:           getSessionId.ID,
 			IdVaccine:    getSessionId.IdVaccine,
 			SessionName:  getSessionId.SessionName,
-			Capacity:     countBook,
+			CapacityLeft: countBook,
+			Capacity:     getSession.Capacity,
 			Dose:         getSessionId.Dose,
 			Date:         getSessionId.Date,
 			IsClose:      getSession.IsClose,
@@ -194,8 +196,10 @@ func (b *bookingService) UpdateBooking(payloads []payload.BookingUpdate) ([]resp
 				return data, err
 			}
 
+			statusHistory := "Absent"
+
 			dataHistoryUpdate := model.VaccineHistories{
-				Status: &v.Status,
+				Status: &statusHistory,
 			}
 
 			idSameBook, err := b.HistoryRepo.GetHistoryByNIK(v.ID, v.NikUser)
@@ -228,7 +232,8 @@ func (b *bookingService) UpdateBooking(payloads []payload.BookingUpdate) ([]resp
 				ID:           getSession.ID,
 				IdVaccine:    getSession.IdVaccine,
 				SessionName:  getSession.SessionName,
-				Capacity:     getbackCap,
+				CapacityLeft: getbackCap,
+				Capacity:     getSession.Capacity,
 				Dose:         getSession.Dose,
 				Date:         getSession.Date,
 				IsClose:      getSession.IsClose,
@@ -322,7 +327,8 @@ func (b *bookingService) UpdateBooking(payloads []payload.BookingUpdate) ([]resp
 			ID:           getSession.ID,
 			IdVaccine:    getSession.IdVaccine,
 			SessionName:  getSession.SessionName,
-			Capacity:     getbackCap,
+			CapacityLeft: getbackCap,
+			Capacity:     getSession.Capacity,
 			Dose:         getSession.Dose,
 			Date:         getSession.Date,
 			IsClose:      getSession.IsClose,
@@ -365,7 +371,6 @@ func (b *bookingService) UpdateAccAttendend(payloads []payload.UpdateAccHistory)
 	var defaultVaccineCount int
 
 	for i, val := range payloads {
-		// update history berdasarkan id
 		if val.Status != "Attended" && val.Status != "Absent" {
 			return updateData, errors.New("input status must Attended or Absent")
 		}
@@ -413,6 +418,102 @@ func (b *bookingService) UpdateAccAttendend(payloads []payload.UpdateAccHistory)
 		}
 	}
 	return updateData, nil
+}
+
+func (b *bookingService) UpdateCancelBooking(payloads payload.BookingCancel, nik string) (response.BookingResponseCustom, error) {
+	var responseData response.BookingResponseCustom
+
+	statusBooking := "Rejected"
+	statusHistory := "Absent"
+
+	updateModelBooking := model.BookingSessions{
+		ID:        payloads.ID,
+		IdSession: payloads.IdSession,
+		Status:    &statusBooking,
+	}
+
+	err := b.BookingRepo.UpdateBooking(updateModelBooking)
+	if err != nil {
+		return responseData, err
+	}
+
+	updateModelHistory := model.VaccineHistories{
+		Status: &statusHistory,
+	}
+
+	_, err = b.HistoryRepo.UpdateHistoryByNik(updateModelHistory, nik, payloads.ID)
+	if err != nil {
+		return responseData, err
+	}
+
+	dataBooking, err := b.BookingRepo.GetBooking(payloads.ID)
+	if err != nil {
+		return responseData, err
+	}
+
+	dataSession, err := b.SessionRepo.GetSessionById(payloads.IdSession)
+	if err != nil {
+		return responseData, err
+	}
+
+	countHistory, err := b.HistoryRepo.GetHistoriesByNIK(payloads.ID)
+	if err != nil {
+		return responseData, err
+	}
+
+	getSession, err := b.SessionRepo.GetSessionById(payloads.IdSession)
+	if err != nil {
+		return responseData, err
+	}
+
+	getBookedByIdSession, err := b.BookingRepo.GetBookingBySessionDen(payloads.IdSession)
+	if err != nil {
+		return responseData, err
+	}
+	getbackCap := getSession.Capacity - len(getBookedByIdSession)
+
+	historyData := make([]response.BookingHistoryCustom, len(countHistory))
+
+	sessionData := response.BookingSessionCustom{
+		ID:           dataSession.ID,
+		IdVaccine:    dataSession.IdVaccine,
+		SessionName:  dataSession.SessionName,
+		Capacity:     dataSession.Capacity,
+		CapacityLeft: getbackCap,
+		Dose:         dataSession.Dose,
+		Date:         dataSession.Date,
+		IsClose:      dataSession.IsClose,
+		StartSession: dataSession.StartSession,
+		EndSession:   dataSession.EndSession,
+		CreatedAt:    dataSession.CreatedAt,
+		UpdatedAt:    dataSession.UpdatedAt,
+		Vaccine:      dataSession.Vaccine,
+	}
+
+	for i, val := range countHistory {
+		historyData[i] = response.BookingHistoryCustom{
+			ID:         val.ID,
+			IdBooking:  val.IdBooking,
+			NikUser:    val.NikUser,
+			IdSameBook: val.IdSameBook,
+			Status:     val.Status,
+			CreatedAt:  val.CreatedAt,
+			UpdatedAt:  val.UpdatedAt,
+			User:       val.User,
+		}
+	}
+
+	responseData = response.BookingResponseCustom{
+		ID:        dataBooking.ID,
+		IdSession: dataBooking.IdSession,
+		Queue:     &dataBooking.Queue,
+		Status:    dataBooking.Status,
+		CreatedAt: dataBooking.CreatedAt,
+		UpdatedAt: dataBooking.UpdatedAt,
+		Session:   sessionData,
+		History:   historyData,
+	}
+	return responseData, nil
 }
 
 func (b *bookingService) GetAllBooking() ([]response.BookingResponse, error) {

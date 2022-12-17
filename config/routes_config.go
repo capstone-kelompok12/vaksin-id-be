@@ -14,6 +14,7 @@ import (
 	services_admin "vaksin-id-be/services/admins"
 	services_bookings "vaksin-id-be/services/bookings"
 	services_health "vaksin-id-be/services/health_facilities"
+	services_histories "vaksin-id-be/services/histories"
 	services_sessions "vaksin-id-be/services/sessions"
 	services_user "vaksin-id-be/services/users"
 	services_vaccines "vaksin-id-be/services/vaccines"
@@ -58,7 +59,8 @@ func InitVaccinesAPI(db *gorm.DB) *controllers.VaccinesController {
 func InitSessionsAPI(db *gorm.DB) *controllers.SessionsController {
 	sessionsRepo := mysql_sessions.NewSessionsRepository(db)
 	vaccinesRepo := mysql_vaccines.NewVaccinesRepository(db)
-	sessionsServ := services_sessions.NewSessionsService(sessionsRepo, vaccinesRepo)
+	bookingsRepo := mysql_bookings.NewBookingRepository(db)
+	sessionsServ := services_sessions.NewSessionsService(sessionsRepo, vaccinesRepo, bookingsRepo)
 	sessionsAPI := controllers.NewSessionsController(sessionsServ)
 	return sessionsAPI
 }
@@ -71,4 +73,11 @@ func InitBookingsAPI(db *gorm.DB) *controllers.BookingsController {
 	bookingsServ := services_bookings.NewBookingService(bookingsRepo, historyRepo, sessionsRepo, userRepo)
 	bookingsAPI := controllers.NewBookingController(bookingsServ)
 	return bookingsAPI
+}
+
+func InitHistoryAPI(db *gorm.DB) *controllers.HistoriesController {
+	historyRepo := mysql_histories.NewHistoryRepository(db)
+	historyServ := services_histories.NewHistoriesService(historyRepo)
+	historyAPI := controllers.NewHistoriesController(historyServ)
+	return historyAPI
 }

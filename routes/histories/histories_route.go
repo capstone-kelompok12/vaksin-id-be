@@ -8,6 +8,12 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+func HistoriesUnauthenticated(routes *echo.Group, api *controllers.HistoriesController) {
+	{
+		routes.GET("/dashboard/history", api.GetTotalUserVaccinated)
+	}
+}
+
 func HistoriesAuthenticated(routes *echo.Group, api *controllers.HistoriesController) {
 	authAdmin := routes.Group("/admin")
 	authUser := routes.Group("/users")

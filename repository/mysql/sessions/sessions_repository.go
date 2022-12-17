@@ -57,7 +57,7 @@ func (s *sessionsRepository) GetSumOfCapacity(id string) (response.SessionSumCap
 
 func (s *sessionsRepository) GetSessionById(id string) (model.Sessions, error) {
 	var session model.Sessions
-	if err := s.db.Preload("Vaccine").Preload("Booking").Where("id = ?", id).First(&session).Error; err != nil {
+	if err := s.db.Preload("Vaccine").Preload("Booking.User").Where("id = ?", id).First(&session).Error; err != nil {
 		return session, err
 	}
 	return session, nil
@@ -73,7 +73,7 @@ func (s *sessionsRepository) GetAllFinishedSessionCount() (response.SessionFinis
 
 func (s *sessionsRepository) GetSessionsByAdmin(auth string) ([]model.Sessions, error) {
 	var session []model.Sessions
-	if err := s.db.Preload(clause.Associations).Preload("Booking."+clause.Associations).Preload("Vaccine").Where("id_health_facilities = ?", auth).Find(&session).Error; err != nil {
+	if err := s.db.Preload(clause.Associations).Preload("Booking."+clause.Associations).Preload("Vaccine").Joins("Vaccine").Where("Vaccine.id_health_facilities = ?", auth).Find(&session).Error; err != nil {
 		return session, err
 	}
 	return session, nil

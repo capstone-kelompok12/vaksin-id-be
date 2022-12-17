@@ -26,7 +26,41 @@ type UserHistory struct {
 	BirthDate    time.Time
 	Age          int
 	Address      *model.Addresses
-	History      []*model.VaccineHistories
+	History      []HistoryCustomUser
+}
+
+type HistoryCustomUser struct {
+	ID         string
+	IdBooking  string
+	NikUser    string
+	IdSameBook string
+	Status     *string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	Booking    BookingHistoryLoop
+}
+
+type BookingHistoryLoop struct {
+	ID               string
+	IdSession        string
+	NikUser          string
+	Queue            *int
+	Status           *string
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	Session          model.Sessions
+	HealthFacilities HealthFacilitiesCustomUser
+}
+
+type HealthFacilitiesCustomUser struct {
+	ID        string
+	Email     string
+	PhoneNum  string
+	Name      string
+	Image     *string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Address   *model.Addresses
 }
 
 type AgeUser struct {

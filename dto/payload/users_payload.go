@@ -7,7 +7,7 @@ type RegisterUser struct {
 	Gender    string `json:"gender" gorm:"size:1;not null" validate:"required" example:"L"`
 	Password  string `json:"password" gorm:"size:100;not null" validate:"required,min=6" example:"user123"`
 	PhoneNum  string `json:"phonenum" gorm:"size:15;not null" validate:"required,min=10,max=15" example:"081234567890"`
-	BirthDate string `json:"birthdate" gorm:"not null" validate:"required" example:"2001-05-25"`
+	BirthDate string `json:"birthdate" gorm:"not null" validate:"required" example:"20010525"`
 }
 
 type UpdateUser struct {
@@ -17,7 +17,7 @@ type UpdateUser struct {
 	Gender    string `json:"gender" gorm:"size:1;not null" validate:"required" example:"L"`
 	Password  string `json:"password" gorm:"size:100;not null" validate:"required,min=6" example:"user123"`
 	PhoneNum  string `json:"phonenum" gorm:"size:15;not null" validate:"required,min=10,max=15" example:"081234567890"`
-	BirthDate string `json:"birthdate" gorm:"not null" validate:"required" example:"2001-05-25"`
+	BirthDate string `json:"birthdate" gorm:"not null" validate:"required" example:"20010525"`
 }
 
 type UpdateAddress struct {

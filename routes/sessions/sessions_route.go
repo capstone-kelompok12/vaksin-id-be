@@ -21,9 +21,9 @@ func SessionsAuthenticated(routes *echo.Group, api *controllers.SessionsControll
 	authUser.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY"))))
 	authAdmin.Use(middleware.JWT([]byte(os.Getenv("SECRET_JWT_KEY_ADMIN"))))
 	{
-		// authAdmin.GET("/sessions", api.GetSessionByAdmin)
 		// admin
-		authAdmin.GET("/sessions", api.GetAllSessions)
+		authAdmin.GET("/sessions/all", api.GetAllSessions)
+		authAdmin.GET("/sessions", api.GetAllSessionsByAdmin)
 		authAdmin.GET("/sessions/:id", api.GetSessionsById)
 		authAdmin.POST("/sessions", api.CreateSession)
 		authAdmin.PUT("/sessions/:id", api.UpdateSession)

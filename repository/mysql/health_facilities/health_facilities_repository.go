@@ -12,6 +12,7 @@ type HealthFacilitiesRepository interface {
 	GetAllHealthFacilities() ([]model.HealthFacilities, error)
 	GetAllHealthFacilitiesByCity(city string) ([]model.HealthFacilities, error)
 	GetHealthFacilities(name string) (model.HealthFacilities, error)
+	GetHealthFacilitiesById(id string) (model.HealthFacilities, error)
 	UpdateHealthFacilities(data model.HealthFacilities, id string) error
 	DeleteHealthFacilities(id string) error
 }
@@ -51,6 +52,14 @@ func (h *healthFacilitiesRepository) GetHealthFacilities(name string) (model.Hea
 	var healthFacil model.HealthFacilities
 	likeName := "%" + name + "%"
 	if err := h.db.Preload("Vaccine").Preload("Address").Where("name LIKE ?", likeName).First(&healthFacil).Error; err != nil {
+		return healthFacil, err
+	}
+	return healthFacil, nil
+}
+
+func (h *healthFacilitiesRepository) GetHealthFacilitiesById(id string) (model.HealthFacilities, error) {
+	var healthFacil model.HealthFacilities
+	if err := h.db.Preload("Address").Model(&model.HealthFacilities{}).Where("id = ?", id).First(&healthFacil).Error; err != nil {
 		return healthFacil, err
 	}
 	return healthFacil, nil

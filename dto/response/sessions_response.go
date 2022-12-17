@@ -29,6 +29,19 @@ type BookingInSession struct {
 	Status    *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	User      *model.Users
+}
+
+type SessionUserCustom struct {
+	NIK          string
+	Email        string
+	Fullname     string
+	PhoneNum     string
+	Gender       string
+	VaccineCount int
+	BirthDate    time.Time
+	Age          int
+	Address      *model.Addresses
 }
 
 type SessionsUpdate struct {

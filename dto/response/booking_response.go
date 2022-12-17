@@ -13,17 +13,18 @@ type BookingResponse struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Session   model.Sessions
-	History   []model.VaccineHistories
+	History   model.VaccineHistories
 }
 type BookingResponseCustom struct {
 	ID        string
 	IdSession string
+	NikUser   string
 	Queue     *int
 	Status    *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Session   BookingSessionCustom
-	History   []BookingHistoryCustom
+	History   BookingHistoryCustom
 }
 
 type BookingFindQueue struct {

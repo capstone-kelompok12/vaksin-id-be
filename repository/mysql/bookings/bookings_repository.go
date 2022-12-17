@@ -16,7 +16,7 @@ type BookingRepository interface {
 	GetBookingBySession(id string) ([]model.BookingSessions, error)
 	GetAllBookingBySession(id string) ([]model.BookingSessions, error)
 	GetBookingBySessionDen(id string) ([]model.BookingSessions, error)
-	FindMaxQueue(is_session string) (model.BookingSessions, error)
+	FindMaxQueue(id_session string) (model.BookingSessions, error)
 	DeleteBooking(id string) error
 }
 
@@ -36,7 +36,8 @@ func (b *bookingRepository) CreateBooking(data model.BookingSessions) error {
 }
 
 func (b *bookingRepository) UpdateBooking(data model.BookingSessions) error {
-	if err := b.db.Preload("Session.Vaccine").Preload("History").Model(&model.BookingSessions{}).Where("id_session = ? AND id = ?", data.IdSession, data.ID).Updates(&data).Error; err != nil {
+	var booking model.BookingSessions
+	if err := b.db.Preload("Session.Vaccine").Preload("History").Model(&booking).Where("id_session = ? AND id = ?", data.IdSession, data.ID).Updates(&data).Error; err != nil {
 		return err
 	}
 	return nil
@@ -44,7 +45,7 @@ func (b *bookingRepository) UpdateBooking(data model.BookingSessions) error {
 
 func (b *bookingRepository) UpdateBookingAcc(data model.BookingSessions) (model.BookingSessions, error) {
 	var booking model.BookingSessions
-	if err := b.db.Preload("Session.Vaccine").Preload("History").Model(&booking).Where("id = ?", data.ID).Updates(&data).Error; err != nil {
+	if err := b.db.Preload("Session.Vaccine").Preload("History").Model(&booking).Where("id = ? AND nik_user = ?", data.ID, data.NikUser).Updates(&data).Error; err != nil {
 		return booking, err
 	}
 	return booking, nil
@@ -68,7 +69,7 @@ func (b *bookingRepository) GetBooking(id string) (model.BookingSessions, error)
 
 func (b *bookingRepository) GetAllBookingBySession(id string) ([]model.BookingSessions, error) {
 	var booking []model.BookingSessions
-	if err := b.db.Preload("Session.Vaccine").Where("id_session = ?", id).Find(&booking).Error; err != nil {
+	if err := b.db.Preload("Session.Vaccine").Preload("User").Where("id_session = ? AND NOT status = ?", id, "Rejected").Find(&booking).Error; err != nil {
 		return booking, err
 	}
 	return booking, nil

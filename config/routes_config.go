@@ -24,9 +24,12 @@ import (
 
 func InitUserAPI(db *gorm.DB) *controllers.UserController {
 	userRepo := mysql_user.NewUserRepository(db)
+	historyRepo := mysql_histories.NewHistoryRepository(db)
 	addressRepo := mysql_address.NewAddressesRepository(db)
+	bookingsRepo := mysql_bookings.NewBookingRepository(db)
 	healthRepo := mysql_health.NewHealthFacilitiesRepository(db)
-	userServ := services_user.NewUserService(userRepo, addressRepo, healthRepo)
+	sessionsRepo := mysql_sessions.NewSessionsRepository(db)
+	userServ := services_user.NewUserService(userRepo, addressRepo, healthRepo, historyRepo, bookingsRepo, sessionsRepo)
 	addressServ := services_addresses.NewAddressesService(addressRepo)
 	userAPI := controllers.NewUserController(userServ, addressServ)
 	return userAPI
@@ -60,7 +63,8 @@ func InitSessionsAPI(db *gorm.DB) *controllers.SessionsController {
 	sessionsRepo := mysql_sessions.NewSessionsRepository(db)
 	vaccinesRepo := mysql_vaccines.NewVaccinesRepository(db)
 	bookingsRepo := mysql_bookings.NewBookingRepository(db)
-	sessionsServ := services_sessions.NewSessionsService(sessionsRepo, vaccinesRepo, bookingsRepo)
+	userRepo := mysql_user.NewUserRepository(db)
+	sessionsServ := services_sessions.NewSessionsService(sessionsRepo, vaccinesRepo, bookingsRepo, userRepo)
 	sessionsAPI := controllers.NewSessionsController(sessionsServ)
 	return sessionsAPI
 }

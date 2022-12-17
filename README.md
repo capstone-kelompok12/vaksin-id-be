@@ -5,8 +5,10 @@
 ## Preview
 | Admin | User |
 | ----------- | ----------- |
-| <img src="assets/Dashboard.svg" alt="preview admin">| <img src="" alt="preview user"> |
+| <img src="assets/Dashboard.svg" alt="preview admin">| <img src="assets/Login-Mobile.svg" alt="preview user"> |
 
+## 🎯 Project Goal
+The goal of the project is to help the government’s goal of Covid-19 vaccinations by facilitating users to book vaccination sessions easily and creating a proper system for health facilities.
 
 ## 🚩 MVP
 | Admin | User |

@@ -6,7 +6,6 @@ import (
 	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
-	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqlb "vaksin-id-be/repository/mysql/bookings"
 	mysqls "vaksin-id-be/repository/mysql/sessions"
@@ -185,7 +184,12 @@ func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
 func (s *sessionService) GetAllSessionsByAdmin(auth string) ([]response.SessionsResponse, error) {
 	var sessionsResponse []response.SessionsResponse
 
-	getIdHealthFacilities, err := m.GetIdHealthFacilities(auth)
+	getData, err := s.SessionsRepo.GetSessionById(id)
+	if err != nil {
+		return responseSession, err
+	}
+
+	countBooking, err := s.BookingRepo.GetAllBookingBySession(id)
 	if err != nil {
 		return sessionsResponse, err
 	}
@@ -293,6 +297,20 @@ func (s *sessionService) GetSessionsById(id string) (response.SessionsResponse, 
 	countBooking, err := s.BookingRepo.GetAllBookingBySession(id)
 	if err != nil {
 		return responseSession, err
+	}
+	getbackCap := getSessionById.Capacity - len(countBooking)
+
+	dataBooking := make([]response.BookingInSession, len(countBooking))
+
+	for i, val := range countBooking {
+		dataBooking[i] = response.BookingInSession{
+			ID:        val.ID,
+			IdSession: val.IdSession,
+			Queue:     val.Queue,
+			Status:    val.Status,
+			CreatedAt: val.CreatedAt,
+			UpdatedAt: val.UpdatedAt,
+		}
 	}
 
 	getSessionById, err := s.SessionsRepo.GetSessionById(id)

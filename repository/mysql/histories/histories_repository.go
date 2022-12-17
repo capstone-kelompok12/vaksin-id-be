@@ -113,6 +113,14 @@ func (h *historiesRepository) GetHistoriesByIdBooking(id string) ([]model.Vaccin
 	return history, nil
 }
 
+func (h *historiesRepository) GetHistoriesByNIK(id string) ([]model.VaccineHistories, error) {
+	var history []model.VaccineHistories
+	if err := h.db.Preload("User.Address").Where("id_booking = ?", id).Find(&history).Error; err != nil {
+		return history, err
+	}
+	return history, nil
+}
+
 func (h *historiesRepository) UpdateHistory(data model.VaccineHistories, id string) (model.VaccineHistories, error) {
 	var history model.VaccineHistories
 	if err := h.db.Model(&model.VaccineHistories{}).Where("id = ?", id).Updates(&data).Error; err != nil {

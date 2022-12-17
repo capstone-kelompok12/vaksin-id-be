@@ -294,20 +294,6 @@ func (s *sessionService) GetSessionsById(id string) (response.SessionsResponse, 
 	if err != nil {
 		return responseSession, err
 	}
-	getbackCap := getSessionById.Capacity - len(countBooking)
-
-	dataBooking := make([]response.BookingInSession, len(countBooking))
-
-	for i, val := range countBooking {
-		dataBooking[i] = response.BookingInSession{
-			ID:        val.ID,
-			IdSession: val.IdSession,
-			Queue:     val.Queue,
-			Status:    val.Status,
-			CreatedAt: val.CreatedAt,
-			UpdatedAt: val.UpdatedAt,
-		}
-	}
 
 	getSessionById, err := s.SessionsRepo.GetSessionById(id)
 	if err != nil {

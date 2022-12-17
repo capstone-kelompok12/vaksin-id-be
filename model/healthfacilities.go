@@ -16,6 +16,5 @@ type HealthFacilities struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Address   *Addresses     `gorm:"foreignKey:IdHealthFacilities"` // has one to relationship
-	// Session   []Sessions     `gorm:"foreignKey:IdHealthFacilities"` // has many relationship
-	Vaccine []Vaccines `gorm:"foreignKey:IdHealthFacilities"` // has many relationship
+	Vaccine   []Vaccines     `gorm:"foreignKey:IdHealthFacilities"` // has many relationship
 }

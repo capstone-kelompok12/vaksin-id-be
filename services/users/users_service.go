@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"sort"
 	"time"
 	"vaksin-id-be/dto/payload"
@@ -10,7 +9,10 @@ import (
 	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqla "vaksin-id-be/repository/mysql/addresses"
+	mysqlb "vaksin-id-be/repository/mysql/bookings"
 	mysqlh "vaksin-id-be/repository/mysql/health_facilities"
+	mysqlhs "vaksin-id-be/repository/mysql/histories"
+	mysqls "vaksin-id-be/repository/mysql/sessions"
 	mysqlu "vaksin-id-be/repository/mysql/users"
 	"vaksin-id-be/util"
 
@@ -32,13 +34,26 @@ type userService struct {
 	UserRepo    mysqlu.UserRepository
 	AddressRepo mysqla.AddressesRepository
 	HealthRepo  mysqlh.HealthFacilitiesRepository
+	HistoryRepo mysqlhs.HistoriesRepository
+	BookingRepo mysqlb.BookingRepository
+	SessionRepo mysqls.SessionsRepository
 }
 
-func NewUserService(userRepo mysqlu.UserRepository, addressRepo mysqla.AddressesRepository, healthRepo mysqlh.HealthFacilitiesRepository) *userService {
+func NewUserService(
+	userRepo mysqlu.UserRepository,
+	addressRepo mysqla.AddressesRepository,
+	healthRepo mysqlh.HealthFacilitiesRepository,
+	historyRepo mysqlhs.HistoriesRepository,
+	bookingRepo mysqlb.BookingRepository,
+	sessionRepo mysqls.SessionsRepository,
+) *userService {
 	return &userService{
 		UserRepo:    userRepo,
 		AddressRepo: addressRepo,
 		HealthRepo:  healthRepo,
+		HistoryRepo: historyRepo,
+		BookingRepo: bookingRepo,
+		SessionRepo: sessionRepo,
 	}
 }
 
@@ -174,7 +189,7 @@ func (u *userService) GetUserDataByNik(nik string) (response.UserProfile, error)
 		PhoneNum:     getData.PhoneNum,
 		Gender:       getData.Gender,
 		VaccineCount: getData.VaccineCount,
-		BirthDate:    ageUser.BirthDate,
+		BirthDate:    getData.BirthDate,
 		Age:          ageUser.Age,
 		Address:      getData.Address,
 	}
@@ -211,13 +226,12 @@ func (u *userService) GetUserDataByNikNoAddress(nik string) (response.UserProfil
 
 func (u *userService) GetUserHistory(nik string) (response.UserHistory, error) {
 	var historyUser response.UserHistory
+	// var GetHealthFacil response.HealthFacilitiesCustomUser
 
 	nikUser, err := m.GetUserNik(nik)
 	if err != nil {
 		return historyUser, err
 	}
-
-	fmt.Println(nikUser)
 
 	getData, err := u.UserRepo.GetUserHistoryByNik(nikUser)
 	if err != nil {
@@ -234,6 +248,59 @@ func (u *userService) GetUserHistory(nik string) (response.UserHistory, error) {
 		return historyUser, err
 	}
 
+	countHistoryUser, err := u.HistoryRepo.GetHistoriesByNIK(nikUser)
+	if err != nil {
+		return historyUser, err
+	}
+
+	historyList := make([]response.HistoryCustomUser, len(countHistoryUser))
+
+	for i, val := range countHistoryUser {
+		dataBooking, err := u.BookingRepo.GetBooking(val.IdBooking)
+		if err != nil {
+			return historyUser, err
+		}
+
+		GetHealthFacil, err := u.HealthRepo.GetHealthFacilitiesById(dataBooking.Session.Vaccine.IdHealthFacilities)
+		if err != nil {
+			return historyUser, err
+		}
+
+		dataHealthFacilities := response.HealthFacilitiesCustomUser{
+			ID:        GetHealthFacil.ID,
+			Email:     GetHealthFacil.Email,
+			PhoneNum:  GetHealthFacil.PhoneNum,
+			Name:      GetHealthFacil.Name,
+			Image:     GetHealthFacil.Image,
+			CreatedAt: GetHealthFacil.CreatedAt,
+			UpdatedAt: GetHealthFacil.UpdatedAt,
+			Address:   GetHealthFacil.Address,
+		}
+
+		bookingLoop := response.BookingHistoryLoop{
+			ID:               dataBooking.ID,
+			IdSession:        dataBooking.IdSession,
+			NikUser:          dataBooking.NikUser,
+			Queue:            &dataBooking.Queue,
+			Status:           dataBooking.Status,
+			CreatedAt:        dataBooking.CreatedAt,
+			UpdatedAt:        dataBooking.UpdatedAt,
+			Session:          *dataBooking.Session,
+			HealthFacilities: dataHealthFacilities,
+		}
+
+		historyList[i] = response.HistoryCustomUser{
+			ID:         val.ID,
+			IdBooking:  val.IdBooking,
+			NikUser:    val.NikUser,
+			IdSameBook: val.IdSameBook,
+			Status:     val.Status,
+			CreatedAt:  val.CreatedAt,
+			UpdatedAt:  val.UpdatedAt,
+			Booking:    bookingLoop,
+		}
+	}
+
 	historyUser = response.UserHistory{
 		NIK:          getData.NIK,
 		Email:        getData.Email,
@@ -244,7 +311,7 @@ func (u *userService) GetUserHistory(nik string) (response.UserHistory, error) {
 		BirthDate:    getData.BirthDate,
 		Age:          ageUser.Age,
 		Address:      getData.Address,
-		History:      getData.History,
+		History:      historyList,
 	}
 
 	return historyUser, nil

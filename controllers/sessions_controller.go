@@ -69,6 +69,24 @@ func (s *SessionsController) GetAllSessions(ctx echo.Context) error {
 	})
 }
 
+func (s *SessionsController) GetAllSessionsByAdmin(ctx echo.Context) error {
+	authAdmin := ctx.Request().Header.Get("Authorization")
+
+	data, err := s.SessionService.GetAllSessionsByAdmin(authAdmin)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "success get all sessions",
+		"data":    data,
+	})
+}
+
 func (s *SessionsController) GetAllFinishedSessionCount(ctx echo.Context) error {
 
 	data, err := s.SessionService.GetAllFinishedSessionCount()

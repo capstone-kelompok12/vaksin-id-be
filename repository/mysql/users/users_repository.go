@@ -14,6 +14,7 @@ type UserRepository interface {
 	ReactivatedUpdateUser(data model.Users, nik string) error
 	ReactivatedAddress(nik string) error
 	LoginUser(data model.Users) (model.Users, error)
+	GetDataByIdBooking(id string) (model.Users, error)
 	GetUserDataByNik(nik string) (model.Users, error)
 	GetUserDataByNikNoAddress(nik string) (model.Users, error)
 	GetUserHistoryByNik(nik string) (model.Users, error)
@@ -21,7 +22,6 @@ type UserRepository interface {
 	GetAgeUser(data model.Users) (response.AgeUser, error)
 	DeleteUser(nik string) error
 	NearbyHealthFacilities(city string) ([]model.Addresses, error)
-	// UpdateVaccineHistory()
 }
 
 type userRepository struct {
@@ -80,6 +80,15 @@ func (u *userRepository) LoginUser(data model.Users) (model.Users, error) {
 	return user, nil
 }
 
+func (u *userRepository) GetDataByIdBooking(id string) (model.Users, error) {
+	var user model.Users
+
+	if err := u.db.Preload("History").Joins("History").Where("History.id_booking = ?", id).First(&user).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
 func (u *userRepository) GetUserDataByNik(nik string) (model.Users, error) {
 	var user model.Users
 
@@ -119,7 +128,7 @@ func (u *userRepository) UpdateUserProfile(data model.Users) error {
 func (u *userRepository) GetAgeUser(data model.Users) (response.AgeUser, error) {
 	var age response.AgeUser
 
-	if err := u.db.Raw("SELECT birth_date, DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), birth_date)), '%Y') + 0 AS age FROM users").Scan(&age).Error; err != nil {
+	if err := u.db.Raw("SELECT birth_date, DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), ?)), '%Y') + 0 AS age FROM users", data.BirthDate).Scan(&age).Error; err != nil {
 		return age, err
 	}
 	return age, nil

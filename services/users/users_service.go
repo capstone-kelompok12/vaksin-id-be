@@ -226,7 +226,6 @@ func (u *userService) GetUserDataByNikNoAddress(nik string) (response.UserProfil
 
 func (u *userService) GetUserHistory(nik string) (response.UserHistory, error) {
 	var historyUser response.UserHistory
-	// var GetHealthFacil response.HealthFacilitiesCustomUser
 
 	nikUser, err := m.GetUserNik(nik)
 	if err != nil {
@@ -420,7 +419,6 @@ func (u *userService) NearbyHealthFacilities(payloads payload.NearbyHealth, nik 
 				Ranges:   newRanges,
 				Address:  *val.Address,
 				Vaccine:  val.Vaccine,
-				// Session:  val.Session,
 			}
 		}
 	}

@@ -207,39 +207,6 @@ func (s *sessionService) GetAllSessionsByAdmin(auth string) ([]response.Sessions
 		dataBooking := make([]response.BookingInSession, len(getBooking))
 
 		for idx, value := range getBooking {
-			// getUserData, err := s.UserRepo.GetDataByIdBooking(value.ID)
-			// if err != nil {
-			// 	return sessionsResponse, err
-			// }
-
-			// fmt.Println(&getUserData)
-
-			// getDataUser, err := s.UserRepo.GetUserDataByNikNoAddress(getUserData.NIK)
-			// if err != nil {
-			// 	return sessionsResponse, err
-			// }
-			// fmt.Println(&getUserData)
-
-			// ageUser, err := s.UserRepo.GetAgeUser(getDataUser)
-			// if err != nil {
-			// 	return sessionsResponse, err
-			// }
-
-			// fmt.Println(ageUser.Age)
-
-			// // getHistoryUser
-
-			// userData := response.SessionUserCustom{
-			// 	NIK:          getDataUser.NIK,
-			// 	Email:        getDataUser.Email,
-			// 	Fullname:     getDataUser.Fullname,
-			// 	PhoneNum:     getDataUser.PhoneNum,
-			// 	Gender:       getDataUser.Gender,
-			// 	VaccineCount: getDataUser.VaccineCount,
-			// 	BirthDate:    getDataUser.BirthDate,
-			// 	Age:          ageUser.Age,
-			// 	Address:      getDataUser.Address,
-			// }
 
 			dataBooking[idx] = response.BookingInSession{
 				ID:        value.ID,

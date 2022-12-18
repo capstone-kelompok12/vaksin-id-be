@@ -78,7 +78,6 @@ type UpdateUser struct {
 	NikUser   string
 	Email     string
 	Gender    string
-	Password  string
 	PhoneNum  string
 	BirthDate time.Time
 }

@@ -14,6 +14,7 @@ import (
 	mysqlhs "vaksin-id-be/repository/mysql/histories"
 	mysqls "vaksin-id-be/repository/mysql/sessions"
 	mysqlu "vaksin-id-be/repository/mysql/users"
+	mysqlv "vaksin-id-be/repository/mysql/vaccines"
 	"vaksin-id-be/util"
 
 	"github.com/google/uuid"
@@ -25,6 +26,8 @@ type UserService interface {
 	GetUserDataByNik(nik string) (response.UserProfile, error)
 	GetUserDataByNikNoAddress(nik string) (response.UserProfile, error)
 	GetUserHistory(nik string) (response.UserHistory, error)
+	GetUserRegisteredDashboard() (response.RegisterStatistic, error)
+	GetVaccineRegisteredDashboard() (response.VaccineStatistic, error)
 	UpdateUserProfile(payloads payload.UpdateUser, nik string) (response.UpdateUser, error)
 	DeleteUserProfile(nik string) error
 	NearbyHealthFacilities(payloads payload.NearbyHealth, nik string) (response.UserNearbyHealth, error)
@@ -37,6 +40,7 @@ type userService struct {
 	HistoryRepo mysqlhs.HistoriesRepository
 	BookingRepo mysqlb.BookingRepository
 	SessionRepo mysqls.SessionsRepository
+	VaccineRepo mysqlv.VaccinesRepository
 }
 
 func NewUserService(
@@ -46,6 +50,7 @@ func NewUserService(
 	historyRepo mysqlhs.HistoriesRepository,
 	bookingRepo mysqlb.BookingRepository,
 	sessionRepo mysqls.SessionsRepository,
+	vaccineRepo mysqlv.VaccinesRepository,
 ) *userService {
 	return &userService{
 		UserRepo:    userRepo,
@@ -54,6 +59,7 @@ func NewUserService(
 		HistoryRepo: historyRepo,
 		BookingRepo: bookingRepo,
 		SessionRepo: sessionRepo,
+		VaccineRepo: vaccineRepo,
 	}
 }
 
@@ -316,6 +322,156 @@ func (u *userService) GetUserHistory(nik string) (response.UserHistory, error) {
 	return historyUser, nil
 }
 
+func (u *userService) GetUserRegisteredDashboard() (response.RegisterStatistic, error) {
+	var responseDash response.RegisterStatistic
+	RegisteredData := make([]response.DashboardForm, 3)
+
+	var Name string
+	var FirstDose int
+	var SecondDose int
+	var ThirdDose int
+	var Kosong int
+
+	getData, err := u.UserRepo.GetAllUser()
+	if err != nil {
+		return responseDash, err
+	}
+
+	for _, val := range getData {
+		ageUser, err := u.UserRepo.GetAgeUser(val)
+		if err != nil {
+			return responseDash, err
+		}
+		RegisteredData[0].Name = "12 - 17 Tahun"
+		RegisteredData[1].Name = "18 - 59 Tahun"
+		RegisteredData[2].Name = "60 Tahun Ke atas"
+		if ageUser.Age >= 12 && ageUser.Age <= 17 {
+			if val.VaccineCount == 1 {
+				FirstDose += 1
+			} else if val.VaccineCount == 2 {
+				SecondDose += 1
+			} else if val.VaccineCount == 3 {
+				ThirdDose += 1
+			} else {
+				Kosong = 0
+				fmt.Println(Kosong)
+			}
+			Name = "12 - 17 Tahun"
+			RegisteredData[0] = response.DashboardForm{
+				Name:      Name,
+				DoseOne:   FirstDose,
+				DoseTwo:   SecondDose,
+				DoseThree: ThirdDose,
+			}
+		} else if ageUser.Age >= 18 && ageUser.Age <= 59 {
+			if val.VaccineCount == 1 {
+				FirstDose += 1
+			} else if val.VaccineCount == 2 {
+				SecondDose += 1
+			} else if val.VaccineCount == 3 {
+				ThirdDose += 1
+			} else {
+				Kosong = 0
+				fmt.Println(Kosong)
+			}
+			Name = "18 - 59 Tahun"
+			RegisteredData[1] = response.DashboardForm{
+				Name:      Name,
+				DoseOne:   FirstDose,
+				DoseTwo:   SecondDose,
+				DoseThree: ThirdDose,
+			}
+		} else {
+			if val.VaccineCount == 1 {
+				FirstDose += 1
+			} else if val.VaccineCount == 2 {
+				SecondDose += 1
+			} else if val.VaccineCount == 3 {
+				ThirdDose += 1
+			} else {
+				Kosong = 0
+				fmt.Println(Kosong)
+			}
+			Name = "60 Tahun Ke atas"
+			RegisteredData[2] = response.DashboardForm{
+				Name:      Name,
+				DoseOne:   FirstDose,
+				DoseTwo:   SecondDose,
+				DoseThree: ThirdDose,
+			}
+		}
+	}
+	responseData := response.RegisterStatistic{
+		RegisteredStat: RegisteredData,
+	}
+
+	return responseData, nil
+}
+
+func (u *userService) GetVaccineRegisteredDashboard() (response.VaccineStatistic, error) {
+	var responseDash response.VaccineStatistic
+	var VaccineData []response.DashboardForm
+
+	var Name string
+	var FirstDose int
+	var SecondDose int
+	var ThirdDose int
+
+	var vaccinesResponse []response.VaccinesStockResponse
+
+	getName, err := u.VaccineRepo.GetVaccineByName()
+	if err != nil {
+		return responseDash, err
+	}
+
+	vaccinesResponse = make([]response.VaccinesStockResponse, len(getName))
+
+	for i, val := range getName {
+		vaccinesResponse[i] = response.VaccinesStockResponse{
+			Name:  val.Name,
+			Stock: val.Stock,
+		}
+	}
+
+	allVaccineData, err := u.VaccineRepo.GetAllVaccines()
+	if err != nil {
+		return responseDash, err
+	}
+
+	for _, val := range allVaccineData {
+		fmt.Println(val)
+		fmt.Println(getName)
+		fmt.Println(len(allVaccineData))
+		fmt.Println(len(getName))
+		countName := len(allVaccineData)
+		VaccineData = make([]response.DashboardForm, countName)
+		for j := 0; j < countName; j++ {
+			if val.Name == getName[j].Name {
+				Name = getName[j].Name
+				if val.Dose == 1 {
+					FirstDose += 1
+				} else if val.Dose == 2 {
+					SecondDose += 1
+				} else {
+					ThirdDose += 1
+				}
+				VaccineData[j] = response.DashboardForm{
+					Name:      Name,
+					DoseOne:   FirstDose,
+					DoseTwo:   SecondDose,
+					DoseThree: ThirdDose,
+				}
+			}
+		}
+	}
+
+	responseDash = response.VaccineStatistic{
+		VaccineStat: VaccineData,
+	}
+
+	return responseDash, nil
+}
+
 func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string) (response.UpdateUser, error) {
 	var dataResp response.UpdateUser
 
@@ -338,13 +494,12 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 		return dataResp, err
 	}
 
-	data, err := u.GetUserDataByNikNoAddress(getNikUser)
-	if err != nil {
-		return dataResp, err
-	}
+	// data, err := u.GetUserDataByNikNoAddress(getNikUser)
+	// if err != nil {
+	// 	return dataResp, err
+	// }
 
 	dataUser := model.Users{
-		NIK:       payloads.NikUser,
 		Email:     payloads.Email,
 		Password:  hashPass,
 		Fullname:  payloads.Fullname,
@@ -353,7 +508,12 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 		BirthDate: dateBirth,
 	}
 
-	if err := u.UserRepo.UpdateUserProfile(dataUser); err != nil {
+	if err := u.UserRepo.UpdateUserProfile(dataUser, getNikUser); err != nil {
+		return dataResp, err
+	}
+
+	data, err := u.GetUserDataByNikNoAddress(getNikUser)
+	if err != nil {
 		return dataResp, err
 	}
 
@@ -361,7 +521,6 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 		Fullname:  data.Fullname,
 		NikUser:   data.NIK,
 		Email:     data.Email,
-		Password:  hashPass,
 		PhoneNum:  data.PhoneNum,
 		Gender:    data.Gender,
 		BirthDate: dateBirth,

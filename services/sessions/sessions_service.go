@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
@@ -139,7 +138,6 @@ func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
 		if err != nil {
 			return sessionsResponse, err
 		}
-		fmt.Print(len(getBooking))
 
 		dataBooking := make([]response.BookingInSession, len(getBooking))
 
@@ -224,7 +222,6 @@ func (s *sessionService) GetAllSessionsByAdmin(auth string) ([]response.Sessions
 		if err != nil {
 			return sessionsResponse, err
 		}
-		fmt.Println(getSessionById.Capacity)
 
 		getbackCap := getSessionById.Capacity - len(getBooking)
 
@@ -278,6 +275,7 @@ func (s *sessionService) GetSessionsById(id string) (response.SessionsResponse, 
 			Status:    val.Status,
 			CreatedAt: val.CreatedAt,
 			UpdatedAt: val.UpdatedAt,
+			User:      &val.User,
 		}
 	}
 

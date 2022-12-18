@@ -11,8 +11,8 @@ type RegisterUser struct {
 }
 
 type UpdateUser struct {
-	Fullname  string `json:"fullname" gorm:"size:255;not null" validate:"required" example:"user"`
-	NikUser   string `json:"nik" gorm:"varchar:16;not null" validate:"required,min=16,max=16" example:"1234567898765432"`
+	Fullname string `json:"fullname" gorm:"size:255;not null" validate:"required" example:"user"`
+	// NikUser   string `json:"nik" gorm:"varchar:16;not null" validate:"required,min=16,max=16" example:"1234567898765432"`
 	Email     string `json:"email" gorm:"size:100;not null" validate:"required,email" example:"user@gmail.com"`
 	Gender    string `json:"gender" gorm:"size:1;not null" validate:"required" example:"L"`
 	Password  string `json:"password" gorm:"size:100;not null" validate:"required,min=6" example:"user123"`

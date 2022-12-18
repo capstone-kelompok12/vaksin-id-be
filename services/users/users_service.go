@@ -440,10 +440,6 @@ func (u *userService) GetVaccineRegisteredDashboard() (response.VaccineStatistic
 	}
 
 	for _, val := range allVaccineData {
-		fmt.Println(val)
-		fmt.Println(getName)
-		fmt.Println(len(allVaccineData))
-		fmt.Println(len(getName))
 		countName := len(allVaccineData)
 		VaccineData = make([]response.DashboardForm, countName)
 		for j := 0; j < countName; j++ {

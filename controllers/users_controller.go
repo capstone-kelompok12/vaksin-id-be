@@ -124,6 +124,40 @@ func (u *UserController) GetUserDataByNik(ctx echo.Context) error {
 	})
 }
 
+func (u *UserController) GetUserRegisteredDashboard(ctx echo.Context) error {
+	data, err := u.UserService.GetUserRegisteredDashboard()
+
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "success get user registered statistics",
+		"data":    data,
+	})
+}
+
+func (u *UserController) GetVaccineRegisteredDashboard(ctx echo.Context) error {
+	data, err := u.UserService.GetVaccineRegisteredDashboard()
+
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"error":   false,
+		"message": "success get vaccine statistics",
+		"data":    data,
+	})
+}
+
 func (u *UserController) GetUserDataByNikCheck(ctx echo.Context) error {
 	nik := ctx.Param("nik")
 	data, err := u.UserService.GetUserDataByNikNoAddress(nik)

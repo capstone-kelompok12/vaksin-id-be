@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
@@ -139,7 +138,6 @@ func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
 		if err != nil {
 			return sessionsResponse, err
 		}
-		fmt.Print(len(getBooking))
 
 		dataBooking := make([]response.BookingInSession, len(getBooking))
 
@@ -207,39 +205,6 @@ func (s *sessionService) GetAllSessionsByAdmin(auth string) ([]response.Sessions
 		dataBooking := make([]response.BookingInSession, len(getBooking))
 
 		for idx, value := range getBooking {
-			// getUserData, err := s.UserRepo.GetDataByIdBooking(value.ID)
-			// if err != nil {
-			// 	return sessionsResponse, err
-			// }
-
-			// fmt.Println(&getUserData)
-
-			// getDataUser, err := s.UserRepo.GetUserDataByNikNoAddress(getUserData.NIK)
-			// if err != nil {
-			// 	return sessionsResponse, err
-			// }
-			// fmt.Println(&getUserData)
-
-			// ageUser, err := s.UserRepo.GetAgeUser(getDataUser)
-			// if err != nil {
-			// 	return sessionsResponse, err
-			// }
-
-			// fmt.Println(ageUser.Age)
-
-			// // getHistoryUser
-
-			// userData := response.SessionUserCustom{
-			// 	NIK:          getDataUser.NIK,
-			// 	Email:        getDataUser.Email,
-			// 	Fullname:     getDataUser.Fullname,
-			// 	PhoneNum:     getDataUser.PhoneNum,
-			// 	Gender:       getDataUser.Gender,
-			// 	VaccineCount: getDataUser.VaccineCount,
-			// 	BirthDate:    getDataUser.BirthDate,
-			// 	Age:          ageUser.Age,
-			// 	Address:      getDataUser.Address,
-			// }
 
 			dataBooking[idx] = response.BookingInSession{
 				ID:        value.ID,
@@ -257,7 +222,6 @@ func (s *sessionService) GetAllSessionsByAdmin(auth string) ([]response.Sessions
 		if err != nil {
 			return sessionsResponse, err
 		}
-		fmt.Println(getSessionById.Capacity)
 
 		getbackCap := getSessionById.Capacity - len(getBooking)
 
@@ -311,6 +275,7 @@ func (s *sessionService) GetSessionsById(id string) (response.SessionsResponse, 
 			Status:    val.Status,
 			CreatedAt: val.CreatedAt,
 			UpdatedAt: val.UpdatedAt,
+			User:      &val.User,
 		}
 	}
 

@@ -22,8 +22,8 @@ The goal of the project is to help the government’s goal of Covid-19 vaccinati
 ## 🎨 Design
 * ERD <img src="assets/ERD.svg" alt="ERD-Vaccine-Booking-Team-12-Alttera">
 
-* Usecase Diagram <img src="assets/UseCase.svg" alt="Usecase-Vaccine-Booking-Team-12-Alttera">
+* Usecase Diagram <img src="assets/Use-Case.svg" alt="Usecase-Vaccine-Booking-Team-12-Alttera">
   
 ## 📑 Backend Documentation
-* [Swagger](https://app.swaggerhub.com/apis-docs/MAULANAGALIH3496_1/VAKSIN.ID/1.0.2)
+* [Swagger](https://app.swaggerhub.com/apis-docs/MAULANAGALIH3496_1/VAKSIN.ID/1.0..3)
 * [Postman](https://documenter.getpostman.com/view/19210761/2s8YzWT26m)

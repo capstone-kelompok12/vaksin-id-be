@@ -18,7 +18,9 @@ type UserRepository interface {
 	GetUserDataByNik(nik string) (model.Users, error)
 	GetUserDataByNikNoAddress(nik string) (model.Users, error)
 	GetUserHistoryByNik(nik string) (model.Users, error)
-	UpdateUserProfile(data model.Users) error
+	GetAllUser() ([]model.Users, error)
+	UpdateAccUserProfile(data model.Users) error
+	UpdateUserProfile(data model.Users, nik string) error
 	GetAgeUser(data model.Users) (response.AgeUser, error)
 	DeleteUser(nik string) error
 	NearbyHealthFacilities(city string) ([]model.Addresses, error)
@@ -116,7 +118,26 @@ func (u *userRepository) GetUserDataByNikNoAddress(nik string) (model.Users, err
 	return user, nil
 }
 
-func (u *userRepository) UpdateUserProfile(data model.Users) error {
+func (u *userRepository) GetAllUser() ([]model.Users, error) {
+	var user []model.Users
+
+	if err := u.db.Preload("Address").Preload("History").Model(&model.Users{}).Find(&user).Error; err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (u *userRepository) UpdateUserProfile(data model.Users, nik string) error {
+	var user model.Users
+
+	if err := u.db.Model(&user).Where("nik = ?", nik).Updates(&data).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (u *userRepository) UpdateAccUserProfile(data model.Users) error {
 	var user model.Users
 
 	if err := u.db.Model(&user).Where("nik = ?", data.NIK).Updates(&data).Error; err != nil {

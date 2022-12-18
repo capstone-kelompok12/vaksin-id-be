@@ -20,3 +20,18 @@ type SessionFinished struct {
 type VaccinatedUser struct {
 	Vaccinated int
 }
+
+type RegisterStatistic struct {
+	RegisteredStat []DashboardForm
+}
+
+type VaccineStatistic struct {
+	VaccineStat []DashboardForm
+}
+
+type DashboardForm struct {
+	Name      string
+	DoseOne   int
+	DoseTwo   int
+	DoseThree int
+}

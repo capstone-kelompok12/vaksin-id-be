@@ -24,12 +24,13 @@ import (
 
 func InitUserAPI(db *gorm.DB) *controllers.UserController {
 	userRepo := mysql_user.NewUserRepository(db)
+	vaccinesRepo := mysql_vaccines.NewVaccinesRepository(db)
 	historyRepo := mysql_histories.NewHistoryRepository(db)
 	addressRepo := mysql_address.NewAddressesRepository(db)
 	bookingsRepo := mysql_bookings.NewBookingRepository(db)
 	healthRepo := mysql_health.NewHealthFacilitiesRepository(db)
 	sessionsRepo := mysql_sessions.NewSessionsRepository(db)
-	userServ := services_user.NewUserService(userRepo, addressRepo, healthRepo, historyRepo, bookingsRepo, sessionsRepo)
+	userServ := services_user.NewUserService(userRepo, addressRepo, healthRepo, historyRepo, bookingsRepo, sessionsRepo, vaccinesRepo)
 	addressServ := services_addresses.NewAddressesService(addressRepo)
 	userAPI := controllers.NewUserController(userServ, addressServ)
 	return userAPI

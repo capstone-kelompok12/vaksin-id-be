@@ -394,7 +394,7 @@ func (b *bookingService) UpdateAccAttendend(payloads []payload.UpdateAccHistory)
 			VaccineCount: defaultVaccineCount,
 		}
 
-		if err := b.UserRepo.UpdateUserProfile(updateUserCount); err != nil {
+		if err := b.UserRepo.UpdateAccUserProfile(updateUserCount); err != nil {
 			return updateData, err
 		}
 

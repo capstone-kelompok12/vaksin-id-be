@@ -57,7 +57,7 @@ func (s *sessionsRepository) GetSumOfCapacity(id string) (response.SessionSumCap
 
 func (s *sessionsRepository) GetSessionById(id string) (model.Sessions, error) {
 	var session model.Sessions
-	if err := s.db.Preload("Vaccine").Preload("Booking.User").Where("id = ?", id).First(&session).Error; err != nil {
+	if err := s.db.Preload("Vaccine").Preload("Booking.User.Address").Where("id = ?", id).First(&session).Error; err != nil {
 		return session, err
 	}
 	return session, nil

@@ -25,6 +25,7 @@ type SessionsResponse struct {
 type BookingInSession struct {
 	ID        string
 	IdSession string
+	NikUser   string
 	Queue     int
 	Status    *string
 	CreatedAt time.Time

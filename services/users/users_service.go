@@ -355,7 +355,7 @@ func (u *userService) GetUserRegisteredDashboard() (response.RegisterStatistic, 
 				ThirdDose += 1
 			} else {
 				Kosong = 0
-				fmt.Println(Kosong)
+				fmt.Print(Kosong)
 			}
 			Name = "12 - 17 Tahun"
 			RegisteredData[0] = response.DashboardForm{
@@ -373,7 +373,7 @@ func (u *userService) GetUserRegisteredDashboard() (response.RegisterStatistic, 
 				ThirdDose += 1
 			} else {
 				Kosong = 0
-				fmt.Println(Kosong)
+				fmt.Print(Kosong)
 			}
 			Name = "18 - 59 Tahun"
 			RegisteredData[1] = response.DashboardForm{
@@ -391,7 +391,7 @@ func (u *userService) GetUserRegisteredDashboard() (response.RegisterStatistic, 
 				ThirdDose += 1
 			} else {
 				Kosong = 0
-				fmt.Println(Kosong)
+				fmt.Print(Kosong)
 			}
 			Name = "60 Tahun Ke atas"
 			RegisteredData[2] = response.DashboardForm{
@@ -440,10 +440,6 @@ func (u *userService) GetVaccineRegisteredDashboard() (response.VaccineStatistic
 	}
 
 	for _, val := range allVaccineData {
-		fmt.Println(val)
-		fmt.Println(getName)
-		fmt.Println(len(allVaccineData))
-		fmt.Println(len(getName))
 		countName := len(allVaccineData)
 		VaccineData = make([]response.DashboardForm, countName)
 		for j := 0; j < countName; j++ {

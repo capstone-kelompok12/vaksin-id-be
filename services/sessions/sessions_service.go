@@ -268,14 +268,20 @@ func (s *sessionService) GetSessionsById(id string) (response.SessionsResponse, 
 	dataBooking := make([]response.BookingInSession, len(countBooking))
 
 	for i, val := range countBooking {
+
+		getUser, err := s.UserRepo.GetUserDataByNikNoAddress(val.NikUser)
+		if err != nil {
+			return responseSession, err
+		}
 		dataBooking[i] = response.BookingInSession{
 			ID:        val.ID,
 			IdSession: val.IdSession,
+			NikUser:   val.NikUser,
 			Queue:     val.Queue,
 			Status:    val.Status,
 			CreatedAt: val.CreatedAt,
 			UpdatedAt: val.UpdatedAt,
-			User:      &val.User,
+			User:      &getUser,
 		}
 	}
 

@@ -25,7 +25,7 @@ The goal of the project is to help the government’s goal of Covid-19 vaccinati
 * Usecase Diagram <img src="assets/Use-Case.svg" alt="Usecase-Vaccine-Booking-Team-12-Alttera">
 
 ## 💻 Rest API Design
-<img src="assets/Architecture.svg" alt="design rest api diagram">
+<img src="assets/Design.svg" alt="design rest api diagram">
 
 ## 📑 Backend Documentation
 * [Swagger](https://vaksin-y3awbiupna-as.a.run.app/swagger/index.html#/)

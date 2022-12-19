@@ -70,7 +70,7 @@ func (a *addressesRepository) GetAddressHealthFacilities(id string) (model.Addre
 func (a *addressesRepository) DeleteAddressUser(nik string) error {
 	var address model.Addresses
 
-	if err := a.db.Where("nik_user = ?", nik).Find(&address).Delete(&address).Error; err != nil {
+	if err := a.db.Where("nik_user = ?", nik).Find(&address).Unscoped().Delete(&address).Error; err != nil {
 		return err
 	}
 	return nil

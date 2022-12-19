@@ -157,7 +157,7 @@ func (u *userRepository) GetAgeUser(data model.Users) (response.AgeUser, error) 
 
 func (u *userRepository) DeleteUser(nik string) error {
 	var user model.Users
-	if err := u.db.Where("nik = ?", nik).Find(&user).Delete(&user).Error; err != nil {
+	if err := u.db.Where("nik = ?", nik).Find(&user).Unscoped().Delete(&user).Error; err != nil {
 		return err
 	}
 	return nil

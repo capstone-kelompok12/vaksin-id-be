@@ -11,7 +11,7 @@
 The goal of the project is to help the government’s goal of Covid-19 vaccinations by facilitating users to book vaccination sessions easily and creating a proper system for health facilities.
 
 ## 🚩 MVP
-| Admin | User |
+| User  | Admin |
 | ----------- | ----------- |
 | <ul><li>- [x] Register to the system using NIK</li>| <ul><li>- [x] Manage vaccination bookings</li> |
 | <ul><li>- [x] Add their family members</li>| <ul><li>- [x] Manage sessions availability</li> |
@@ -20,10 +20,10 @@ The goal of the project is to help the government’s goal of Covid-19 vaccinati
 | <ul><li>- [x] Find nearby health facilities </li>| <ul><li>- [x] Manage User Register</li> |
 
 ## 🎨 Design
-* ERD <img src="assets/ERD.svg" alt="ERD-Vaccine-Booking-Team-12-Alttera">
+* ERD <img src="assets/ERD_vaccine.svg" alt="ERD-Vaccine-Booking-Team-12-Alttera">
 
 * Usecase Diagram <img src="assets/Use-Case.svg" alt="Usecase-Vaccine-Booking-Team-12-Alttera">
   
 ## 📑 Backend Documentation
-* [Swagger](https://app.swaggerhub.com/apis-docs/MAULANAGALIH3496_1/VAKSIN.ID/1.0..3)
+* [Swagger](https://vaksin-y3awbiupna-as.a.run.app/swagger/index.html#/)
 * [Postman](https://documenter.getpostman.com/view/19210761/2s8YzWT26m)

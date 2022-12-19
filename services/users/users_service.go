@@ -28,7 +28,6 @@ type UserService interface {
 	GetUserDataByNikNoAddress(nik string) (response.UserProfile, error)
 	GetUserHistory(nik string) (response.UserHistory, error)
 	GetUserRegisteredDashboard() (response.RegisterStatistic, error)
-	GetVaccineRegisteredDashboard() (response.VaccineStatistic, error)
 	UpdateUserProfile(payloads payload.UpdateUser, nik string) (response.UpdateUser, error)
 	DeleteUserProfile(nik string) error
 	NearbyHealthFacilities(payloads payload.NearbyHealth, nik string) (response.UserNearbyHealth, error)
@@ -409,66 +408,6 @@ func (u *userService) GetUserRegisteredDashboard() (response.RegisterStatistic, 
 	return responseData, nil
 }
 
-func (u *userService) GetVaccineRegisteredDashboard() (response.VaccineStatistic, error) {
-	var responseDash response.VaccineStatistic
-	var VaccineData []response.DashboardForm
-
-	var Name string
-	var FirstDose int
-	var SecondDose int
-	var ThirdDose int
-
-	var vaccinesResponse []response.VaccinesStockResponse
-
-	getName, err := u.VaccineRepo.GetVaccineByName()
-	if err != nil {
-		return responseDash, err
-	}
-
-	vaccinesResponse = make([]response.VaccinesStockResponse, len(getName))
-
-	for i, val := range getName {
-		vaccinesResponse[i] = response.VaccinesStockResponse{
-			Name:  val.Name,
-			Stock: val.Stock,
-		}
-	}
-
-	allVaccineData, err := u.VaccineRepo.GetAllVaccines()
-	if err != nil {
-		return responseDash, err
-	}
-
-	for _, val := range allVaccineData {
-		countName := len(allVaccineData)
-		VaccineData = make([]response.DashboardForm, countName)
-		for j := 0; j < countName; j++ {
-			if val.Name == getName[j].Name {
-				Name = getName[j].Name
-				if val.Dose == 1 {
-					FirstDose += 1
-				} else if val.Dose == 2 {
-					SecondDose += 1
-				} else {
-					ThirdDose += 1
-				}
-				VaccineData[j] = response.DashboardForm{
-					Name:      Name,
-					DoseOne:   FirstDose,
-					DoseTwo:   SecondDose,
-					DoseThree: ThirdDose,
-				}
-			}
-		}
-	}
-
-	responseDash = response.VaccineStatistic{
-		VaccineStat: VaccineData,
-	}
-
-	return responseDash, nil
-}
-
 func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string) (response.UpdateUser, error) {
 	var dataResp response.UpdateUser
 
@@ -490,11 +429,6 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 	if err != nil {
 		return dataResp, err
 	}
-
-	// data, err := u.GetUserDataByNikNoAddress(getNikUser)
-	// if err != nil {
-	// 	return dataResp, err
-	// }
 
 	dataUser := model.Users{
 		Email:     payloads.Email,

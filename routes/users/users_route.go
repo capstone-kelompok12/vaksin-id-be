@@ -13,7 +13,6 @@ func UserUnauthenticated(routes *echo.Group, api *controllers.UserController) {
 		routes.POST("/signup", api.RegisterUser)
 		routes.POST("/login", api.LoginUser)
 		routes.GET("/dashboard/statistics/users", api.GetUserRegisteredDashboard)
-		routes.GET("/dashboard/statistics/vaccines", api.GetVaccineRegisteredDashboard)
 	}
 }
 

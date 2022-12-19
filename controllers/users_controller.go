@@ -22,16 +22,6 @@ func NewUserController(userServ service_u.UserService, addressServ service_a.Add
 	}
 }
 
-// @Summary 	Register Users
-// @Description Register User
-// @Tags 		Authentication
-// @Accept		json
-// @Produce 	json
-// @Param		register body 	payload.RegisterUser	true	"Input Register User"
-// @Success 	201		{object} 	response.Response{data=payload.RegisterUser}		"success register user"
-// @Router 		/api/v1/signup [post]
-// @failure		400		{object}	response.ResponseError	"StatusBadRequest"
-// @failure		500		{object}	response.ResponseError	"StatusInternalServerError"
 func (u *UserController) RegisterUser(ctx echo.Context) error {
 	var payloads payload.RegisterUser
 
@@ -64,16 +54,6 @@ func (u *UserController) RegisterUser(ctx echo.Context) error {
 	})
 }
 
-// @Summary 	Login Users
-// @Description Login User
-// @Tags 		Authentication
-// @Accept		json
-// @Produce 	json
-// @Param		login body 	payload.Login	true	"Input Login User"
-// @Success 	200		{object} 	response.Response{data=response.Login}		"success login user"
-// @Router 		/api/v1/login [post]
-// @failure		400		{object}		response.ResponseError	"StatusBadRequest"
-// @failure		401		{object}	response.ResponseError	"StatusUnauthorized"
 func (u *UserController) LoginUser(ctx echo.Context) error {
 	var payload payload.Login
 
@@ -100,12 +80,6 @@ func (u *UserController) LoginUser(ctx echo.Context) error {
 	})
 }
 
-// @Summary		Get User by NIK
-// @Description	This can only be done by the logged in user.
-// @Tags		Users
-// @Produce		json
-// @Success		200	{object}	response.Response{data=response.UserProfile}	"Success get user"
-// @Router		/api/v1/profile [get]
 func (u *UserController) GetUserDataByNik(ctx echo.Context) error {
 	nik := ctx.Request().Header.Get("Authorization")
 	data, err := u.UserService.GetUserDataByNik(nik)
@@ -137,23 +111,6 @@ func (u *UserController) GetUserRegisteredDashboard(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"error":   false,
 		"message": "success get user registered statistics",
-		"data":    data,
-	})
-}
-
-func (u *UserController) GetVaccineRegisteredDashboard(ctx echo.Context) error {
-	data, err := u.UserService.GetVaccineRegisteredDashboard()
-
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error":   true,
-			"message": err.Error(),
-		})
-	}
-
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"error":   false,
-		"message": "success get vaccine statistics",
 		"data":    data,
 	})
 }
@@ -195,15 +152,6 @@ func (u *UserController) GetUserHistoryByNikCheck(ctx echo.Context) error {
 	})
 }
 
-// @Summary 	Update User
-// @Description This can only be done by the logged in user.
-// @Tags 		Users
-// @Accept		json
-// @Produce 	json
-// @Param		update body 	payload.UpdateUser	true	"Input new data user"
-// @Success 	200		{object} 	response.Response{data=payload.UpdateUser}		"success update user"
-// @Router 		/api/v1/profile [put]
-// @failure		400		{object}		response.ResponseError	"StatusBadRequest"
 func (u *UserController) UpdateUser(ctx echo.Context) error {
 	var payloads payload.UpdateUser
 
@@ -231,12 +179,6 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 	})
 }
 
-// @Summary		Get User Address
-// @Description	This can only be done by the logged in user.
-// @Tags		Users
-// @Produce		json
-// @Success		200	{object}	response.Response{data=response.UserAddresses}	"Success get user address"
-// @Router		/api/v1/profile/address [get]
 func (u *UserController) GetUserAddress(ctx echo.Context) error {
 	nik := ctx.Request().Header.Get("Authorization")
 	data, err := u.AddressService.GetAddressUser(nik)
@@ -255,13 +197,6 @@ func (u *UserController) GetUserAddress(ctx echo.Context) error {
 	})
 }
 
-// @Summary 	Delete User
-// @Description This can only be done by the logged in user.
-// @Tags 		Users
-// @Produce 	json
-// @Success 	200		{object} 	response.ResponseDelete	"success delete user"
-// @Router 		/api/v1/profile [delete]
-// @failure		401		{object}		response.ResponseError	"StatusUnauthorized"
 func (u *UserController) DeleteUser(ctx echo.Context) error {
 	nik := ctx.Request().Header.Get("Authorization")
 
@@ -278,16 +213,6 @@ func (u *UserController) DeleteUser(ctx echo.Context) error {
 	})
 }
 
-// @Summary 	Update User Address
-// @Description This can only be done by the logged in user.
-// @Tags 		Users
-// @Accept		json
-// @Produce 	json
-// @Param		update body 	payload.UpdateAddress	true	"Input new data user address"
-// @Success 	200		{object} 	response.Response{data=payload.UpdateUser}		"success update address user"
-// @Router 		/api/v1/profile/address [put]
-// @failure		400		{object}		response.ResponseError	"StatusBadRequest"
-// @failure		401		{object}	response.ResponseError	"StatusUnauthorized"
 func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 	var payloads payload.UpdateAddress
 

@@ -23,7 +23,10 @@ The goal of the project is to help the government’s goal of Covid-19 vaccinati
 * ERD <img src="assets/ERD_vaccine.svg" alt="ERD-Vaccine-Booking-Team-12-Alttera">
 
 * Usecase Diagram <img src="assets/Use-Case.svg" alt="Usecase-Vaccine-Booking-Team-12-Alttera">
-  
+
+## 💻 Rest API Design
+<img src="assets/Design.svg" alt="design rest api diagram">
+
 ## 📑 Backend Documentation
 * [Swagger](https://vaksin-y3awbiupna-as.a.run.app/swagger/index.html#/)
 * [Postman](https://documenter.getpostman.com/view/19210761/2s8YzWT26m)

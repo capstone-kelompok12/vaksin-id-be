@@ -33,7 +33,7 @@ func (u *UserController) RegisterUser(ctx echo.Context) error {
 		})
 	}
 
-	if err := util.ValidateRegister(payloads); err != nil {
+	if err := util.Validate(payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),

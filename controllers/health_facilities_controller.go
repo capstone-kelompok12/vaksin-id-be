@@ -34,7 +34,7 @@ func (h *HealthFacilitiesController) CreateHealthFacilities(ctx echo.Context) er
 		})
 	}
 
-	if err := util.ValidateHealthFacilities(payloads); err != nil {
+	if err := util.Validate(payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),

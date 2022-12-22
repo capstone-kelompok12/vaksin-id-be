@@ -31,6 +31,15 @@ type BookingInSession struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	User      *model.Users
+	History   SessionCustomHistory
+}
+
+type SessionCustomHistory struct {
+	ID         string
+	IdBooking  string
+	NikUser    string
+	IdSameBook string
+	Status     string
 }
 
 type SessionUserCustom struct {

@@ -6,6 +6,7 @@ import (
 	service_s "vaksin-id-be/services/sessions"
 	"vaksin-id-be/util"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -36,9 +37,7 @@ func (s *SessionsController) CreateSession(ctx echo.Context) error {
 		})
 	}
 
-	authAdmin := ctx.Request().Header.Get("Authorization")
-
-	data, err := s.SessionService.CreateSessions(payloads, authAdmin)
+	data, err := s.SessionService.CreateSessions(payloads)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
@@ -70,9 +69,11 @@ func (s *SessionsController) GetAllSessions(ctx echo.Context) error {
 }
 
 func (s *SessionsController) GetAllSessionsByAdmin(ctx echo.Context) error {
-	authAdmin := ctx.Request().Header.Get("Authorization")
+	admin := ctx.Get("user").(*jwt.Token)
+	claimId := admin.Claims.(jwt.MapClaims)
+	id := claimId["IdHealthFacilities"].(string)
 
-	data, err := s.SessionService.GetAllSessionsByAdmin(authAdmin)
+	data, err := s.SessionService.GetAllSessionsByAdmin(id)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,

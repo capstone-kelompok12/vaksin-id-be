@@ -7,6 +7,7 @@ import (
 	service_u "vaksin-id-be/services/users"
 	"vaksin-id-be/util"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -81,7 +82,9 @@ func (u *UserController) LoginUser(ctx echo.Context) error {
 }
 
 func (u *UserController) GetUserDataByNik(ctx echo.Context) error {
-	nik := ctx.Request().Header.Get("Authorization")
+	user := ctx.Get("user").(*jwt.Token)
+	claimId := user.Claims.(jwt.MapClaims)
+	nik := claimId["NikUser"].(string)
 	data, err := u.UserService.GetUserDataByNik(nik)
 
 	if err != nil {
@@ -134,9 +137,11 @@ func (u *UserController) GetUserDataByNikCheck(ctx echo.Context) error {
 }
 
 func (u *UserController) GetUserHistoryByNikCheck(ctx echo.Context) error {
-	authUser := ctx.Request().Header.Get("Authorization")
+	user := ctx.Get("user").(*jwt.Token)
+	claimId := user.Claims.(jwt.MapClaims)
+	nik := claimId["NikUser"].(string)
 
-	data, err := u.UserService.GetUserHistory(authUser)
+	data, err := u.UserService.GetUserHistory(nik)
 
 	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -162,7 +167,9 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 		})
 	}
 
-	nik := ctx.Request().Header.Get("Authorization")
+	user := ctx.Get("user").(*jwt.Token)
+	claimId := user.Claims.(jwt.MapClaims)
+	nik := claimId["NikUser"].(string)
 
 	data, err := u.UserService.UpdateUserProfile(payloads, nik)
 	if err != nil {
@@ -180,7 +187,9 @@ func (u *UserController) UpdateUser(ctx echo.Context) error {
 }
 
 func (u *UserController) GetUserAddress(ctx echo.Context) error {
-	nik := ctx.Request().Header.Get("Authorization")
+	user := ctx.Get("user").(*jwt.Token)
+	claimId := user.Claims.(jwt.MapClaims)
+	nik := claimId["NikUser"].(string)
 	data, err := u.AddressService.GetAddressUser(nik)
 
 	if err != nil {
@@ -198,7 +207,9 @@ func (u *UserController) GetUserAddress(ctx echo.Context) error {
 }
 
 func (u *UserController) DeleteUser(ctx echo.Context) error {
-	nik := ctx.Request().Header.Get("Authorization")
+	user := ctx.Get("user").(*jwt.Token)
+	claimId := user.Claims.(jwt.MapClaims)
+	nik := claimId["NikUser"].(string)
 
 	if err := u.UserService.DeleteUserProfile(nik); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
@@ -223,7 +234,9 @@ func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 		})
 	}
 
-	nik := ctx.Request().Header.Get("Authorization")
+	user := ctx.Get("user").(*jwt.Token)
+	claimId := user.Claims.(jwt.MapClaims)
+	nik := claimId["NikUser"].(string)
 
 	data, err := u.AddressService.UpdateUserAddress(payloads, nik)
 	if err != nil {
@@ -241,7 +254,9 @@ func (u *UserController) UpdateUserAddress(ctx echo.Context) error {
 }
 
 func (u *UserController) UserNearbyHealth(ctx echo.Context) error {
-	nik := ctx.Request().Header.Get("Authorization")
+	user := ctx.Get("user").(*jwt.Token)
+	claimId := user.Claims.(jwt.MapClaims)
+	nik := claimId["NikUser"].(string)
 	var payloads payload.NearbyHealth
 
 	if err := ctx.Bind(&payloads); err != nil {

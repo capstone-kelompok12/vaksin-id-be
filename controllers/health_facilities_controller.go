@@ -8,6 +8,7 @@ import (
 	service_h "vaksin-id-be/services/health_facilities"
 	"vaksin-id-be/util"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -93,7 +94,9 @@ func (h *HealthFacilitiesController) GetAllHealthFacilities(ctx echo.Context) er
 func (h *HealthFacilitiesController) UpdateHealthFacilities(ctx echo.Context) error {
 	var payloads payload.UpdateHealthFacilities
 
-	id := ctx.Request().Header.Get("Authorization")
+	admin := ctx.Get("user").(*jwt.Token)
+	claimId := admin.Claims.(jwt.MapClaims)
+	id := claimId["IdHealthFacilities"].(string)
 
 	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{

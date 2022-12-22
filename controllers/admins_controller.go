@@ -5,6 +5,7 @@ import (
 	"vaksin-id-be/dto/payload"
 	service_a "vaksin-id-be/services/admins"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -45,7 +46,9 @@ func (a *AdminController) LoginAdmin(ctx echo.Context) error {
 }
 
 func (a *AdminController) GetAdmins(ctx echo.Context) error {
-	id := ctx.Request().Header.Get("Authorization")
+	admin := ctx.Get("user").(*jwt.Token)
+	claimId := admin.Claims.(jwt.MapClaims)
+	id := claimId["Id"].(string)
 
 	data, err := a.AdminServ.GetAdmins(id)
 
@@ -83,7 +86,9 @@ func (a *AdminController) GetAllAdmins(ctx echo.Context) error {
 func (a *AdminController) UpdateAdmins(ctx echo.Context) error {
 	var payloads payload.AdminsPayload
 
-	id := ctx.Request().Header.Get("Authorization")
+	admin := ctx.Get("user").(*jwt.Token)
+	claimId := admin.Claims.(jwt.MapClaims)
+	id := claimId["Id"].(string)
 
 	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{

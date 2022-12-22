@@ -5,7 +5,6 @@ import (
 	"time"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
-	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqlb "vaksin-id-be/repository/mysql/bookings"
 	mysqlh "vaksin-id-be/repository/mysql/histories"
@@ -17,9 +16,9 @@ import (
 )
 
 type SessionsService interface {
-	CreateSessions(payloads payload.SessionsPayload, auth string) (response.SessionsResponse, error)
+	CreateSessions(payloads payload.SessionsPayload) (response.SessionsResponse, error)
 	GetAllSessions() ([]response.SessionsResponse, error)
-	GetAllSessionsByAdmin(auth string) ([]response.SessionsResponse, error)
+	GetAllSessionsByAdmin(idhealth string) ([]response.SessionsResponse, error)
 	GetSessionsById(id string) (response.SessionsResponse, error)
 	GetSessionActive() (response.IsCloseFalse, error)
 	GetAllFinishedSessionCount() (response.SessionFinished, error)
@@ -46,7 +45,7 @@ func NewSessionsService(sessionRepo mysqls.SessionsRepository, vaccineRepo mysql
 	}
 }
 
-func (s *sessionService) CreateSessions(payloads payload.SessionsPayload, auth string) (response.SessionsResponse, error) {
+func (s *sessionService) CreateSessions(payloads payload.SessionsPayload) (response.SessionsResponse, error) {
 	var sessionModel model.Sessions
 	var sessionResponse response.SessionsResponse
 
@@ -183,15 +182,10 @@ func (s *sessionService) GetAllSessions() ([]response.SessionsResponse, error) {
 	return sessionsResponse, nil
 }
 
-func (s *sessionService) GetAllSessionsByAdmin(auth string) ([]response.SessionsResponse, error) {
+func (s *sessionService) GetAllSessionsByAdmin(idhealth string) ([]response.SessionsResponse, error) {
 	var sessionsResponse []response.SessionsResponse
 
-	getIdHealthFacilities, err := m.GetIdHealthFacilities(auth)
-	if err != nil {
-		return sessionsResponse, err
-	}
-
-	getSessions, err := s.SessionsRepo.GetSessionsByAdmin(getIdHealthFacilities)
+	getSessions, err := s.SessionsRepo.GetSessionsByAdmin(idhealth)
 	if err != nil {
 		return sessionsResponse, err
 	}

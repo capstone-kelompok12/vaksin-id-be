@@ -85,12 +85,7 @@ func (a *adminService) GetAllAdmins() ([]response.AdminResponse, error) {
 func (a *adminService) GetAdmins(id string) (response.AdminResponse, error) {
 	var responseAdmin response.AdminResponse
 
-	getIdAdmin, err := m.GetIdAdmin(id)
-	if err != nil {
-		return responseAdmin, err
-	}
-
-	getData, err := a.AdminRepo.GetAdmins(getIdAdmin)
+	getData, err := a.AdminRepo.GetAdmins(id)
 
 	if err != nil {
 		return responseAdmin, err
@@ -114,11 +109,6 @@ func (a *adminService) UpdateAdmins(payloads payload.AdminsPayload, id string) (
 		return dataResp, err
 	}
 
-	getIdAdmin, err := m.GetIdAdmin(id)
-	if err != nil {
-		return dataResp, err
-	}
-
 	adminData := model.Admins{
 		IdHealthFacilities: payloads.IdHealthFacilities,
 		Email:              payloads.Email,
@@ -126,11 +116,11 @@ func (a *adminService) UpdateAdmins(payloads payload.AdminsPayload, id string) (
 	}
 
 	dataResp = response.AdminProfileResponse{
-		ID:    getIdAdmin,
+		ID:    id,
 		Email: payloads.Email,
 	}
 
-	if err := a.AdminRepo.UpdateAdmins(adminData, getIdAdmin); err != nil {
+	if err := a.AdminRepo.UpdateAdmins(adminData, id); err != nil {
 		return dataResp, err
 	}
 	return dataResp, nil

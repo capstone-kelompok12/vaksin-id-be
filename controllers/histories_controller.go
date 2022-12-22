@@ -80,7 +80,7 @@ func (h *HistoriesController) GetHistoryById(ctx echo.Context) error {
 func (h *HistoriesController) UpdateHistory(ctx echo.Context) error {
 	var payloads payload.UpdateAccHistory
 
-	id := ctx.Request().Header.Get("Authorization")
+	id := ctx.Param("id")
 
 	if err := ctx.Bind(&payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{

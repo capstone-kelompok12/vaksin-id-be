@@ -173,12 +173,7 @@ func (u *userService) LoginUser(payloads payload.Login) (response.Login, error) 
 func (u *userService) GetUserDataByNik(nik string) (response.UserProfile, error) {
 	var responseUser response.UserProfile
 
-	getUserNik, err := m.GetUserNik(nik)
-	if err != nil {
-		return responseUser, err
-	}
-
-	getData, err := u.UserRepo.GetUserDataByNik(getUserNik)
+	getData, err := u.UserRepo.GetUserDataByNik(nik)
 	if err != nil {
 		return responseUser, err
 	}
@@ -233,17 +228,12 @@ func (u *userService) GetUserDataByNikNoAddress(nik string) (response.UserProfil
 func (u *userService) GetUserHistory(nik string) (response.UserHistory, error) {
 	var historyUser response.UserHistory
 
-	nikUser, err := m.GetUserNik(nik)
+	getData, err := u.UserRepo.GetUserHistoryByNik(nik)
 	if err != nil {
 		return historyUser, err
 	}
 
-	getData, err := u.UserRepo.GetUserHistoryByNik(nikUser)
-	if err != nil {
-		return historyUser, err
-	}
-
-	getDataUser, err := u.UserRepo.GetUserDataByNikNoAddress(nikUser)
+	getDataUser, err := u.UserRepo.GetUserDataByNikNoAddress(nik)
 	if err != nil {
 		return historyUser, err
 	}
@@ -253,7 +243,7 @@ func (u *userService) GetUserHistory(nik string) (response.UserHistory, error) {
 		return historyUser, err
 	}
 
-	countHistoryUser, err := u.HistoryRepo.GetHistoriesByNIK(nikUser)
+	countHistoryUser, err := u.HistoryRepo.GetHistoriesByNIK(nik)
 	if err != nil {
 		return historyUser, err
 	}
@@ -411,11 +401,6 @@ func (u *userService) GetUserRegisteredDashboard() (response.RegisterStatistic, 
 func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string) (response.UpdateUser, error) {
 	var dataResp response.UpdateUser
 
-	getNikUser, err := m.GetUserNik(nik)
-	if err != nil {
-		return dataResp, err
-	}
-
 	if payloads.Gender != "P" && payloads.Gender != "L" {
 		return dataResp, errors.New("input gender must P or L")
 	}
@@ -439,11 +424,11 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 		BirthDate: dateBirth,
 	}
 
-	if err := u.UserRepo.UpdateUserProfile(dataUser, getNikUser); err != nil {
+	if err := u.UserRepo.UpdateUserProfile(dataUser, nik); err != nil {
 		return dataResp, err
 	}
 
-	data, err := u.GetUserDataByNikNoAddress(getNikUser)
+	data, err := u.GetUserDataByNikNoAddress(nik)
 	if err != nil {
 		return dataResp, err
 	}
@@ -461,16 +446,12 @@ func (u *userService) UpdateUserProfile(payloads payload.UpdateUser, nik string)
 }
 
 func (u *userService) DeleteUserProfile(nik string) error {
-	getUserNik, err := m.GetUserNik(nik)
-	if err != nil {
+
+	if err := u.AddressRepo.DeleteAddressUser(nik); err != nil {
 		return err
 	}
 
-	if err := u.AddressRepo.DeleteAddressUser(getUserNik); err != nil {
-		return err
-	}
-
-	if err := u.UserRepo.DeleteUser(getUserNik); err != nil {
+	if err := u.UserRepo.DeleteUser(nik); err != nil {
 		return err
 	}
 
@@ -481,12 +462,8 @@ func (u *userService) NearbyHealthFacilities(payloads payload.NearbyHealth, nik 
 	var result response.UserNearbyHealth
 	var tempData []response.HealthResponse
 	var tempRes []response.HealthResponse
-	getUserNik, err := m.GetUserNik(nik)
-	if err != nil {
-		return result, err
-	}
 
-	userProfile, err := u.UserRepo.GetUserDataByNik(getUserNik)
+	userProfile, err := u.UserRepo.GetUserDataByNik(nik)
 	if err != nil {
 		return result, err
 	}

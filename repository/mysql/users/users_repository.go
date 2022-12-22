@@ -112,7 +112,7 @@ func (u *userRepository) GetUserHistoryByNik(nik string) (model.Users, error) {
 func (u *userRepository) GetUserDataByNikNoAddress(nik string) (model.Users, error) {
 	var user model.Users
 
-	if err := u.db.Preload("History").Where("nik = ?", nik).First(&user).Error; err != nil {
+	if err := u.db.Where("nik = ?", nik).First(&user).Error; err != nil {
 		return user, err
 	}
 	return user, nil

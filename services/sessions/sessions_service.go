@@ -8,6 +8,7 @@ import (
 	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqlb "vaksin-id-be/repository/mysql/bookings"
+	mysqlh "vaksin-id-be/repository/mysql/histories"
 	mysqls "vaksin-id-be/repository/mysql/sessions"
 	mysqlu "vaksin-id-be/repository/mysql/users"
 	mysqlv "vaksin-id-be/repository/mysql/vaccines"
@@ -32,14 +33,16 @@ type sessionService struct {
 	VaccineRepo  mysqlv.VaccinesRepository
 	BookingRepo  mysqlb.BookingRepository
 	UserRepo     mysqlu.UserRepository
+	HistoryRepo  mysqlh.HistoriesRepository
 }
 
-func NewSessionsService(sessionRepo mysqls.SessionsRepository, vaccineRepo mysqlv.VaccinesRepository, bookingRepo mysqlb.BookingRepository, userRepo mysqlu.UserRepository) *sessionService {
+func NewSessionsService(sessionRepo mysqls.SessionsRepository, vaccineRepo mysqlv.VaccinesRepository, bookingRepo mysqlb.BookingRepository, userRepo mysqlu.UserRepository, historyRepo mysqlh.HistoriesRepository) *sessionService {
 	return &sessionService{
 		SessionsRepo: sessionRepo,
 		VaccineRepo:  vaccineRepo,
 		BookingRepo:  bookingRepo,
 		UserRepo:     userRepo,
+		HistoryRepo:  historyRepo,
 	}
 }
 
@@ -206,6 +209,11 @@ func (s *sessionService) GetAllSessionsByAdmin(auth string) ([]response.Sessions
 
 		for idx, value := range getBooking {
 
+			getHistory, err := s.HistoryRepo.GetOneHistoryByIdBooking(value.ID)
+			if err != nil {
+				return sessionsResponse, err
+			}
+
 			dataBooking[idx] = response.BookingInSession{
 				ID:        value.ID,
 				IdSession: value.IdSession,
@@ -214,6 +222,7 @@ func (s *sessionService) GetAllSessionsByAdmin(auth string) ([]response.Sessions
 				CreatedAt: value.CreatedAt,
 				UpdatedAt: value.UpdatedAt,
 				User:      &value.User,
+				History:   getHistory,
 			}
 
 		}
@@ -273,6 +282,12 @@ func (s *sessionService) GetSessionsById(id string) (response.SessionsResponse, 
 		if err != nil {
 			return responseSession, err
 		}
+
+		getHistory, err := s.HistoryRepo.GetOneHistoryByIdBooking(val.ID)
+		if err != nil {
+			return responseSession, err
+		}
+
 		dataBooking[i] = response.BookingInSession{
 			ID:        val.ID,
 			IdSession: val.IdSession,
@@ -282,6 +297,7 @@ func (s *sessionService) GetSessionsById(id string) (response.SessionsResponse, 
 			CreatedAt: val.CreatedAt,
 			UpdatedAt: val.UpdatedAt,
 			User:      &getUser,
+			History:   getHistory,
 		}
 	}
 

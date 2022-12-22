@@ -2,7 +2,6 @@ package services
 
 import (
 	"vaksin-id-be/dto/payload"
-	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysql "vaksin-id-be/repository/mysql/addresses"
 )
@@ -25,12 +24,7 @@ func NewAddressesService(addressRepo mysql.AddressesRepository) *addressService 
 func (a *addressService) GetAddressUser(nik string) (model.Addresses, error) {
 	var address model.Addresses
 
-	getUserNik, err := m.GetUserNik(nik)
-	if err != nil {
-		return address, err
-	}
-
-	dataAddress, err := a.AddressRepo.GetAddressUser(getUserNik)
+	dataAddress, err := a.AddressRepo.GetAddressUser(nik)
 	if err != nil {
 		return address, err
 	}
@@ -40,10 +34,6 @@ func (a *addressService) GetAddressUser(nik string) (model.Addresses, error) {
 
 func (a *addressService) UpdateUserAddress(payloads payload.UpdateAddress, nik string) (payload.UpdateAddress, error) {
 	var addressResp payload.UpdateAddress
-	getUserNik, err := m.GetUserNik(nik)
-	if err != nil {
-		return addressResp, err
-	}
 
 	newAddress := model.Addresses{
 		CurrentAddress: payloads.CurrentAddress,
@@ -54,7 +44,7 @@ func (a *addressService) UpdateUserAddress(payloads payload.UpdateAddress, nik s
 		Latitude:       payloads.Latitude,
 	}
 
-	if err := a.AddressRepo.UpdateAddressUser(newAddress, getUserNik); err != nil {
+	if err := a.AddressRepo.UpdateAddressUser(newAddress, nik); err != nil {
 		return addressResp, err
 	}
 

@@ -3,7 +3,6 @@ package services
 import (
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
-	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqla "vaksin-id-be/repository/mysql/addresses"
 	mysqladm "vaksin-id-be/repository/mysql/admins"
@@ -108,10 +107,6 @@ func (h *healthFacilitiesService) GetHealthFacilities(name string) (model.Health
 
 func (h *healthFacilitiesService) UpdateHealthFacilities(payloads payload.UpdateHealthFacilities, id string) (response.UpdateHealthFacilities, error) {
 	var dataResp response.UpdateHealthFacilities
-	getIdHealth, err := m.GetIdHealthFacilities(id)
-	if err != nil {
-		return dataResp, err
-	}
 
 	healthFacil := model.HealthFacilities{
 		Email:    payloads.Email,
@@ -120,7 +115,7 @@ func (h *healthFacilitiesService) UpdateHealthFacilities(payloads payload.Update
 		Image:    payloads.Image,
 	}
 
-	if err := h.HealthRepo.UpdateHealthFacilities(healthFacil, getIdHealth); err != nil {
+	if err := h.HealthRepo.UpdateHealthFacilities(healthFacil, id); err != nil {
 		return dataResp, err
 	}
 

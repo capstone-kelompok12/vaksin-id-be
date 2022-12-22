@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"vaksin-id-be/dto/payload"
 	"vaksin-id-be/dto/response"
-	m "vaksin-id-be/middleware"
 	"vaksin-id-be/model"
 	mysqlv "vaksin-id-be/repository/mysql/vaccines"
 
@@ -12,7 +11,7 @@ import (
 )
 
 type VaccinesService interface {
-	CreateVaccine(authAdmin string, payloads payload.VaccinesPayload) (model.Vaccines, error)
+	CreateVaccine(idhealth string, payloads payload.VaccinesPayload) (model.Vaccines, error)
 	GetAllVaccines() ([]response.VaccinesResponse, error)
 	GetVaccineByAdmin(idhealthfacilities string) ([]model.Vaccines, error)
 	GetVaccineDashboard() ([]response.DashboardVaccine, error)
@@ -31,17 +30,12 @@ func NewVaccinesService(vaccinesRepo mysqlv.VaccinesRepository) *vaccinesService
 	}
 }
 
-func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.VaccinesPayload) (model.Vaccines, error) {
+func (v *vaccinesService) CreateVaccine(idhealth string, payloads payload.VaccinesPayload) (model.Vaccines, error) {
 	var vaccineModel model.Vaccines
 
 	id := uuid.NewString()
 
-	idHealthFacilities, err := m.GetIdHealthFacilities(authAdmin)
-	if err != nil {
-		return vaccineModel, err
-	}
-
-	vaccineData, err := v.VaccinesRepo.CheckNameDosisExist(idHealthFacilities, payloads.Name, payloads.Dose)
+	vaccineData, err := v.VaccinesRepo.CheckNameDosisExist(idhealth, payloads.Name, payloads.Dose)
 	if err == nil {
 		fmt.Println(vaccineData.ID)
 		addStock := payloads.Stock + vaccineData.Stock
@@ -56,7 +50,7 @@ func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.Vacci
 
 		vaccineModel = model.Vaccines{
 			ID:                 dataUpdate.ID,
-			IdHealthFacilities: idHealthFacilities,
+			IdHealthFacilities: idhealth,
 			Name:               payloads.Name,
 			Stock:              addStock,
 			Dose:               payloads.Dose,
@@ -69,7 +63,7 @@ func (v *vaccinesService) CreateVaccine(authAdmin string, payloads payload.Vacci
 
 	vaccineModel = model.Vaccines{
 		ID:                 id,
-		IdHealthFacilities: idHealthFacilities,
+		IdHealthFacilities: idhealth,
 		Name:               payloads.Name,
 		Dose:               payloads.Dose,
 		Stock:              payloads.Stock,
@@ -128,12 +122,8 @@ func (v *vaccinesService) GetAllVaccines() ([]response.VaccinesResponse, error) 
 
 func (v *vaccinesService) GetVaccineByAdmin(idhealthfacilities string) ([]model.Vaccines, error) {
 	var vaccines []model.Vaccines
-	idHealthFacilities, err := m.GetIdHealthFacilities(idhealthfacilities)
-	if err != nil {
-		return vaccines, err
-	}
 
-	vaccines, err = v.VaccinesRepo.GetVaccinesByIdAdmin(idHealthFacilities)
+	vaccines, err := v.VaccinesRepo.GetVaccinesByIdAdmin(idhealthfacilities)
 	if err != nil {
 		return vaccines, err
 	}

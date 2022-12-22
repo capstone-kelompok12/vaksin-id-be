@@ -1,9 +1,7 @@
 package middleware
 
 import (
-	"errors"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -23,7 +21,7 @@ type ClaimsCustomAdmin struct {
 
 func CreateToken(nikUser string, email string) (string, error) {
 	exp := time.Now().Add(time.Hour * 72).Unix()
-	claims := ClaimsCustom{
+	claims := &ClaimsCustom{
 		NikUser: nikUser,
 		Email:   email,
 		StandardClaims: jwt.StandardClaims{
@@ -36,24 +34,9 @@ func CreateToken(nikUser string, email string) (string, error) {
 	return token.SignedString(key)
 }
 
-func GetUserNik(auth string) (string, error) {
-	claims := &ClaimsCustom{}
-	splitToken := strings.Split(auth, "Bearer ")
-	auth = splitToken[1]
-
-	_, err := jwt.ParseWithClaims(auth, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("SECRET_JWT_KEY")), nil
-	})
-
-	if err != nil {
-		return "", errors.New("token has expired")
-	}
-	return claims.NikUser, nil
-}
-
 func CreateTokenAdmin(id, idhealthfacil, email string) (string, error) {
 	exp := time.Now().Add(time.Hour * 72).Unix()
-	claims := ClaimsCustomAdmin{
+	claims := &ClaimsCustomAdmin{
 		Id:                 id,
 		IdHealthFacilities: idhealthfacil,
 		Email:              email,
@@ -65,34 +48,4 @@ func CreateTokenAdmin(id, idhealthfacil, email string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(key)
-}
-
-func GetIdAdmin(auth string) (string, error) {
-	claims := &ClaimsCustomAdmin{}
-	splitToken := strings.Split(auth, "Bearer ")
-	auth = splitToken[1]
-
-	_, err := jwt.ParseWithClaims(auth, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("SECRET_JWT_KEY_ADMIN")), nil
-	})
-
-	if err != nil {
-		return "", errors.New("token has expired")
-	}
-	return claims.Id, nil
-}
-
-func GetIdHealthFacilities(auth string) (string, error) {
-	claims := &ClaimsCustomAdmin{}
-	splitToken := strings.Split(auth, "Bearer ")
-	auth = splitToken[1]
-
-	_, err := jwt.ParseWithClaims(auth, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("SECRET_JWT_KEY_ADMIN")), nil
-	})
-
-	if err != nil {
-		return "", errors.New("token has expired")
-	}
-	return claims.IdHealthFacilities, nil
 }

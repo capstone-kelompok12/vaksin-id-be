@@ -6,6 +6,7 @@ import (
 	service_v "vaksin-id-be/services/vaccines"
 	"vaksin-id-be/util"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,16 +30,18 @@ func (v *VaccinesController) CreateVaccine(ctx echo.Context) error {
 		})
 	}
 
-	if err := util.ValidateVaccine(payloads); err != nil {
+	if err := util.Validate(payloads); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	authAdmin := ctx.Request().Header.Get("Authorization")
+	admin := ctx.Get("user").(*jwt.Token)
+	claimId := admin.Claims.(jwt.MapClaims)
+	id := claimId["IdHealthFacilities"].(string)
 
-	data, err := v.VaccineService.CreateVaccine(authAdmin, payloads)
+	data, err := v.VaccineService.CreateVaccine(id, payloads)
 	if err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error":   true,
@@ -86,9 +89,11 @@ func (v *VaccinesController) GetAllVaccinesCount(ctx echo.Context) error {
 }
 
 func (v *VaccinesController) GetVaccineByAdmin(ctx echo.Context) error {
-	authAdmin := ctx.Request().Header.Get("Authorization")
+	admin := ctx.Get("user").(*jwt.Token)
+	claimId := admin.Claims.(jwt.MapClaims)
+	id := claimId["IdHealthFacilities"].(string)
 
-	dataVaccines, err := v.VaccineService.GetVaccineByAdmin(authAdmin)
+	dataVaccines, err := v.VaccineService.GetVaccineByAdmin(id)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error":   true,
